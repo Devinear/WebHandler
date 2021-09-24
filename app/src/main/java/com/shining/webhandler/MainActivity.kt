@@ -1,11 +1,13 @@
 package com.shining.webhandler
 
 import android.annotation.SuppressLint
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
+import android.view.View
+import android.view.WindowManager
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,7 +25,12 @@ class MainActivity : AppCompatActivity() {
             loadUrl(github)
             webChromeClient = WebChromeClient()
             webViewClient = WebViewClientClass()
+
+            // Build.VERSION.SDK_INT >= 19
+            setLayerType(View.LAYER_TYPE_HARDWARE, null)
         }
+        window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
