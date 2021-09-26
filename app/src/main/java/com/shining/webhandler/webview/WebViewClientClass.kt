@@ -1,4 +1,4 @@
-package com.shining.webhandler
+package com.shining.webhandler.webview
 
 import android.graphics.Bitmap
 import android.os.Build

@@ -1,4 +1,4 @@
-package com.shining.webhandler
+package com.shining.webhandler.view
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -8,6 +8,8 @@ import android.view.WindowManager
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
+import com.shining.webhandler.R
+import com.shining.webhandler.webview.WebViewClientClass
 
 class MainActivity : AppCompatActivity() {
 
