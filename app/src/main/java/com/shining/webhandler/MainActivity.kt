@@ -12,7 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 class MainActivity : AppCompatActivity() {
 
     private var webView : WebView? = null
-    private val github = "https://github.com/"
+//    private val github = "https://github.com/"
+    private val github = "https://www.naver.com/"
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
