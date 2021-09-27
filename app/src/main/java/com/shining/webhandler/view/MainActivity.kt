@@ -9,6 +9,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import com.shining.webhandler.R
+import com.shining.webhandler.webview.WebChromeClientClass
 import com.shining.webhandler.webview.WebViewClientClass
 
 class MainActivity : AppCompatActivity() {
@@ -26,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         webView?.apply {
             settings.javaScriptEnabled = true
             loadUrl(github)
-            webChromeClient = WebChromeClient()
+            webChromeClient = WebChromeClientClass()
             webViewClient = WebViewClientClass()
 
             // Build.VERSION.SDK_INT >= 19

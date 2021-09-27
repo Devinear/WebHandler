@@ -1,15 +1,18 @@
 package com.shining.webhandler.webview
 
 import android.graphics.Bitmap
+import android.net.http.SslError
 import android.os.Build
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.view.KeyEvent
+import android.webkit.*
 import androidx.annotation.RequiresApi
 
 class WebViewClientClass : WebViewClient() {
+    /*
+    * https://developer.android.com/reference/android/webkit/WebViewClient.html
+    * */
 
+    /* url이 웹뷰에서 처리되려고 할 경우에, WebvView에서 노출하지 않고 처리할 수 있음 */
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         view?.loadUrl(url?:"")
         return true
@@ -23,16 +26,23 @@ class WebViewClientClass : WebViewClient() {
         super.onPageFinished(view, url)
     }
 
+    /* 페이지 내부의 리소스가 로드가 되면서 다수 호출  */
     override fun onLoadResource(view: WebView?, url: String?) {
         super.onLoadResource(view, url)
     }
 
-    override fun onReceivedError(
-        view: WebView?,
-        errorCode: Int,
-        description: String?,
-        failingUrl: String?
-    ) {
+    /* 방문한 링크를 업데이트하는 경우 호출 */
+    override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
+        super.doUpdateVisitedHistory(view, url, isReload)
+    }
+
+    /* 키 입력에 대한 처리
+    * true : 동작을 WebView에 위임하지 않는다. */
+    override fun shouldOverrideKeyEvent(view: WebView?, event: KeyEvent?): Boolean {
+        return super.shouldOverrideKeyEvent(view, event)
+    }
+
+    override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
 //        super.onReceivedError(view, errorCode, description, failingUrl)
         view?: return
         failingUrl?: return
@@ -41,11 +51,7 @@ class WebViewClientClass : WebViewClient() {
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
-    override fun onReceivedError(
-        view: WebView?,
-        request: WebResourceRequest?,
-        error: WebResourceError?
-    ) {
+    override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
 //        super.onReceivedError(view, request, error)
         view?: return
         request?: return
@@ -87,5 +93,10 @@ class WebViewClientClass : WebViewClient() {
             // URI가 지원되지 않는 방식
             ERROR_UNSUPPORTED_SCHEME -> { }
         }
+    }
+
+    /* WebView에서 ssl을 호출할 경우 인증서 만료, 변조된 인증서의 사용제한하기 위 */
+    override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
+        super.onReceivedSslError(view, handler, error)
     }
 }
