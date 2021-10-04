@@ -4,9 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.webkit.WebView
+import androidx.databinding.DataBindingUtil
 import com.shining.webhandler.R
+import com.shining.webhandler.databinding.LayoutWebviewBinding
 import com.shining.webhandler.webview.WebChromeClientClass
 import com.shining.webhandler.webview.WebViewClientClass
 
@@ -16,6 +17,12 @@ import com.shining.webhandler.webview.WebViewClientClass
  */
 
 class WebViewFragment : BaseFragment() {
+
+    // ViewBinding
+    // This property is only valid between onCreateView and onDestroyView.
+//    private var _binding : LayoutWebviewBinding? = null
+//    private val binding get() = _binding!!
+    private lateinit var binding : LayoutWebviewBinding
 
     private var webView : WebView? = null
     private val github = "https://www.naver.com/"
@@ -30,7 +37,14 @@ class WebViewFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_webview, container, false)
+        binding = LayoutWebviewBinding.inflate(layoutInflater, container, false)
+        val view = binding.root
+        return view
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+//        _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

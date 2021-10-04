@@ -8,8 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import com.shining.webhandler.R
+import com.shining.webhandler.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity(R.layout.activity_main), NavigationBarView.OnItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener {
+
+    // ViewBinding
+    private lateinit var binding : ActivityMainBinding
 
     companion object {
         const val TAG = "[DE][AC] Main"
@@ -19,13 +23,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), NavigationBarVie
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+
         initUi()
         requestFragment()
     }
 
     private fun initUi() {
-        findViewById<BottomNavigationView>(R.id.bottom_navigation_view)
-            .setOnItemSelectedListener(this)
+        binding.bottomNavigationView.setOnItemSelectedListener(this@MainActivity)
     }
 
     fun requestFragment() {

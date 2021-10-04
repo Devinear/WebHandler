@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.shining.webhandler.R
+import com.shining.webhandler.databinding.LayoutSettingBinding
 
 /**
  * SettingFragment.kt
@@ -12,6 +13,8 @@ import com.shining.webhandler.R
  */
 
 class SettingFragment : BaseFragment() {
+
+    private lateinit var binding : LayoutSettingBinding
 
     companion object {
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { SettingFragment() }
@@ -23,6 +26,9 @@ class SettingFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_setting, container, false)
+        binding = LayoutSettingBinding.inflate(layoutInflater, container, false)
+        val view = binding.root
+
+        return view
     }
 }
