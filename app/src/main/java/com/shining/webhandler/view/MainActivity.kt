@@ -11,9 +11,6 @@ import com.shining.webhandler.R
 
 class MainActivity : AppCompatActivity(R.layout.activity_main), NavigationBarView.OnItemSelectedListener {
 
-    private val frWebView by lazy { WebViewFragment() }
-    private val frSetting by lazy { SettingFragment() }
-
     companion object {
         const val TAG = "[DE][AC] Main"
     }
@@ -32,7 +29,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), NavigationBarVie
     }
 
     fun requestFragment() {
-        changeFragment(frWebView)
+        changeFragment(WebViewFragment.INSTANCE)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -41,10 +38,10 @@ class MainActivity : AppCompatActivity(R.layout.activity_main), NavigationBarVie
 
         when(id) {
             R.id.setting -> {
-                changeFragment(frSetting)
+                changeFragment(SettingFragment.INSTANCE)
             }
             else -> {
-                changeFragment(frWebView)
+                changeFragment(WebViewFragment.INSTANCE)
             }
         }
 

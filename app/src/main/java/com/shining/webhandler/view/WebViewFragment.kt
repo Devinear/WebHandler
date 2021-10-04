@@ -20,6 +20,11 @@ class WebViewFragment : BaseFragment() {
     private var webView : WebView? = null
     private val github = "https://www.naver.com/"
 
+    companion object {
+        val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { WebViewFragment() }
+        val TAG = "[DE][FR] WebView"
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,

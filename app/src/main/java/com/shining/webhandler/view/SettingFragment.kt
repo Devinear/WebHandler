@@ -13,6 +13,11 @@ import com.shining.webhandler.R
 
 class SettingFragment : BaseFragment() {
 
+    companion object {
+        val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { SettingFragment() }
+        val TAG = "[DE][FR] Setting"
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
