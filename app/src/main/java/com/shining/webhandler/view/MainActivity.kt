@@ -3,10 +3,10 @@ package com.shining.webhandler.view
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
@@ -60,19 +60,39 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         }
     }
 
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        // WebView BackKey
+        if(keyCode == KeyEvent.KEYCODE_BACK && WebViewFragment.INSTANCE.webCanGoBack()) {
+            WebViewFragment.INSTANCE.webGoBack()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         Log.d(TAG, "onNavigationItemSelected id[${id}]")
 
         when(id) {
-            R.id.setting -> {
+            R.id.bo_forward -> {
+                if(showFragment != FragmentType.WebView)
+                    requestFragment(FragmentType.WebView)
+                else
+                    WebViewFragment.INSTANCE.webGoForward()
+            }
+            R.id.bo_back -> {
+                if(showFragment != FragmentType.WebView)
+                    requestFragment(FragmentType.WebView)
+                else
+                    WebViewFragment.INSTANCE.webGoBack()
+            }
+            R.id.bo_setting -> {
                 requestFragment(FragmentType.Setting)
             }
             else -> {
                 requestFragment(FragmentType.WebView)
             }
         }
-
         return true
     }
 

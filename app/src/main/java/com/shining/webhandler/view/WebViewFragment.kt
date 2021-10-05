@@ -1,6 +1,7 @@
 package com.shining.webhandler.view
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,14 +19,11 @@ import com.shining.webhandler.webview.WebViewClientClass
 
 class WebViewFragment : BaseFragment() {
 
-    // ViewBinding
-    // This property is only valid between onCreateView and onDestroyView.
-//    private var _binding : LayoutWebviewBinding? = null
-//    private val binding get() = _binding!!
     private lateinit var binding : LayoutWebviewBinding
+    private lateinit var viewModel : WebViewViewModel
 
     private var webView : WebView? = null
-    private val github = "https://www.naver.com/"
+    private val cUrl = "https://www.naver.com/"
 
     companion object {
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { WebViewFragment() }
@@ -38,28 +36,29 @@ class WebViewFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = LayoutWebviewBinding.inflate(layoutInflater, container, false)
-        val view = binding.root
-        return view
+        return binding.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-//        _binding = null
-    }
+    override fun initUi() {
+        super.initUi()
+        Log.d(TAG, "initUi")
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        binding.webView.apply {
 
-        webView = view.findViewById(R.id.web_view)
-        webView?.apply {
-            settings.javaScriptEnabled = true
-            loadUrl(github)
-            webChromeClient = WebChromeClientClass()
-            webViewClient = WebViewClientClass()
+            settings.useWideViewPort = true     // 화면 맞추기 허용여부
+            settings.javaScriptEnabled = true   // javascript 허용여부
+            settings.domStorageEnabled = true   // 내부저장소 이용여부
+
+            loadUrl(cUrl)
 
             // Build.VERSION.SDK_INT >= 19
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
         }
-//        window.setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
     }
+
+    fun webCanGoBack() : Boolean = binding.webView.canGoBack()
+
+    fun webGoBack() = binding.webView.goBack()
+
+    fun webGoForward() = binding.webView.goForward()
 }
