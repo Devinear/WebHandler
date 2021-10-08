@@ -1,4 +1,4 @@
-package com.shining.webhandler.webview
+package com.shining.nwebview
 
 import android.graphics.Bitmap
 import android.net.http.SslError

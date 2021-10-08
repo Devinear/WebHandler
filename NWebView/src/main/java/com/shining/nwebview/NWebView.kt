@@ -1,4 +1,4 @@
-package com.shining.webhandler.webview
+package com.shining.nwebview
 
 import android.content.Context
 import android.util.AttributeSet
