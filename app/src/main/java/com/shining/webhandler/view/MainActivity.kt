@@ -7,14 +7,13 @@ import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.navigation.NavigationBarView
+import androidx.core.view.GravityCompat
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
 import com.shining.webhandler.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListener {
+class MainActivity : AppCompatActivity() {
 
-    // ViewBinding
     private lateinit var binding : ActivityMainBinding
     private var showFragment : FragmentType
 
@@ -31,20 +30,84 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
 
         initUi()
         requestFragment()
     }
 
     private fun initUi() {
-        binding.bottomNavigationView.setOnItemSelectedListener(this@MainActivity)
+
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.apply {
+            setDisplayHomeAsUpEnabled(true) // 왼쪽 상단 버튼
+            setHomeAsUpIndicator(R.drawable.outline_menu_24) // 왼쪽 상단 버튼 아이콘
+        }
+
+        binding.drawerLayout.closeDrawers()
+        binding.drawerNavigation.setNavigationItemSelectedListener {
+            val id = it.itemId
+            Log.d(TAG, "Drawer onNavigationItemSelected id[${id}]")
+//            Toast.makeText(this@MainActivity, "Drawer Item ID : [$id]", Toast.LENGTH_SHORT).show()
+
+            when(id) {
+                R.id.dr_first -> { }
+                R.id.dr_second -> { }
+                R.id.dr_third -> { }
+            }
+            true
+        }
+
+        binding.bottomNavigation.setOnItemSelectedListener {
+            val id = it.itemId
+            Log.d(TAG, "Bottom onNavigationItemSelected id[${id}]")
+
+            when(id) {
+                R.id.bo_forward -> {
+                    if(showFragment != FragmentType.WebView)
+                        requestFragment(FragmentType.WebView)
+                    else
+                        WebViewFragment.INSTANCE.webGoForward()
+                }
+                R.id.bo_back -> {
+                    if(showFragment != FragmentType.WebView)
+                        requestFragment(FragmentType.WebView)
+                    else
+                        WebViewFragment.INSTANCE.webGoBack()
+                }
+                R.id.bo_setting -> {
+                    requestFragment(FragmentType.Setting)
+                }
+                else -> {
+                    requestFragment(FragmentType.WebView)
+                }
+            }
+            true
+        }
 
         // HARDWARE ACCELERATED 필요..?
         window.setFlags(
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // 왼쪽 상단 버튼 눌렀을 때
+        if (item.itemId == android.R.id.home) {
+            binding.drawerLayout.openDrawer(GravityCompat.START)
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onBackPressed() {
+        // 뒤로가기시 Drawer 먼저 처리
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        }
+        else {
+            super.onBackPressed()
+        }
     }
 
     private fun requestFragment(type: FragmentType = FragmentType.WebView) {
@@ -67,33 +130,6 @@ class MainActivity : AppCompatActivity(), NavigationBarView.OnItemSelectedListen
             return true
         }
         return super.onKeyDown(keyCode, event)
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        Log.d(TAG, "onNavigationItemSelected id[${id}]")
-
-        when(id) {
-            R.id.bo_forward -> {
-                if(showFragment != FragmentType.WebView)
-                    requestFragment(FragmentType.WebView)
-                else
-                    WebViewFragment.INSTANCE.webGoForward()
-            }
-            R.id.bo_back -> {
-                if(showFragment != FragmentType.WebView)
-                    requestFragment(FragmentType.WebView)
-                else
-                    WebViewFragment.INSTANCE.webGoBack()
-            }
-            R.id.bo_setting -> {
-                requestFragment(FragmentType.Setting)
-            }
-            else -> {
-                requestFragment(FragmentType.WebView)
-            }
-        }
-        return true
     }
 
     private fun changeFragment(fragment: BaseFragment) {

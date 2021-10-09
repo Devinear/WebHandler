@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single" >
+        <item
+            android:id="@+id/dr_first"
+            android:icon="@drawable/outline_arrow_back_24"
+            android:title="FIRST" />
+        <item
+            android:id="@+id/dr_second"
+            android:icon="@drawable/outline_arrow_forward_24"
+            android:title="SECOND" />
+        <item
+            android:id="@+id/dr_third"
+            android:icon="@drawable/outline_content_paste_go_24"
+            android:title="THIRD" />
+    </group>
+
+</menu>
