@@ -5,7 +5,7 @@
     <application
         android:name=".App">
         <activity android:name=".PermissionActivity"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
+            android:theme="@style/Theme.Transparent.Permission" />
 
     </application>
 
