@@ -10,3 +10,4 @@ rootProject.name = "WebHandler"
 include ':app'
 include ':NWebView'
 include ':NPermission'
+include ':NBottomBar'
