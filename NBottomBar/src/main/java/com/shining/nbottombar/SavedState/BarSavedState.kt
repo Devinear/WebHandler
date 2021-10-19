@@ -10,24 +10,14 @@ import android.view.View
  */
 class BarSavedState : View.BaseSavedState {
 
-    var preIndex = -1
-    var curIndex = 0
+    var prePosition = -1
+    var position = 0
 
-    constructor(superState: Parcelable) : super(superState)
+    constructor(superState: Parcelable?) : super(superState)
 
     private constructor(parcel: Parcel) : super(parcel) {
-        preIndex = parcel.readInt()
-        curIndex = parcel.readInt()
-    }
-
-    override fun writeToParcel(parcel: Parcel, flags: Int) {
-        super.writeToParcel(parcel, flags)
-        parcel.writeInt(preIndex)
-        parcel.writeInt(curIndex)
-    }
-
-    override fun describeContents(): Int {
-        return 0
+        prePosition = parcel.readInt()
+        position = parcel.readInt()
     }
 
     companion object CREATOR : Parcelable.Creator<BarSavedState> {
@@ -39,4 +29,13 @@ class BarSavedState : View.BaseSavedState {
             return arrayOfNulls(size)
         }
     }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        super.writeToParcel(parcel, flags)
+        parcel.writeInt(prePosition)
+        parcel.writeInt(position)
+    }
+
+    override fun describeContents(): Int = 0
+
 }

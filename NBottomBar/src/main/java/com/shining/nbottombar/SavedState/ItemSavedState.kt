@@ -12,6 +12,7 @@ import android.view.View
  * Copyright © 2021 NHN COMMERCE Corp. All rights reserved.
  */
 class ItemSavedState : View.BaseSavedState {
+
     lateinit var text: String
     var padding = 0f
     var iconNormal = 0
@@ -30,6 +31,16 @@ class ItemSavedState : View.BaseSavedState {
         isSelected = parcel.readByte() != 0.toByte()
     }
 
+    companion object CREATOR : Parcelable.Creator<ItemSavedState> {
+        override fun createFromParcel(parcel: Parcel): ItemSavedState {
+            return ItemSavedState(parcel)
+        }
+
+        override fun newArray(size: Int): Array<ItemSavedState?> {
+            return arrayOfNulls(size)
+        }
+    }
+
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         super.writeToParcel(parcel, flags)
         parcel.writeString(text)
@@ -40,17 +51,6 @@ class ItemSavedState : View.BaseSavedState {
         parcel.writeByte(if (isSelected) 1 else 0)
     }
 
-    override fun describeContents(): Int {
-        return 0
-    }
+    override fun describeContents(): Int = 0
 
-    companion object CREATOR : Parcelable.Creator<ItemSavedState> {
-        override fun createFromParcel(parcel: Parcel): ItemSavedState {
-            return ItemSavedState(parcel)
-        }
-
-        override fun newArray(size: Int): Array<ItemSavedState?> {
-            return arrayOfNulls(size)
-        }
-    }
 }
