@@ -18,7 +18,7 @@ import com.shining.nbottombar.SavedState.ItemSavedState
  * NBottomItem.kt
  * WebHandler
  */
-class NBottomItem
+class BItem
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0,
     var text: String = "",
@@ -62,8 +62,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0,
         if (iconSelectedBt == null) {
             iconSelectedBt = if (iconSelected == 0) null else getDrawable(context, iconSelected)?.toBitmap()
         }
-        if (padding == 0f) padding = dp2px(5f)
-        if (textSize == 0f) textSize = sp2px(12f)
+        if (padding == 0f) padding = Utils.dp2px(context, 5f)
+        if (textSize == 0f) textSize = Utils.sp2px(context, 12f)
 
         initDrawTools()
         setPadding(0,tabPaddingTop,0,tabPaddingBottom)
@@ -78,14 +78,14 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0,
         iconPaint = Paint(Paint.ANTI_ALIAS_FLAG)
             .apply {
                 isFilterBitmap = true
-                alpha = this@NBottomItem.alpha
+                alpha = this@BItem.alpha
             }
         iconAvailableRect = Rect()
         iconDrawRect = Rect()
         textBound = Rect()
         textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
             .apply {
-                textSize = this@NBottomItem.textSize
+                textSize = this@BItem.textSize
                 color = textColorNormal
                 isDither = true
                 getTextBounds(text, 0, text.length, textBound)
@@ -100,7 +100,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0,
         }
         badgeTextPaint = Paint().apply {
             color = Color.WHITE
-            textSize = dp2px(textSize, context)
+            textSize = Utils.dp2px(context, textSize)
             isAntiAlias = true
             textAlign = Paint.Align.CENTER
             typeface = Typeface.DEFAULT_BOLD
@@ -179,7 +179,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0,
         // if showPoint, don't show number
         if (isShowPoint) {
             i = if (i > 10) 10 else i
-            val width = dp2px(i.toFloat())
+            val width = Utils.dp2px(context, i.toFloat())
             badgeRF.set(left, top, left + width, top + width)
             canvas.drawOval(badgeRF, badgeBgPaint)
             return
@@ -187,24 +187,24 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0,
 
         if (badgeNumber > 0) {
             badgeTextPaint.apply {
-                textSize = dp2px(if (i / 1.5f == 0f) 5f else i / 1.5f)
+                textSize = Utils.dp2px(context, if (i / 1.5f == 0f) 5f else i / 1.5f)
                 color = badgeTextColor
             }
             val number = if (badgeNumber > 99) "99+" else badgeNumber.toString()
             val width: Int
-            val height = dp2px(i.toFloat()).toInt()
+            val height = Utils.dp2px(context, i.toFloat()).toInt()
             val bitmap: Bitmap
             when {
                 number.length == 1 -> {
-                    width = dp2px(i.toFloat()).toInt()
+                    width = Utils.dp2px(context, i.toFloat()).toInt()
                     bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                 }
                 number.length == 2 -> {
-                    width = dp2px((i + 5).toFloat()).toInt()
+                    width = Utils.dp2px(context, (i + 5).toFloat()).toInt()
                     bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                 }
                 else -> {
-                    width = dp2px((i + 8).toFloat()).toInt()
+                    width = Utils.dp2px(context, (i + 8).toFloat()).toInt()
                     bitmap = Bitmap.createBitmap(width, width, Bitmap.Config.ARGB_8888)
                 }
             }
@@ -259,12 +259,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0,
     override fun onSaveInstanceState(): Parcelable {
         Log.d(TAG, "onSaveInstanceState")
         return ItemSavedState(super.onSaveInstanceState()).apply {
-            text = this@NBottomItem.text
-            padding = this@NBottomItem.padding
-            textSize = this@NBottomItem.textSize
-            iconNormal = this@NBottomItem.iconNormal
-            iconSelected = this@NBottomItem.iconSelected
-            isSelected = this@NBottomItem.isSelected
+            text = this@BItem.text
+            padding = this@BItem.padding
+            textSize = this@BItem.textSize
+            iconNormal = this@BItem.iconNormal
+            iconSelected = this@BItem.iconSelected
+            isSelected = this@BItem.isSelected
         }
     }
 
@@ -309,8 +309,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0,
     private fun Drawable.toBitmap(
         @Px width: Int = intrinsicWidth,
         @Px height: Int = intrinsicHeight,
-        config: Bitmap.Config? = null
-    ): Bitmap {
+        config: Bitmap.Config? = null)
+    : Bitmap {
+
         if (this is BitmapDrawable) {
             if (config == null || bitmap.config == config) {
                 // Fast-path to return original. Bitmap.createScaledBitmap will do this check, but it
@@ -327,7 +328,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0,
         val oldRight = bounds.right
         val oldBottom = bounds.bottom
 
-
         val bitmap = Bitmap.createBitmap(width, height, config ?: Bitmap.Config.ARGB_8888)
         setBounds(0, 0, width, height)
         draw(Canvas(bitmap))
@@ -335,15 +335,4 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0,
         setBounds(oldLeft, oldTop, oldRight, oldBottom)
         return bitmap
     }
-
-    private fun dp2px(value: Float) = dp2px(value, context)
-
-    private fun sp2px(value: Float) = sp2px(value, context)
-
-    private fun dp2px(value: Float, context: Context) =
-        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, value, context.resources.displayMetrics)
-
-    private fun sp2px(value: Float, context: Context) =
-        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, value, context.resources.displayMetrics)
-
 }

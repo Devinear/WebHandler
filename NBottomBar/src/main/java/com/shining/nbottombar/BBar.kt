@@ -12,11 +12,11 @@ import com.shining.nbottombar.SavedState.BarSavedState
  * NBottomBar.kt
  * WebHandler
  */
-class NBottomBar
+class BBar
 @JvmOverloads
 constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : LinearLayout(context, attrs, defStyle) {
 
-    private val items = ArrayList<NBottomItem>()
+    private val items = ArrayList<BItem>()
     private var selectedListener: (prePosition: Int, position: Int) -> Unit = { _, _ -> }
 
     //    private var reselectedListener : (position: Int) -> Unit = {}
@@ -81,7 +81,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : 
         onSelectedListener(preIndex, curIndex)
     }
 
-    private fun applyView(view: NBottomItem) =
+    private fun applyView(view: BItem) =
         view.apply {
             layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT).apply {
                 weight = 1f
@@ -91,7 +91,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : 
             }
         }
 
-    fun addItem(vararg item: NBottomItem) {
+    fun addItem(vararg item: BItem) {
         items.addAll(item)
 
         for (i in items.indices) {
@@ -134,9 +134,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : 
         }
     }
 
-    fun updateItem(index: Int, item: NBottomItem) {
+    fun updateItem(index: Int, item: BItem) {
         val original = getChildAt(index) ?: return
-        (original as NBottomItem).apply {
+        (original as BItem).apply {
 
         }
         original.requestLayout()
@@ -146,13 +146,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : 
 
     fun previousPosition() = prePosition
 
-    fun selectedItem() : NBottomItem?
+    fun selectedItem() : BItem?
         = if(childCount >= position) null
-        else getChildAt(position) as NBottomItem
+        else getChildAt(position) as BItem
 
-    fun getItem(position: Int) : NBottomItem?
+    fun getItem(position: Int) : BItem?
         = if(childCount >= position) null
-        else getChildAt(position) as NBottomItem
+        else getChildAt(position) as BItem
 
 
 }
