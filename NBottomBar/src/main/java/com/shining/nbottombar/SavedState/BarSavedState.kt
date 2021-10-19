@@ -1,4 +1,4 @@
-package com.shining.nbottombar.common
+package com.shining.nbottombar.SavedState
 
 import android.os.Parcel
 import android.os.Parcelable
@@ -8,7 +8,7 @@ import android.view.View
  * SavedState.kt
  * WebHandler
  */
-class SavedState : View.BaseSavedState {
+class BarSavedState : View.BaseSavedState {
 
     var preIndex = -1
     var curIndex = 0
@@ -30,12 +30,12 @@ class SavedState : View.BaseSavedState {
         return 0
     }
 
-    companion object CREATOR : Parcelable.Creator<SavedState> {
-        override fun createFromParcel(parcel: Parcel): SavedState {
-            return SavedState(parcel)
+    companion object CREATOR : Parcelable.Creator<BarSavedState> {
+        override fun createFromParcel(parcel: Parcel): BarSavedState {
+            return BarSavedState(parcel)
         }
 
-        override fun newArray(size: Int): Array<SavedState?> {
+        override fun newArray(size: Int): Array<BarSavedState?> {
             return arrayOfNulls(size)
         }
     }

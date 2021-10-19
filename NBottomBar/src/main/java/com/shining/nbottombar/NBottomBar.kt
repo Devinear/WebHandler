@@ -6,13 +6,15 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import com.shining.nbottombar.common.SavedState
+import com.shining.nbottombar.SavedState.BarSavedState
 
 /**
  * NBottomBar.kt
  * WebHandler
  */
-class NBottomBar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : LinearLayout(context, attrs, defStyle) {
+class NBottomBar
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : LinearLayout(context, attrs, defStyle) {
 
     private val items = ArrayList<NBottomItem>()
     private var selectedListener: (prePosition: Int, position: Int) -> Unit = { _, _ -> }
@@ -45,14 +47,14 @@ class NBottomBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
     }
 
     override fun onSaveInstanceState(): Parcelable? {
-        return SavedState(super.onSaveInstanceState() ?: return null).apply {
+        return BarSavedState(super.onSaveInstanceState() ?: return null).apply {
             this.preIndex = prePosition
             this.curIndex = position
         }
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
-        if (state == null || state !is SavedState) {
+        if (state == null || state !is BarSavedState) {
             super.onRestoreInstanceState(state)
             return
         }
@@ -60,9 +62,9 @@ class NBottomBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
         restoreState(state)
     }
 
-    private fun restoreState(savedState: SavedState) {
-        prePosition = savedState.preIndex
-        position = savedState.curIndex
+    private fun restoreState(barSavedState: BarSavedState) {
+        prePosition = barSavedState.preIndex
+        position = barSavedState.curIndex
         post {
             onSelected(prePosition, position, selectedListener)
         }
@@ -98,6 +100,7 @@ class NBottomBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 
             addViewInLayout(child, -1, child.layoutParams, true)
             child.setOnClickListener { selectItem(i) }
+            child.setOnLongClickListener { pressItem(i) }
         }
 
         isInit = true
@@ -105,6 +108,11 @@ class NBottomBar @JvmOverloads constructor(context: Context, attrs: AttributeSet
 
         selectedItem()?.isSelected = true
         requestLayout()
+    }
+
+    private fun pressItem(index: Int) : Boolean {
+
+        return true
     }
 
     fun selectItem(index: Int) {
