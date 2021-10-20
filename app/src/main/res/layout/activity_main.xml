@@ -20,10 +20,18 @@
             android:layout_height="wrap_content"
             android:theme="@style/NavigationDrawer"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/fl_container" />
-
+            app:layout_constraintBottom_toTopOf="@id/view_pager" />
+<!--
         <FrameLayout
             android:id="@+id/fl_container"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintVertical_weight="1"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
+            app:layout_constraintBottom_toTopOf="@id/bottom_navigation" />
+-->
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/view_pager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             app:layout_constraintVertical_weight="1"
@@ -35,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:menu="@menu/menu_bottom"
-            app:layout_constraintTop_toBottomOf="@id/fl_container"
+            app:layout_constraintTop_toBottomOf="@id/view_pager"
             app:layout_constraintBottom_toTopOf="@id/bottom_bar" />
 
         <com.shining.nbottombar.BBar

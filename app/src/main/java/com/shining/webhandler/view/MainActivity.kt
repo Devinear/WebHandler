@@ -9,6 +9,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.viewpager2.widget.ViewPager2
 import com.shining.nbottombar.BItem
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
@@ -39,13 +40,45 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initUi() {
+        initHeaderUi()
+        initViewPager()
+        initDrawerUi()
+        initNavigationBar()
+        initBottomBar()
 
+        // HARDWARE ACCELERATED 필요..?
+        window.setFlags(
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
+            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+    }
+
+    private fun initHeaderUi() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true) // 왼쪽 상단 버튼
             setHomeAsUpIndicator(R.drawable.outline_menu_24) // 왼쪽 상단 버튼 아이콘
         }
+    }
 
+    private fun initViewPager() {
+        binding.viewPager.apply {
+            adapter = PageAdapter(this@MainActivity,
+                arrayOf(DashboardFragment.INSTANCE, WebViewFragment.INSTANCE, SettingFragment.INSTANCE).toList())
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    val navigation = when (position) {
+                        0 -> R.id.bo_dashboard
+                        1 -> R.id.bo_back
+                        else -> R.id.bo_setting
+                    }
+                    if(binding.bottomNavigation.selectedItemId != navigation)
+                        binding.bottomNavigation.selectedItemId = navigation
+                }
+            })
+        }
+    }
+
+    private fun initDrawerUi() {
         binding.drawerLayout.closeDrawers()
         binding.drawerNavigation.setNavigationItemSelectedListener {
             val id = it.itemId
@@ -59,12 +92,17 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+    }
 
+    private fun initNavigationBar() {
         binding.bottomNavigation.setOnItemSelectedListener {
             val id = it.itemId
             Log.d(TAG, "Bottom onNavigationItemSelected id[${id}]")
 
             when(id) {
+                R.id.bo_dashboard -> {
+                    requestFragment(FragmentType.Dashboard)
+                }
                 R.id.bo_forward -> {
                     if(showFragment != FragmentType.WebView)
                         requestFragment(FragmentType.WebView)
@@ -86,12 +124,9 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+    }
 
-        // HARDWARE ACCELERATED 필요..?
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
-            WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
-
+    private fun initBottomBar() {
         val items = listOf(
             BItem(this, text = "1", iconNormal = R.drawable.outline_collections_24,
                 iconSelected = R.mipmap.ic_launcher, badgeNumber = 8),
@@ -108,18 +143,15 @@ class MainActivity : AppCompatActivity() {
             BItem(this, text = "6", iconNormal = R.mipmap.ic_launcher,
                 iconSelected = R.mipmap.ic_launcher)
         )
-        binding.bottomBar.addItem(*(items.toTypedArray()))
-        binding.bottomBar.selectState(0)
-        binding.bottomBar.setOnSelectedListener { prePosition, position ->
-
+        binding.bottomBar.apply {
+            addItem(*(items.toTypedArray()))
+            selectState(0)
+            setOnSelectedListener { prePosition, position -> }
+            setOnReSelectedListener { position -> }
+            setOnPressedListener { position ->
+                Toast.makeText(this@MainActivity, "PRESSED INDEX [$position]", Toast.LENGTH_SHORT).show()
+            }
         }
-        binding.bottomBar.setOnReSelectedListener { position ->
-
-        }
-        binding.bottomBar.setOnPressedListener { index ->
-            Toast.makeText(this, "PRESSED INDEX [$index]", Toast.LENGTH_SHORT).show()
-        }
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -141,32 +173,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun requestFragment(type: FragmentType = FragmentType.WebView) {
+    private fun requestFragment(type: FragmentType = FragmentType.Dashboard) {
         showFragment = type
-
-        when(type) {
-            FragmentType.WebView -> {
-                changeFragment(WebViewFragment.INSTANCE)
-            }
-            FragmentType.Setting -> {
-                changeFragment(SettingFragment.INSTANCE)
-            }
+        val page = when(type) {
+            FragmentType.Dashboard -> 0
+            FragmentType.WebView -> 1
+            else -> 2
         }
+        if(binding.viewPager.currentItem != page)
+            binding.viewPager.currentItem = page
+
+//        when(type) {
+//            FragmentType.Dashboard ->
+//                changeFragment(DashboardFragment.INSTANCE)
+//            FragmentType.WebView ->
+//                changeFragment(WebViewFragment.INSTANCE)
+//            FragmentType.Setting ->
+//                changeFragment(SettingFragment.INSTANCE)
+//        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         // WebView BackKey
-        if(keyCode == KeyEvent.KEYCODE_BACK && WebViewFragment.INSTANCE.webCanGoBack()) {
+        if(keyCode == KeyEvent.KEYCODE_BACK &&
+            showFragment == FragmentType.WebView && WebViewFragment.INSTANCE.webCanGoBack()) {
             WebViewFragment.INSTANCE.webGoBack()
             return true
         }
         return super.onKeyDown(keyCode, event)
     }
 
-    private fun changeFragment(fragment: BaseFragment) {
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.fl_container, fragment)
-            .commit()
-    }
+//    private fun changeFragment(fragment: BaseFragment) {
+//        supportFragmentManager
+//            .beginTransaction()
+//            .replace(R.id.fl_container, fragment)
+//            .commit()
+//    }
 }

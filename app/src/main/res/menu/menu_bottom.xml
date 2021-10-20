@@ -2,6 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/bo_dashboard"
+        android:icon="@drawable/outline_content_paste_go_24"
+        android:title="Dashboard" />
+    <item
         android:id="@+id/bo_back"
         android:icon="@drawable/outline_arrow_back_24"
         android:title="Back" />
@@ -9,10 +13,6 @@
         android:id="@+id/bo_forward"
         android:icon="@drawable/outline_arrow_forward_24"
         android:title="Forward" />
-    <item
-        android:id="@+id/bo_go_to_url"
-        android:icon="@drawable/outline_content_paste_go_24"
-        android:title="Go To" />
     <item
         android:id="@+id/bo_collections"
         android:icon="@drawable/outline_collections_24"
