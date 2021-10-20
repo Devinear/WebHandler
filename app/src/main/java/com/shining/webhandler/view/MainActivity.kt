@@ -6,8 +6,10 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.WindowManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import com.shining.nbottombar.BItem
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
 import com.shining.webhandler.databinding.ActivityMainBinding
@@ -89,6 +91,35 @@ class MainActivity : AppCompatActivity() {
         window.setFlags(
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+
+        val items = listOf(
+            BItem(this, text = "1", iconNormal = R.drawable.outline_collections_24,
+                iconSelected = R.mipmap.ic_launcher, badgeNumber = 8),
+            BItem(this, text = "2", iconNormal = R.mipmap.ic_launcher,
+                iconSelected = R.mipmap.ic_launcher, badgeNumber = 22),
+            BItem(this, iconNormal = R.mipmap.ic_launcher,
+                iconSelected = R.mipmap.ic_launcher, badgeNumber = 888),
+            BItem(this, text = "3", iconNormal = R.mipmap.ic_launcher,
+                iconSelected = R.mipmap.ic_launcher, isShowPoint = true),
+            BItem(this, text = "4", iconNormal = R.mipmap.ic_launcher,
+                iconSelected = R.mipmap.ic_launcher),
+            BItem(this, text = "5", iconNormal = R.mipmap.ic_launcher,
+                iconSelected = R.mipmap.ic_launcher),
+            BItem(this, text = "6", iconNormal = R.mipmap.ic_launcher,
+                iconSelected = R.mipmap.ic_launcher)
+        )
+        binding.bottomBar.addItem(*(items.toTypedArray()))
+        binding.bottomBar.selectState(0)
+        binding.bottomBar.setOnSelectedListener { prePosition, position ->
+
+        }
+        binding.bottomBar.setOnReSelectedListener { position ->
+
+        }
+        binding.bottomBar.setOnPressedListener { index ->
+            Toast.makeText(this, "PRESSED INDEX [$index]", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
