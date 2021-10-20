@@ -49,6 +49,7 @@ dependencies {
 
     implementation project(path: ':NWebView')
     implementation project(path: ':NPermission')
+    implementation project(path: ':NBottomBar')
 
     // Coroutine
     def coroutines_version = "1.5.1"
