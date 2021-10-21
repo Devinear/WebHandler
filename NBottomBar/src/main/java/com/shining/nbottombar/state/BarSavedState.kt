@@ -1,4 +1,4 @@
-package com.shining.nbottombar.SavedState
+package com.shining.nbottombar.state
 
 import android.os.Parcel
 import android.os.Parcelable

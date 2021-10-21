@@ -7,7 +7,7 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import com.shining.nbottombar.SavedState.BarSavedState
+import com.shining.nbottombar.state.BarSavedState
 
 /**
  * NBottomBar.kt

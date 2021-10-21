@@ -12,7 +12,7 @@ import android.util.TypedValue
 import android.view.View
 import androidx.annotation.Px
 import androidx.core.content.ContextCompat.getDrawable
-import com.shining.nbottombar.SavedState.ItemSavedState
+import com.shining.nbottombar.state.ItemSavedState
 
 /**
  * NBottomItem.kt
