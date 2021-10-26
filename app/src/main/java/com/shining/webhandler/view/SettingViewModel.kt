@@ -6,6 +6,5 @@ import androidx.lifecycle.ViewModel
  * SettingViewModel.kt
  * WebHandler
  */
-
 class SettingViewModel : ViewModel() {
 }

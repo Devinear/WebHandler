@@ -8,5 +8,6 @@ package com.shining.webhandler.common
 enum class FragmentType {
     Dashboard,
     WebView,
+    Collection,
     Setting
 }

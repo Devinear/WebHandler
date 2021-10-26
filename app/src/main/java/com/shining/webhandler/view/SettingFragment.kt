@@ -4,14 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.shining.webhandler.R
 import com.shining.webhandler.databinding.LayoutSettingBinding
+import com.shining.webhandler.view.base.BaseFragment
 
 /**
  * SettingFragment.kt
  * WebHandler
  */
-
 class SettingFragment : BaseFragment() {
 
     private lateinit var binding : LayoutSettingBinding

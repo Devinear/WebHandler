@@ -1,11 +1,11 @@
-package com.shining.webhandler.view
+package com.shining.webhandler.view.common
 
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 
 /**
- * FragmentAdapter.kt
+ * PageAdapter.kt
  * WebHandler
  */
 class PageAdapter(activity: AppCompatActivity, private val fragments: List<Fragment>) : FragmentStateAdapter(activity) {

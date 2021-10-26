@@ -5,24 +5,18 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.WebView
-import androidx.databinding.DataBindingUtil
-import com.shining.webhandler.R
 import com.shining.webhandler.databinding.LayoutWebviewBinding
-import com.shining.webhandler.webview.WebChromeClientClass
-import com.shining.webhandler.webview.WebViewClientClass
+import com.shining.webhandler.view.base.BaseFragment
 
 /**
  * WebViewFragment.kt
  * WebHandler
  */
-
 class WebViewFragment : BaseFragment() {
 
     private lateinit var binding : LayoutWebviewBinding
     private lateinit var viewModel : WebViewViewModel
 
-    private var webView : WebView? = null
     private val cUrl = "https://www.naver.com/"
 
     companion object {
@@ -44,7 +38,6 @@ class WebViewFragment : BaseFragment() {
         Log.d(TAG, "initUi")
 
         binding.webView.apply {
-
             settings.useWideViewPort = true     // 화면 맞추기 허용여부
             settings.javaScriptEnabled = true   // javascript 허용여부
             settings.domStorageEnabled = true   // 내부저장소 이용여부

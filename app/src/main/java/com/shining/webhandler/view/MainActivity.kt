@@ -14,6 +14,7 @@ import com.shining.nbottombar.BItem
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
 import com.shining.webhandler.databinding.ActivityMainBinding
+import com.shining.webhandler.view.common.PageAdapter
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         initViewPager()
         initDrawerUi()
         initNavigationBar()
-        initBottomBar()
+//        initBottomBar()
 
         // HARDWARE ACCELERATED 필요..?
         window.setFlags(
@@ -63,13 +64,14 @@ class MainActivity : AppCompatActivity() {
     private fun initViewPager() {
         binding.viewPager.apply {
             adapter = PageAdapter(this@MainActivity,
-                arrayOf(DashboardFragment.INSTANCE, WebViewFragment.INSTANCE, SettingFragment.INSTANCE).toList())
+                arrayOf(DashboardFragment.INSTANCE, WebViewFragment.INSTANCE, CollectionFragment.INSTANCE, SettingFragment.INSTANCE).toList())
             registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
                 override fun onPageSelected(position: Int) {
                     val navigation = when (position) {
                         0 -> R.id.bo_dashboard
-                        1 -> R.id.bo_back
-                        else -> R.id.bo_setting
+                        1 -> R.id.bo_web
+                        2 -> R.id.bo_collections
+                        else -> R.id.bo_setting // 3
                     }
                     if(binding.bottomNavigation.selectedItemId != navigation)
                         binding.bottomNavigation.selectedItemId = navigation
@@ -100,32 +102,16 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Bottom onNavigationItemSelected id[${id}]")
 
             when(id) {
-                R.id.bo_dashboard -> {
-                    requestFragment(FragmentType.Dashboard)
-                }
-                R.id.bo_forward -> {
-                    if(showFragment != FragmentType.WebView)
-                        requestFragment(FragmentType.WebView)
-                    else
-                        WebViewFragment.INSTANCE.webGoForward()
-                }
-                R.id.bo_back -> {
-                    if(showFragment != FragmentType.WebView)
-                        requestFragment(FragmentType.WebView)
-                    else
-                        WebViewFragment.INSTANCE.webGoBack()
-                }
-                R.id.bo_setting -> {
-                    requestFragment(FragmentType.Setting)
-                }
-                else -> {
-                    requestFragment(FragmentType.WebView)
-                }
+                R.id.bo_dashboard ->    requestFragment(FragmentType.Dashboard)
+                R.id.bo_web ->          requestFragment(FragmentType.WebView)
+                R.id.bo_collections ->  requestFragment(FragmentType.Collection)
+                R.id.bo_setting ->      requestFragment(FragmentType.Setting)
             }
             true
         }
     }
 
+/*
     private fun initBottomBar() {
         val items = listOf(
             BItem(this, text = "1", iconNormal = R.drawable.outline_collections_24,
@@ -153,6 +139,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+*/
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // 왼쪽 상단 버튼 눌렀을 때
@@ -178,19 +165,11 @@ class MainActivity : AppCompatActivity() {
         val page = when(type) {
             FragmentType.Dashboard -> 0
             FragmentType.WebView -> 1
-            else -> 2
+            FragmentType.Collection -> 2
+            else -> 3
         }
         if(binding.viewPager.currentItem != page)
             binding.viewPager.currentItem = page
-
-//        when(type) {
-//            FragmentType.Dashboard ->
-//                changeFragment(DashboardFragment.INSTANCE)
-//            FragmentType.WebView ->
-//                changeFragment(WebViewFragment.INSTANCE)
-//            FragmentType.Setting ->
-//                changeFragment(SettingFragment.INSTANCE)
-//        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
@@ -202,11 +181,4 @@ class MainActivity : AppCompatActivity() {
         }
         return super.onKeyDown(keyCode, event)
     }
-
-//    private fun changeFragment(fragment: BaseFragment) {
-//        supportFragmentManager
-//            .beginTransaction()
-//            .replace(R.id.fl_container, fragment)
-//            .commit()
-//    }
 }
