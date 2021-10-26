@@ -14,6 +14,10 @@ import kotlinx.coroutines.launch
 
 class IntroActivity : AppCompatActivity() {
 
+    companion object {
+        const val TAG = "[DE][AC] Intro"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.d(TAG, "onCreate")
         super.onCreate(savedInstanceState)
@@ -42,7 +46,7 @@ class IntroActivity : AppCompatActivity() {
 
         NPermission.create()
             .permissionListener(listener)
-            .permissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.CAMERA))
+            .permissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))
             .rationaleTitle("Rationale Title")
             .rationaleMessage("Rationale Message")
             .rationaleConfirmText("Rationale Confirm")
@@ -50,9 +54,5 @@ class IntroActivity : AppCompatActivity() {
             .denyMessage("Deny Message")
             .denyCloseText("Deny Close")
             .check()
-    }
-
-    companion object {
-        const val TAG = "[DE] Intro"
     }
 }

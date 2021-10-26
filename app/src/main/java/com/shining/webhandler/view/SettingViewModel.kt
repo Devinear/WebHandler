@@ -1,10 +1,10 @@
 package com.shining.webhandler.view
 
-import androidx.lifecycle.ViewModel
+import com.shining.webhandler.view.base.BaseViewModel
 
 /**
  * SettingViewModel.kt
  * WebHandler
  */
-class SettingViewModel : ViewModel() {
+class SettingViewModel : BaseViewModel() {
 }

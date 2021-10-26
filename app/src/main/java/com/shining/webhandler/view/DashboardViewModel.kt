@@ -1,10 +1,10 @@
 package com.shining.webhandler.view
 
-import androidx.lifecycle.ViewModel
+import com.shining.webhandler.view.base.BaseViewModel
 
 /**
  * DashboardViewModel.kt
  * WebHandler
  */
-class DashboardViewModel : ViewModel() {
+class DashboardViewModel : BaseViewModel() {
 }

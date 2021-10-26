@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
     private var showFragment : FragmentType
 
     init {
-        showFragment = FragmentType.WebView
+        showFragment = FragmentType.Dashboard
     }
 
     companion object {
@@ -168,8 +168,9 @@ class MainActivity : AppCompatActivity() {
             FragmentType.Collection -> 2
             else -> 3
         }
-        if(binding.viewPager.currentItem != page)
+        if(binding.viewPager.currentItem != page) {
             binding.viewPager.currentItem = page
+        }
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
