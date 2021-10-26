@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.MenuItem
+import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.viewpager2.widget.ViewPager2
 import com.shining.nbottombar.BItem
 import com.shining.webhandler.R
@@ -55,6 +57,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun initHeaderUi() {
         setSupportActionBar(binding.toolbar)
+
+        // Toolbar 비활성화
+        binding.toolbar.visibility = View.GONE
+
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true) // 왼쪽 상단 버튼
             setHomeAsUpIndicator(R.drawable.outline_menu_24) // 왼쪽 상단 버튼 아이콘
@@ -81,12 +87,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initDrawerUi() {
+        // Drawer 비활성화
+        binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
         binding.drawerLayout.closeDrawers()
         binding.drawerNavigation.setNavigationItemSelectedListener {
             val id = it.itemId
-            Log.d(TAG, "Drawer onNavigationItemSelected id[${id}]")
-//            Toast.makeText(this@MainActivity, "Drawer Item ID : [$id]", Toast.LENGTH_SHORT).show()
-
             when(id) {
                 R.id.dr_first -> { }
                 R.id.dr_second -> { }

@@ -18,14 +18,16 @@
         android:theme="@style/Theme.WebHandler">
 
         <activity
-            android:name=".view.IntroActivity">
+            android:name=".view.IntroActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name=".view.MainActivity"
+        <activity
+            android:name=".view.MainActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
 
     </application>
