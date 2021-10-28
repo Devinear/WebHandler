@@ -1,35 +1,228 @@
 package com.shining.nwebview
 
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.DownloadManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.Settings
 import android.util.AttributeSet
+import android.util.Base64
 import android.util.Log
-import android.webkit.ValueCallback
-import android.webkit.WebView
+import android.view.ViewGroup
+import android.webkit.*
+import androidx.fragment.app.Fragment
+import java.io.UnsupportedEncodingException
+import java.lang.ref.WeakReference
+import java.nio.charset.Charset
+import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * NWebView.kt
  * WebHandler
  */
-class NWebView : WebView {
+class NWebView
+@JvmOverloads
+constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
+    : WebView(context, attrs, defStyle) {
 
 //    private val nWebChromeClient = WebChromeClientClass()
 //    private val nWebViewClient = WebViewClientClass()
+
+    private var mListener : NWebListener? = null
+
+    internal val REQUEST_CODE_FILE_PICKER = 51426
+    internal var mRequestCodeFilePicker: Int = REQUEST_CODE_FILE_PICKER
+
+    internal var mActivity: WeakReference<Activity>? = null
+    internal var mFragment: WeakReference<Fragment>? = null
+
+    internal var mGeolocationEnabled = false
+    internal var mUploadableFileTypes = "*/*"
+
+
+    val PACKAGE_NAME_DOWNLOAD_MANAGER = "com.android.providers.downloads"
+    internal val DATABASES_SUB_FOLDER = "/databases"
+    internal val LANGUAGE_DEFAULT_ISO3 = "eng"
+    internal val CHARSET_DEFAULT = "UTF-8"
+
+    /** Alternative browsers that have their own rendering engine and *may* be installed on this device  */
+//    internal val ALTERNATIVE_BROWSERS = arrayOf(
+//        "org.mozilla.firefox",
+//        "com.android.chrome",
+//        "com.opera.browser",
+//        "org.mozilla.firefox_beta",
+//        "com.chrome.beta",
+//        "com.opera.browser.beta"
+//    )
+    internal val mPermittedHostnames = ArrayList<String>()
+
+    /** File upload callback for platform versions prior to Android 5.0  */
+    internal var mFileUploadCallbackFirst: ValueCallback<Uri>? = null
+
+    /** File upload callback for Android 5.0+  */
+    internal var mFileUploadCallbackSecond: ValueCallback<Array<Uri>>? = null
+    internal var mLastError: Long = 0
+    internal var mLanguageIso3: String? = null
+    internal var mCustomWebViewClient: WebViewClient? = null
+    internal var mCustomWebChromeClient: WebChromeClient? = null
+    internal val mHttpHeaders = HashMap<String, String>()
 
     companion object {
         const val TAG = "[DE][SDK] NWebView"
     }
 
-    constructor(context: Context) : super(context)
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle)
-
     init {
         Log.d(TAG, "init")
-        webChromeClient = WebChromeClientClass()
-        webViewClient = WebViewClientClass()
+        webChromeClient = NWebChromeClient(this@NWebView)
+        webViewClient = NWebViewClient(this@NWebView)
 
-//        webChromeClient = nWebChromeClient
-//        webViewClient = nWebViewClient
+        initContext(context)
+    }
+
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun initContext(context: Context) {
+        Log.d(TAG, "initContext")
+        // in IDE's preview mode
+        if (isInEditMode) {
+            // do not run the code from this method
+            return
+        }
+
+        if (context is Activity) {
+            mActivity = WeakReference(context)
+        }
+
+        mLanguageIso3 = getLanguageIso3()
+
+        isFocusable = true
+        isFocusableInTouchMode = true
+
+        isSaveEnabled = true
+
+        val filesDir = context.filesDir.path
+        val databaseDir = filesDir.substring(0, filesDir.lastIndexOf("/")) + DATABASES_SUB_FOLDER
+        val webSettings = settings
+        webSettings.allowFileAccess = false
+//        setAllowAccessFromFileUrls(webSettings, false)
+        webSettings.builtInZoomControls = false
+        webSettings.javaScriptEnabled = true
+        webSettings.domStorageEnabled = true
+        webSettings.databaseEnabled = true
+        webSettings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+        setThirdPartyCookiesEnabled(true)
+
+        setDownloadListener { url, userAgent, contentDisposition, mimeType, contentLength ->
+            mListener ?: return@setDownloadListener
+
+            val suggestedFilename = URLUtil.guessFileName(url, contentDisposition, mimeType)
+            mListener!!.onDownloadRequested(url, suggestedFilename, mimeType, contentLength, contentDisposition, userAgent)
+        }
+    }
+
+    fun setListener(activity: Activity, listener: NWebListener)
+        = setListener(activity, listener, REQUEST_CODE_FILE_PICKER)
+
+    fun setListener(activity: Activity, listener: NWebListener, requestCodeFilePicker: Int) {
+        mActivity = WeakReference(activity)
+        setListener(listener, requestCodeFilePicker)
+    }
+
+    fun setListener(fragment: Fragment, listener: NWebListener)
+        = setListener(fragment, listener, REQUEST_CODE_FILE_PICKER)
+
+    fun setListener(fragment: Fragment, listener: NWebListener, requestCodeFilePicker: Int) {
+        mFragment = WeakReference(fragment)
+        setListener(listener, requestCodeFilePicker)
+    }
+
+    internal fun setListener(listener: NWebListener, requestCodeFilePicker: Int) {
+        mListener = listener
+        mRequestCodeFilePicker = requestCodeFilePicker
+    }
+
+    fun setGeolocationEnabled(enabled: Boolean) {
+        if (enabled) {
+            settings.javaScriptEnabled = true
+            settings.setGeolocationEnabled(true)
+            setGeolocationDatabasePath()
+        }
+        mGeolocationEnabled = enabled
+    }
+
+    @SuppressLint("NewApi")
+    internal fun setGeolocationDatabasePath() {
+        val activity =
+            if (mFragment != null && mFragment!!.get() != null && mFragment!!.get()!!.activity != null) {
+                mFragment!!.get()!!.activity
+            } else if (mActivity != null && mActivity!!.get() != null) {
+                mActivity!!.get()
+            } else {
+                return
+            }
+        settings.setGeolocationDatabasePath(activity!!.filesDir.path)
+    }
+
+    fun setUploadableFileTypes(mimeType: String) {
+        mUploadableFileTypes = mimeType
+    }
+
+    /**
+     * Loads and displays the provided HTML source text
+     *
+     * @param html the HTML source text to load
+     */
+    fun loadHtml(html: String?) {
+        loadHtml(html, null)
+    }
+
+    /**
+     * Loads and displays the provided HTML source text
+     *
+     * @param html the HTML source text to load
+     * @param baseUrl the URL to use as the page's base URL
+     */
+    fun loadHtml(html: String?, baseUrl: String?) {
+        loadHtml(html, baseUrl, null)
+    }
+
+    /**
+     * Loads and displays the provided HTML source text
+     *
+     * @param html the HTML source text to load
+     * @param baseUrl the URL to use as the page's base URL
+     * @param historyUrl the URL to use for the page's history entry
+     */
+    fun loadHtml(html: String?, baseUrl: String?, historyUrl: String?) {
+        loadHtml(html, baseUrl, historyUrl, "utf-8")
+    }
+
+    /**
+     * Loads and displays the provided HTML source text
+     *
+     * @param html the HTML source text to load
+     * @param baseUrl the URL to use as the page's base URL
+     * @param historyUrl the URL to use for the page's history entry
+     * @param encoding the encoding or charset of the HTML source text
+     */
+    fun loadHtml(html: String?, baseUrl: String?, historyUrl: String?, encoding: String?) {
+        loadDataWithBaseURL(baseUrl, html!!, "text/html", encoding, historyUrl)
+    }
+
+    @SuppressLint("NewApi")
+    override fun onResume() {
+        Log.d(TAG, "onResume")
+        resumeTimers()
+    }
+
+    @SuppressLint("NewApi")
+    override fun onPause() {
+        Log.d(TAG, "onPause")
+        pauseTimers()
     }
 
     override fun evaluateJavascript(script: String, resultCallback: ValueCallback<String>?) {
@@ -37,14 +230,515 @@ class NWebView : WebView {
         super.evaluateJavascript(script, resultCallback)
     }
 
+//    override fun loadUrl(url: String, additionalHttpHeaders: MutableMap<String, String>) {
+//        Log.d(TAG, "loadUrl")
+//        super.loadUrl(url, additionalHttpHeaders)
+//    }
+//
+//    override fun loadUrl(url: String) {
+//        Log.d(TAG, "loadUrl")
+//        super.loadUrl(url)
+//    }
+
+    fun onDestroy() {
+        Log.d(TAG, "onDestroy")
+        // try to remove this view from its parent first
+        try {
+            (parent as ViewGroup).removeView(this)
+        } catch (ignored: Exception) {
+        }
+        // then try to remove all child views from this view
+        try {
+            removeAllViews()
+        } catch (ignored: Exception) {
+        }
+        // and finally destroy this view
+        destroy()
+    }
+
+    fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        Log.d(TAG, "onActivityResult")
+        if (requestCode == mRequestCodeFilePicker) {
+            if (resultCode == Activity.RESULT_OK) {
+                intent ?: return
+
+//                mFileUploadCallbackFirst?.apply {
+//                    onReceiveValue(intent.data)
+//                    mFileUploadCallbackFirst = null
+//                    return
+//                }
+
+                if (mFileUploadCallbackFirst != null) {
+                    mFileUploadCallbackFirst!!.onReceiveValue(intent.data)
+                    mFileUploadCallbackFirst = null
+                }
+                else if (mFileUploadCallbackSecond != null) {
+                    var dataUris: Array<Uri>? = null
+                    try {
+                        if (intent.dataString != null) {
+                            dataUris = arrayOf(Uri.parse(intent.dataString))
+                        }
+                        else if (intent.clipData != null) {
+                            val numSelectedFiles = intent.clipData!!.itemCount
+                            val list = ArrayList<Uri>()
+                            for (i in 0 until numSelectedFiles) {
+//                                dataUris[i] = intent.clipData!!.getItemAt(i).uri
+                                list.add(intent.clipData!!.getItemAt(i).uri)
+                            }
+                            dataUris = list.toTypedArray()
+                        }
+                    } catch (ignored: Exception) {
+
+                    }
+                    mFileUploadCallbackSecond!!.onReceiveValue(dataUris)
+                    mFileUploadCallbackSecond = null
+                }
+            } else {
+                if (mFileUploadCallbackFirst != null) {
+                    mFileUploadCallbackFirst!!.onReceiveValue(null)
+                    mFileUploadCallbackFirst = null
+                } else if (mFileUploadCallbackSecond != null) {
+                    mFileUploadCallbackSecond!!.onReceiveValue(null)
+                    mFileUploadCallbackSecond = null
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds an additional HTTP header that will be sent along with every HTTP `GET` request
+     *
+     * This does only affect the main requests, not the requests to included resources (e.g. images)
+     *
+     * If you later want to delete an HTTP header that was previously added this way, call `removeHttpHeader()`
+     *
+     * The `WebView` implementation may in some cases overwrite headers that you set or unset
+     *
+     * @param name the name of the HTTP header to add
+     * @param value the value of the HTTP header to send
+     */
+    fun addHttpHeader(name: String, value: String) {
+        mHttpHeaders.put(name, value)
+    }
+
+    /**
+     * Removes one of the HTTP headers that have previously been added via `addHttpHeader()`
+     *
+     * If you want to unset a pre-defined header, set it to an empty string with `addHttpHeader()` instead
+     *
+     * The `WebView` implementation may in some cases overwrite headers that you set or unset
+     *
+     * @param name the name of the HTTP header to remove
+     */
+    fun removeHttpHeader(name: String) {
+        mHttpHeaders.remove(name)
+    }
+
+    fun addPermittedHostname(hostname: String) {
+        mPermittedHostnames.add(hostname)
+    }
+
+    fun addPermittedHostnames(collection: Collection<String>) {
+        mPermittedHostnames.addAll(collection)
+    }
+
+    fun getPermittedHostnames(): List<String> {
+        return mPermittedHostnames
+    }
+
+    fun removePermittedHostname(hostname: String) {
+        mPermittedHostnames.remove(hostname)
+    }
+
+    fun clearPermittedHostnames() {
+        mPermittedHostnames.clear()
+    }
+
+    fun onBackPressed(): Boolean {
+        return if (canGoBack()) {
+            goBack()
+            false
+        } else {
+            true
+        }
+    }
+
+    //        androidx.webkit.WebViewAssetLoader
+    // 대체 사용
+//    @SuppressLint("NewApi")
+//    private fun setAllowAccessFromFileUrls(webSettings: WebSettings, allowed: Boolean) {
+//        webSettings.allowFileAccessFromFileURLs = allowed
+//        webSettings.allowUniversalAccessFromFileURLs = allowed
+//    }
+
+    fun setCookiesEnabled(enabled: Boolean) {
+        CookieManager.getInstance().setAcceptCookie(enabled)
+    }
+
+    fun setThirdPartyCookiesEnabled(enabled: Boolean) {
+        CookieManager.getInstance().setAcceptThirdPartyCookies(this, enabled)
+    }
+
+    fun setMixedContentAllowed(allowed: Boolean) {
+        setMixedContentAllowed(settings, allowed)
+    }
+
+    @SuppressLint("NewApi")
+    internal fun setMixedContentAllowed(webSettings: WebSettings, allowed: Boolean) {
+        webSettings.mixedContentMode =
+            if (allowed) WebSettings.MIXED_CONTENT_ALWAYS_ALLOW else WebSettings.MIXED_CONTENT_NEVER_ALLOW
+    }
+
+//    fun setDesktopMode(enabled: Boolean) {
+//        val webSettings = settings
+//        val newUserAgent: String
+//        newUserAgent = if (enabled) {
+//            webSettings.userAgentString.replace("Mobile", "eliboM").replace("Android", "diordnA")
+//        } else {
+//            webSettings.userAgentString.replace("eliboM", "Mobile").replace("diordnA", "Android")
+//        }
+//        webSettings.userAgentString = newUserAgent
+//        webSettings.useWideViewPort = enabled
+//        webSettings.loadWithOverviewMode = enabled
+//        webSettings.setSupportZoom(enabled)
+//        webSettings.builtInZoomControls = enabled
+//    }
+
+    // override
     override fun loadUrl(url: String, additionalHttpHeaders: MutableMap<String, String>) {
         Log.d(TAG, "loadUrl")
+
+        takeIf { mHttpHeaders.size > 0 }?.apply {
+            additionalHttpHeaders.putAll(mHttpHeaders)
+        }
         super.loadUrl(url, additionalHttpHeaders)
     }
 
     override fun loadUrl(url: String) {
         Log.d(TAG, "loadUrl")
-        super.loadUrl(url)
+
+        takeIf { mHttpHeaders.size > 0 }?.apply {
+            super.loadUrl(url, mHttpHeaders)
+        } ?: run {
+            super.loadUrl(url)
+        }
+
+//        if (mHttpHeaders.size > 0)
+//            super.loadUrl(url, mHttpHeaders)
+//        else
+//            super.loadUrl(url)
     }
+
+    public fun loadUrl(url: String, preventCaching: Boolean) {
+//        takeIf { preventCaching }.apply {
+//            loadUrl(makeUrlUnique(url))
+//        } ?: run {
+//            loadUrl(url)
+//        }
+        loadUrl( if(preventCaching) makeUrlUnique(url) else url)
+    }
+
+    public fun loadUrl(url: String, preventCaching: Boolean, additionalHttpHeaders: MutableMap<String, String>) {
+        takeIf { preventCaching }?.apply {
+            loadUrl(makeUrlUnique(url), additionalHttpHeaders)
+        } ?: run {
+            loadUrl(url, additionalHttpHeaders)
+        }
+    }
+
+    private fun makeUrlUnique(url: String): String {
+        val unique = StringBuilder().apply {
+            append(url)
+            if (url.contains("?")) {
+                append('&')
+            } else {
+                if (url.lastIndexOf('/') <= 7)
+                    append('/')
+                append('?')
+            }
+            append(System.currentTimeMillis())
+            append('=')
+            append(1)
+        }
+        return unique.toString()
+    }
+
+    fun isPermittedUrl(url: String): Boolean {
+        // if the permitted hostnames have not been restricted to a specific set
+        if (mPermittedHostnames.size == 0) {
+            // all hostnames are allowed
+            return true
+        }
+        val parsedUrl = Uri.parse(url)
+
+        // get the hostname of the URL that is to be checked
+        // if the hostname could not be determined, usually because the URL has been invalid
+        val actualHost = parsedUrl.host ?: return false
+
+        // if the host contains invalid characters (e.g. a backslash)
+        if (!actualHost.matches(Regex("^[a-zA-Z0-9._!~*')(;:&=+$,%\\[\\]-]*$"))) {
+            // prevent mismatches between interpretations by `Uri` and `WebView`, e.g. for `http://evil.example.com\.good.example.com/`
+            return false
+        }
+
+        // get the user information from the authority part of the URL that is to be checked
+        val actualUserInformation = parsedUrl.userInfo
+
+        // if the user information contains invalid characters (e.g. a backslash)
+        if (actualUserInformation != null && !actualUserInformation.matches(Regex("^[a-zA-Z0-9._!~*')(;:&=+$,%-]*$"))) {
+            // prevent mismatches between interpretations by `Uri` and `WebView`, e.g. for `http://evil.example.com\@good.example.com/`
+            return false
+        }
+
+        // for every hostname in the set of permitted hosts
+        for (expectedHost in mPermittedHostnames) {
+            // if the two hostnames match or if the actual host is a subdomain of the expected host
+            if (actualHost == expectedHost || actualHost.endsWith(".$expectedHost")) {
+                // the actual hostname of the URL to be checked is allowed
+                return true
+            }
+        }
+        // the actual hostname of the URL to be checked is not allowed since there were no matches
+        return false
+    }
+
+    internal fun setLastError() {
+        mLastError = System.currentTimeMillis()
+    }
+
+    internal fun hasError(): Boolean {
+        return mLastError + 500 >= System.currentTimeMillis()
+    }
+
+    private fun getLanguageIso3(): String {
+        return try {
+            Locale.getDefault().isO3Language.lowercase(Locale.US)
+        } catch (e: MissingResourceException) {
+            LANGUAGE_DEFAULT_ISO3
+        }
+    }
+
+    /**
+     * Provides localizations for the 25 most widely spoken languages that have a ISO 639-2/T code
+     *
+     * @return the label for the file upload prompts as a string
+     */
+    private fun getFileUploadPromptLabel(): String? {
+        try {
+            when (mLanguageIso3) {
+                "zho" -> return decodeBase64("6YCJ5oup5LiA5Liq5paH5Lu2")
+                "spa" -> return decodeBase64("RWxpamEgdW4gYXJjaGl2bw==")
+                "hin" -> return decodeBase64("4KSP4KSVIOCkq+CkvOCkvuCkh+CksiDgpJrgpYHgpKjgpYfgpII=")
+                "ben" -> return decodeBase64("4KaP4KaV4Kaf4Ka/IOCmq+CmvuCmh+CmsiDgpqjgpr/gprDgp43gpqzgpr7gpprgpqg=")
+                "ara" -> return decodeBase64("2KfYrtiq2YrYp9ixINmF2YTZgSDZiNin2K3Yrw==")
+                "por" -> return decodeBase64("RXNjb2xoYSB1bSBhcnF1aXZv")
+                "rus" -> return decodeBase64("0JLRi9Cx0LXRgNC40YLQtSDQvtC00LjQvSDRhNCw0LnQuw==")
+                "jpn" -> return decodeBase64("MeODleOCoeOCpOODq+OCkumBuOaKnuOBl+OBpuOBj+OBoOOBleOBhA==")
+                "pan" -> return decodeBase64("4KiH4Kmx4KiVIOCoq+CovuCoh+CosiDgqJrgqYHgqKPgqYs=")
+                "deu" -> return decodeBase64("V8OkaGxlIGVpbmUgRGF0ZWk=")
+                "jav" -> return decodeBase64("UGlsaWggc2lqaSBiZXJrYXM=")
+                "msa" -> return decodeBase64("UGlsaWggc2F0dSBmYWls")
+                "tel" -> return decodeBase64("4LCS4LCVIOCwq+CxhuCxluCwsuCxjeCwqOCxgSDgsI7gsILgsJrgsYHgsJXgsYvgsILgsKHgsL8=")
+                "vie" -> return decodeBase64("Q2jhu41uIG3hu5l0IHThuq1wIHRpbg==")
+                "kor" -> return decodeBase64("7ZWY64KY7J2YIO2MjOydvOydhCDshKDtg50=")
+                "fra" -> return decodeBase64("Q2hvaXNpc3NleiB1biBmaWNoaWVy")
+                "mar" -> return decodeBase64("4KSr4KS+4KSH4KSyIOCkqOCkv+CkteCkoeCkvg==")
+                "tam" -> return decodeBase64("4K6S4K6w4K+BIOCuleCvh+CuvuCuquCvjeCuquCviCDgrqTgr4fgrrDgr43grrXgr4E=")
+                "urd" -> return decodeBase64("2KfbjNqpINmB2KfYptmEINmF24zauiDYs9uSINin2YbYqtiu2KfYqCDaqdix24zaug==")
+                "fas" -> return decodeBase64("2LHYpyDYp9mG2KrYrtin2Kgg2qnZhtuM2K8g24zaqSDZgdin24zZhA==")
+                "tur" -> return decodeBase64("QmlyIGRvc3lhIHNlw6dpbg==")
+                "ita" -> return decodeBase64("U2NlZ2xpIHVuIGZpbGU=")
+                "tha" -> return decodeBase64("4LmA4Lil4Li34Lit4LiB4LmE4Lif4Lil4LmM4Lir4LiZ4Li24LmI4LiH")
+                "guj" -> return decodeBase64("4KqP4KqVIOCqq+CqvuCqh+CqsuCqqOCrhyDgqqrgqrjgqoLgqqY=")
+            }
+        } catch (ignored: Exception) {
+
+        }
+        return "Choose a file"
+    }
+
+    @Throws(IllegalArgumentException::class, UnsupportedEncodingException::class)
+    private fun decodeBase64(base64: String): String {
+        val bytes = Base64.decode(base64, Base64.DEFAULT)
+        return String(bytes, Charset.forName(CHARSET_DEFAULT))
+    }
+
+    @SuppressLint("NewApi")
+    internal fun openFileInput(
+        fileUploadCallbackFirst: ValueCallback<Uri>?,
+        fileUploadCallbackSecond: ValueCallback<Array<Uri>>?,
+        allowMultiple: Boolean
+    ) {
+        if (mFileUploadCallbackFirst != null) {
+            mFileUploadCallbackFirst!!.onReceiveValue(null)
+        }
+        mFileUploadCallbackFirst = fileUploadCallbackFirst
+        if (mFileUploadCallbackSecond != null) {
+            mFileUploadCallbackSecond!!.onReceiveValue(null)
+        }
+        mFileUploadCallbackSecond = fileUploadCallbackSecond
+        val i = Intent(Intent.ACTION_GET_CONTENT)
+        i.addCategory(Intent.CATEGORY_OPENABLE)
+        if (allowMultiple) {
+            i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+        }
+        i.type = mUploadableFileTypes
+        if (mFragment != null && mFragment!!.get() != null) {
+            mFragment!!.get()!!.startActivityForResult(
+                Intent.createChooser(i, getFileUploadPromptLabel()),
+                mRequestCodeFilePicker
+            )
+        } else if (mActivity != null && mActivity!!.get() != null) {
+            mActivity!!.get()!!.startActivityForResult(
+                Intent.createChooser(i, getFileUploadPromptLabel()),
+                mRequestCodeFilePicker
+            )
+        }
+    }
+
+    /**
+     * Returns whether file uploads can be used on the current device (generally all platform versions except for 4.4)
+     *
+     * @return whether file uploads can be used
+     */
+    fun isFileUploadAvailable(): Boolean {
+        return isFileUploadAvailable(false)
+    }
+
+    /**
+     * Returns whether file uploads can be used on the current device (generally all platform versions except for 4.4)
+     *
+     * On Android 4.4.3/4.4.4, file uploads may be possible but will come with a wrong MIME type
+     *
+     * @param needsCorrectMimeType whether a correct MIME type is required for file uploads or `application/octet-stream` is acceptable
+     * @return whether file uploads can be used
+     */
+    fun isFileUploadAvailable(needsCorrectMimeType: Boolean): Boolean {
+        return if (Build.VERSION.SDK_INT == 19) {
+            val platformVersion = if (Build.VERSION.RELEASE == null) "" else Build.VERSION.RELEASE
+            !needsCorrectMimeType && (platformVersion.startsWith("4.4.3") || platformVersion.startsWith(
+                "4.4.4"
+            ))
+        } else {
+            true
+        }
+    }
+
+    /**
+     * Handles a download by loading the file from `fromUrl` and saving it to `toFilename` on the external storage
+     *
+     * This requires the two permissions `android.permission.INTERNET` and `android.permission.WRITE_EXTERNAL_STORAGE`
+     *
+     * Only supported on API level 9 (Android 2.3) and above
+     *
+     * @param context a valid `Context` reference
+     * @param fromUrl the URL of the file to download, e.g. the one from `AdvancedWebView.onDownloadRequested(...)`
+     * @param toFilename the name of the destination file where the download should be saved, e.g. `myImage.jpg`
+     * @return whether the download has been successfully handled or not
+     * @throws IllegalStateException if the storage or the target directory could not be found or accessed
+     */
+    @SuppressLint("NewApi")
+    fun handleDownload(context: Context, fromUrl: String?, toFilename: String?): Boolean {
+        val request = DownloadManager.Request(Uri.parse(fromUrl))
+        request.allowScanningByMediaScanner()
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, toFilename)
+        val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        return try {
+            try {
+                dm.enqueue(request)
+            } catch (e: SecurityException) {
+                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+                dm.enqueue(request)
+            }
+            true
+        } // if the download manager app has been disabled on the device
+        catch (e: IllegalArgumentException) {
+            // show the settings screen where the user can enable the download manager app again
+            openAppSettings(
+                context,
+                PACKAGE_NAME_DOWNLOAD_MANAGER
+            )
+            false
+        }
+    }
+
+    @SuppressLint("NewApi")
+    private fun openAppSettings(context: Context, packageName: String): Boolean {
+        return try {
+            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            intent.data = Uri.parse("package:$packageName")
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            context.startActivity(intent)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /** Wrapper for methods related to alternative browsers that have their own rendering engines  */
+    /*
+    object Browsers {
+        /** Package name of an alternative browser that is installed on this device  */
+        private var mAlternativePackage: String? = null
+
+        /**
+         * Returns whether there is an alternative browser with its own rendering engine currently installed
+         *
+         * @param context a valid `Context` reference
+         * @return whether there is an alternative browser or not
+         */
+        fun hasAlternative(context: Context): Boolean {
+            return getAlternative(context) != null
+        }
+
+        /**
+         * Returns the package name of an alternative browser with its own rendering engine or `null`
+         *
+         * @param context a valid `Context` reference
+         * @return the package name or `null`
+         */
+        fun getAlternative(context: Context): String? {
+            if (mAlternativePackage != null) {
+                return mAlternativePackage
+            }
+            val alternativeBrowsers = ALTERNATIVE_BROWSERS
+            val apps = context.packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+            for (app in apps) {
+                if (!app.enabled) {
+                    continue
+                }
+                if (alternativeBrowsers.contains(app.packageName)) {
+                    mAlternativePackage = app.packageName
+                    return app.packageName
+                }
+            }
+            return null
+        }
+        /**
+         * Opens the given URL in an alternative browser
+         *
+         * @param context a valid `Activity` reference
+         * @param url the URL to open
+         * @param withoutTransition whether to switch to the browser `Activity` without a transition
+         */
+        /**
+         * Opens the given URL in an alternative browser
+         *
+         * @param context a valid `Activity` reference
+         * @param url the URL to open
+         */
+        @JvmOverloads
+        fun openUrl(context: Activity, url: String?, withoutTransition: Boolean = false) {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            intent.setPackage(getAlternative(context))
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(intent)
+            if (withoutTransition) {
+                context.overridePendingTransition(0, 0)
+            }
+        }
+    }
+    */
 
 }

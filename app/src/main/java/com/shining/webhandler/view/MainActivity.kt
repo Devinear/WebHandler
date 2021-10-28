@@ -1,6 +1,7 @@
 package com.shining.webhandler.view
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -11,6 +12,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
 import androidx.viewpager2.widget.ViewPager2
 import com.shining.nbottombar.BItem
 import com.shining.webhandler.R
@@ -186,5 +188,12 @@ class MainActivity : AppCompatActivity() {
             return true
         }
         return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        takeIf { showFragment == FragmentType.WebView }?.apply {
+            WebViewFragment.INSTANCE.onWebViewResult(resultCode, requestCode, data)
+        }
     }
 }
