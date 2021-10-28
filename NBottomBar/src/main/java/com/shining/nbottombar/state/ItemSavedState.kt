@@ -7,9 +7,6 @@ import android.view.View
 /**
  * ItemSavedState.kt
  * WebHandler
- *
- * Created by Chahyung-Lee on 2021/10/19.
- * Copyright © 2021 NHN COMMERCE Corp. All rights reserved.
  */
 class ItemSavedState : View.BaseSavedState {
 
