@@ -19,6 +19,8 @@ import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
 import com.shining.webhandler.databinding.ActivityMainBinding
 import com.shining.webhandler.view.common.PageAdapter
+import androidx.recyclerview.widget.RecyclerView
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -85,6 +87,20 @@ class MainActivity : AppCompatActivity() {
                         binding.bottomNavigation.selectedItemId = navigation
                 }
             })
+
+            try {
+                // 민감도 조절
+                val recyclerViewField = ViewPager2::class.java.getDeclaredField("mRecyclerView")
+                recyclerViewField.isAccessible = true
+
+                val recyclerView = recyclerViewField.get(this)
+                val touchSlopField = RecyclerView::class.java.getDeclaredField("mTouchSlop")
+                touchSlopField.isAccessible = true
+                touchSlopField.set(recyclerView, (touchSlopField.get(recyclerView) as Int)*6)
+            }
+            catch (e: Exception) {
+                Log.e(TAG, "initViewPager Exception[${e.message}]")
+            }
         }
     }
 
