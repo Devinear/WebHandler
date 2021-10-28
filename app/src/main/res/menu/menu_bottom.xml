@@ -8,7 +8,7 @@
     <item
         android:id="@+id/bo_web"
         android:icon="@drawable/outline_web_asset_24"
-        android:title="Back" />
+        android:title="Browser" />
     <item
         android:id="@+id/bo_collections"
         android:icon="@drawable/outline_collections_24"

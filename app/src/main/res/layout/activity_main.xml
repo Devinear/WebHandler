@@ -7,8 +7,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context=".view.MainActivity"
-    tools:openDrawer="start">
+    tools:context=".view.MainActivity">
+    <!--tools:openDrawer="start">-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -43,6 +43,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:menu="@menu/menu_bottom"
+            app:itemIconTint="@drawable/menu_selector_color"
+            app:itemTextColor="@drawable/menu_selector_color"
             app:layout_constraintTop_toBottomOf="@id/view_pager"
             app:layout_constraintBottom_toBottomOf="parent" />
 <!--
