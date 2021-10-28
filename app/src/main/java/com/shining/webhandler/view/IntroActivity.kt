@@ -10,6 +10,7 @@ import com.shining.npermission.NPermission
 import com.shining.npermission.PermissionListener
 import com.shining.webhandler.R
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class IntroActivity : AppCompatActivity() {
@@ -27,32 +28,32 @@ class IntroActivity : AppCompatActivity() {
 
             override fun onPermissionGranted() {
                 Toast.makeText(this@IntroActivity, "Permission Granted", Toast.LENGTH_SHORT).show()
-
-                GlobalScope.launch {
-                    startActivity(Intent(this@IntroActivity, MainActivity::class.java))
-                    finish()
-                }
+                startMainActivity()
             }
 
             override fun onPermissionDenied(deniedPermissions: List<String>) {
                 Toast.makeText(this@IntroActivity, "Permission Denied\n$deniedPermissions", Toast.LENGTH_SHORT).show()
-
-                GlobalScope.launch {
-                    startActivity(Intent(this@IntroActivity, MainActivity::class.java))
-                    finish()
-                }
+                startMainActivity()
             }
         }
 
         NPermission.create()
             .permissionListener(listener)
             .permissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))
-            .rationaleTitle("Rationale Title")
-            .rationaleMessage("Rationale Message")
-            .rationaleConfirmText("Rationale Confirm")
-            .denyTitle("Deny Title")
-            .denyMessage("Deny Message")
-            .denyCloseText("Deny Close")
+//            .rationaleTitle("Rationale Title")
+//            .rationaleMessage("Rationale Message")
+//            .rationaleConfirmText("Rationale Confirm")
+//            .denyTitle("Deny Title")
+//            .denyMessage("Deny Message")
+//            .denyCloseText("Deny Close")
             .check()
+    }
+
+    private fun startMainActivity() {
+        GlobalScope.launch {
+            delay(100L)
+            startActivity(Intent(this@IntroActivity, MainActivity::class.java))
+            finish()
+        }
     }
 }
