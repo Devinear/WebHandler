@@ -75,7 +75,7 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
     }
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-        Log.d(TAG, "onPageStarted")
+        Log.d(TAG, "onPageStarted URL[$url]")
         if (!webView.hasError()) {
             mListener?.onPageStarted(url, favicon)
         }
@@ -83,7 +83,7 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
-        Log.d(TAG, "onPageFinished")
+        Log.d(TAG, "onPageFinished URL[$url]")
         if (!webView.hasError()) {
             mListener?.onPageFinished(url)
         }
@@ -92,18 +92,18 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
 
     /* 페이지 내부의 리소스가 로드가 되면서 다수 호출  */
     override fun onLoadResource(view: WebView?, url: String?) {
-        Log.d(TAG, "onLoadResource")
+        Log.d(TAG, "onLoadResource URL[$url]")
         super.onLoadResource(view, url)
     }
 
     /* 방문한 링크를 업데이트하는 경우 호출 */
     override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
-        Log.d(TAG, "doUpdateVisitedHistory")
+        Log.d(TAG, "doUpdateVisitedHistory isReload[$isReload] URL[$url]")
         super.doUpdateVisitedHistory(view, url, isReload)
     }
 
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
-        Log.d(TAG, "shouldInterceptRequest")
+        Log.d(TAG, "shouldInterceptRequest Request[$request]")
         return super.shouldInterceptRequest(view, request)
     }
 
@@ -111,8 +111,6 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         Log.d(TAG, "onFormResubmission")
         super.onFormResubmission(view, dontResend, resend)
     }
-
-
 
     /** 키 입력에 대한 처리
     * true : 동작을 WebView에 위임하지 않는다.

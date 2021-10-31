@@ -14,7 +14,7 @@ class NWebChromeClient(private val webView: NWebView) : WebChromeClient() {
         const val TAG = "[DE][SDK] ChromeClient"
     }
 
-    // file upload callback (Android 5.0 (API level 21) -- current) (public method)
+    // file upload callback : Android 5.0 (API level 21) -- current
     override fun onShowFileChooser(
         webView: WebView?,
         filePathCallback: ValueCallback<Array<Uri>>?,
@@ -100,7 +100,7 @@ class NWebChromeClient(private val webView: NWebView) : WebChromeClient() {
 
     /* 페이지가 로드됨에 따른 퍼센트를 보여주는 부분 */
     override fun onProgressChanged(view: WebView, newProgress: Int) {
-        Log.d(TAG, "onProgressChanged")
+        Log.d(TAG, "onProgressChanged Progress[$newProgress]")
         super.onProgressChanged(view, newProgress)
     }
 
@@ -112,7 +112,7 @@ class NWebChromeClient(private val webView: NWebView) : WebChromeClient() {
 
     /* 타이틀이 있는 경우 호출. 네비게이션에 타이틀 넣을때 */
     override fun onReceivedTitle(view: WebView, title: String) {
-        Log.d(TAG, "onReceivedTitle")
+        Log.d(TAG, "onReceivedTitle Title[$title]")
         super.onReceivedTitle(view, title)
     }
 
@@ -145,7 +145,8 @@ class NWebChromeClient(private val webView: NWebView) : WebChromeClient() {
 
     override fun getDefaultVideoPoster(): Bitmap? {
         Log.d(TAG, "getDefaultVideoPoster")
-        return super.getDefaultVideoPoster()
+        val bitmap = super.getDefaultVideoPoster()
+        return bitmap
     }
 
     override fun getVideoLoadingProgressView(): View? {
