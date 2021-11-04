@@ -32,12 +32,7 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
 
         // 유효한 URL
         if (!WebViewUtils.isPermittedUrl(view.context, url)) {
-            // if a listener is available
-            if (mListener != null) {
-                // inform the listener about the request
-                mListener!!.onExternalPageRequest(url)
-            }
-            // cancel the original request
+            mListener?.onExternalPageRequest(url)
             return true
         }
 
@@ -45,7 +40,28 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
             return true
         }
 
-        // route the request through the custom URL loading method
+        view.loadUrl(url)
+        return true
+    }
+
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+        Log.d(TAG, "shouldOverrideUrlLoading URL[${request?.url}]")
+        view ?: return false
+        request ?: return false
+
+        val url : String = request.url.toString()
+        if(url.isBlank()) return false
+
+        // 유효한 URL
+        if (!WebViewUtils.isPermittedUrl(view.context, url)) {
+            mListener?.onExternalPageRequest(url)
+            return true
+        }
+
+        if (mViewClient?.shouldOverrideUrlLoading(view, request) == true) {
+            return true
+        }
+
         view.loadUrl(url)
         return true
     }
