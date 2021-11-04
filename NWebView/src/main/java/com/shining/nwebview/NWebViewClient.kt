@@ -13,7 +13,7 @@ import java.util.regex.Pattern
 class NWebViewClient(private val webView: NWebView) : WebViewClient() {
 
     var mListener : NWebListener? = null
-//    var mViewClient : WebViewClient? = null
+    var mViewClient : WebViewClient? = null
 
     private var mLastLoadFailed = false
 
@@ -41,6 +41,10 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
             return true
         }
 
+        if (mViewClient?.shouldOverrideUrlLoading(view, url) == true) {
+            return true
+        }
+
         // route the request through the custom URL loading method
         view.loadUrl(url)
         return true
@@ -54,7 +58,9 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         if (!webView.hasError()) {
             mListener?.onPageStarted(url, favicon)
         }
-        super.onPageStarted(view, url, favicon)
+        mViewClient?.onPageStarted(view, url, favicon) ?: run {
+            super.onPageStarted(view, url, favicon)
+        }
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
@@ -77,19 +83,25 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         if (!webView.hasError()) {
             mListener?.onPageFinished(url)
         }
-        super.onPageFinished(view, url)
+        mViewClient?.onPageFinished(view, url) ?: run {
+            super.onPageFinished(view, url)
+        }
     }
 
     /* 페이지 내부의 리소스가 로드가 되면서 다수 호출  */
     override fun onLoadResource(view: WebView?, url: String?) {
         Log.d(TAG, "onLoadResource URL[$url]")
-        super.onLoadResource(view, url)
+        mViewClient?.onLoadResource(view, url) ?: run {
+            super.onLoadResource(view, url)
+        }
     }
 
     /* 방문한 링크를 업데이트하는 경우 호출 */
     override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
         Log.d(TAG, "doUpdateVisitedHistory isReload[$isReload] URL[$url]")
-        super.doUpdateVisitedHistory(view, url, isReload)
+        mViewClient?.doUpdateVisitedHistory(view, url, isReload) ?: run {
+            super.doUpdateVisitedHistory(view, url, isReload)
+        }
     }
 
     /**
@@ -98,12 +110,16 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
      * */
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
         Log.d(TAG, "shouldInterceptRequest Request[$request]")
-        return super.shouldInterceptRequest(view, request)
+        return mViewClient?.shouldInterceptRequest(view, request) ?: run {
+            super.shouldInterceptRequest(view, request)
+        }
     }
 
     override fun onFormResubmission(view: WebView?, dontResend: Message?, resend: Message?) {
         Log.d(TAG, "onFormResubmission")
-        super.onFormResubmission(view, dontResend, resend)
+        mViewClient?.onFormResubmission(view, dontResend, resend) ?: run {
+            super.onFormResubmission(view, dontResend, resend)
+        }
     }
 
     /** 키 입력에 대한 처리
@@ -111,7 +127,9 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
     * */
     override fun shouldOverrideKeyEvent(view: WebView?, event: KeyEvent?): Boolean {
         Log.d(TAG, "shouldOverrideKeyEvent")
-        return super.shouldOverrideKeyEvent(view, event)
+        return mViewClient?.shouldOverrideKeyEvent(view, event) ?: run {
+            super.shouldOverrideKeyEvent(view, event)
+        }
     }
 
     /**
@@ -119,7 +137,6 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
      * */
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         Log.d(TAG, "onReceivedError")
-//        super.onReceivedError(view, request, error)
         view?: return
         request?: return
         error?: return
@@ -128,6 +145,10 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         webView.setLastError()
         mListener?.onPageError(error.errorCode, error.description.toString(), request.url.toString())
         onReceivedError(view, request.url.toString(), error.errorCode)
+
+        mViewClient?.onReceivedError(view, request, error) ?: run {
+            super.onReceivedError(view, request, error)
+        }
     }
 
     private fun onReceivedError(view: WebView, failingUrl: String, errorCode: Int) {
@@ -168,31 +189,43 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
     /* WebView에서 ssl을 호출할 경우 인증서 만료, 변조된 인증서의 사용제한하기 위 */
     override fun onReceivedSslError(view: WebView?, handler: SslErrorHandler?, error: SslError?) {
         Log.d(TAG, "onReceivedSslError")
-        super.onReceivedSslError(view, handler, error)
+        mViewClient?.onReceivedSslError(view, handler, error) ?: run {
+            super.onReceivedSslError(view, handler, error)
+        }
     }
 
     override fun onReceivedClientCertRequest(view: WebView?, request: ClientCertRequest?) {
         Log.d(TAG, "onReceivedClientCertRequest")
-        super.onReceivedClientCertRequest(view, request)
+        mViewClient?.onReceivedClientCertRequest(view, request) ?: run {
+            super.onReceivedClientCertRequest(view, request)
+        }
     }
 
     override fun onReceivedHttpAuthRequest(view: WebView?, handler: HttpAuthHandler?, host: String?, realm: String?) {
         Log.d(TAG, "onReceivedHttpAuthRequest Realm[$realm]")
-        super.onReceivedHttpAuthRequest(view, handler, host, realm)
+        mViewClient?.onReceivedHttpAuthRequest(view, handler, host, realm) ?: run {
+            super.onReceivedHttpAuthRequest(view, handler, host, realm)
+        }
     }
 
     override fun onUnhandledKeyEvent(view: WebView?, event: KeyEvent?) {
         Log.d(TAG, "onUnhandledKeyEvent")
-        super.onUnhandledKeyEvent(view, event)
+        mViewClient?.onUnhandledKeyEvent(view, event) ?: run {
+            super.onUnhandledKeyEvent(view, event)
+        }
     }
 
     override fun onScaleChanged(view: WebView?, oldScale: Float, newScale: Float) {
         Log.d(TAG, "onScaleChanged")
-        super.onScaleChanged(view, oldScale, newScale)
+        mViewClient?.onScaleChanged(view, oldScale, newScale) ?: run {
+            super.onScaleChanged(view, oldScale, newScale)
+        }
     }
 
     override fun onReceivedLoginRequest(view: WebView?, realm: String?, account: String?, args: String?) {
         Log.d(TAG, "onReceivedLoginRequest")
-        super.onReceivedLoginRequest(view, realm, account, args)
+        mViewClient?.onReceivedLoginRequest(view, realm, account, args) ?: run {
+            super.onReceivedLoginRequest(view, realm, account, args)
+        }
     }
 }

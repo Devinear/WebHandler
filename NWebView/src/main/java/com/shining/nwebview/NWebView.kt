@@ -33,11 +33,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
 
     private var mListener : NWebListener? = null
 
-//    private var mWebChromeClient : WebChromeClient? = null
-//    private var mWebViewClient : WebViewClient? = null
-//
-//    private var mNWebChromeClient : NWebChromeClient? = null
-//    private var mNWebViewClient : NWebViewClient? = null
+    private var mNWebChromeClient : NWebChromeClient? = null
+    private var mNWebViewClient : NWebViewClient? = null
 
     internal val REQUEST_CODE_FILE_PICKER = 51426
     internal var mRequestCodeFilePicker: Int = REQUEST_CODE_FILE_PICKER
@@ -70,11 +67,11 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     init {
         Log.d(TAG, "init")
         NWebChromeClient(context, this@NWebView).apply {
-//            mNWebChromeClient = this
+            mNWebChromeClient = this
             webChromeClient = this
         }
         NWebViewClient(this@NWebView).apply {
-//            mNWebViewClient = this
+            mNWebViewClient = this
             webViewClient = this
         }
         initContext(context)
@@ -123,15 +120,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
         }
     }
 
-//    override fun setWebViewClient(client: WebViewClient) {
-//        mWebViewClient = client
-//        mNWebViewClient?.mViewClient = client
-//    }
-//
-//    override fun setWebChromeClient(client: WebChromeClient?) {
-//        mWebChromeClient = client
-//        mNWebChromeClient?.mChromeClient = client
-//    }
+    override fun setWebViewClient(client: WebViewClient) {
+        mNWebViewClient?.mViewClient = client
+    }
+
+    override fun setWebChromeClient(client: WebChromeClient?) {
+        mNWebChromeClient?.mChromeClient = client
+    }
 
     fun setListener(activity: Activity, listener: NWebListener)
         = setListener(activity, listener, REQUEST_CODE_FILE_PICKER)

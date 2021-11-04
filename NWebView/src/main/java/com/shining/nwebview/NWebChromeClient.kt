@@ -22,8 +22,7 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
     private var mVideoView: View? = null
     private var mCustomViewCallback: CustomViewCallback? = null
 
-//    private var mNewWebView: NWebView? = null
-//    var mChromeClient : WebChromeClient? = null
+    var mChromeClient : WebChromeClient? = null
 
     companion object {
         const val TAG = "[DE][SDK] ChromeClient"
@@ -77,13 +76,10 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         mVideoView?.setBackgroundColor(Color.BLACK)
         webView.rootView
         webView.visibility = View.GONE
-
-        super.onShowCustomView(view, callback)
     }
 
     override fun onHideCustomView() {
         Log.d(TAG, "onHideCustomView")
-        super.onHideCustomView()
     }
 
     // file upload callback : Android 5.0 (API level 21) -- current
@@ -173,7 +169,6 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
     /* 팝업형태나 Webview의 window가 사라지는 경우 */
     override fun onCloseWindow(window: WebView?) {
         Log.e(TAG, "onCloseWindow")
-        super.onCloseWindow(window)
 
         window ?: return
         closeWindow(window)
@@ -190,7 +185,12 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
     override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
         val debug = BuildConfig.DEBUG
         Log.d(TAG, "onConsoleMessage Debug[$debug]")
-        return if (debug) super.onConsoleMessage(consoleMessage) else true
+        return if (debug) { mChromeClient?.onConsoleMessage(consoleMessage)
+            ?: run {
+                super.onConsoleMessage(consoleMessage)
+            }
+        }
+        else true
     }
 
     /* Geolocation API 사용을 위한 팝업 노출 */
@@ -199,20 +199,23 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         if (webView.mGeolocationEnabled) {
             callback.invoke(origin, true, false)
         } else {
-            super.onGeolocationPermissionsShowPrompt(origin, callback)
+            mChromeClient?.onGeolocationPermissionsShowPrompt(origin, callback) ?: run {
+                super.onGeolocationPermissionsShowPrompt(origin, callback)
+            }
         }
     }
 
     override fun onGeolocationPermissionsHidePrompt() {
         Log.d(TAG, "onGeolocationPermissionsHidePrompt")
-        super.onGeolocationPermissionsHidePrompt()
+        mChromeClient?.onGeolocationPermissionsHidePrompt() ?: run {
+            super.onGeolocationPermissionsHidePrompt()
+        }
     }
 
     /* Javascript에서 alert를 이용하여서 팝업을 노출할 경우. 커스텀 가능 */
     override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
         Log.d(TAG, "onJsAlert")
 
-        //AlertDialog 생성
         AlertDialog.Builder(view.context)
             .setMessage(message)
             .setPositiveButton(R.string.ok) { dialog, which ->
@@ -249,43 +252,57 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
     * */
     override fun onJsBeforeUnload(view: WebView, url: String, message: String, result: JsResult): Boolean {
         Log.d(TAG, "onJsBeforeUnload")
-        return super.onJsBeforeUnload(view, url, message, result)
+        return mChromeClient?.onJsBeforeUnload(view, url, message, result) ?: run {
+            super.onJsBeforeUnload(view, url, message, result)
+        }
     }
 
     /* Javascript prompt에 대한하는 기능을 제공 */
     override fun onJsPrompt(view: WebView, url: String, message: String, defaultValue: String, result: JsPromptResult): Boolean {
         Log.d(TAG, "onJsPrompt")
-        return super.onJsPrompt(view, url, message, defaultValue, result)
+        return mChromeClient?.onJsPrompt(view, url, message, defaultValue, result) ?: run {
+            super.onJsPrompt(view, url, message, defaultValue, result)
+        }
     }
 
     /* 클라이언트에 권한이 필요할 경우에 호출되는 부분 */
     override fun onPermissionRequest(request: PermissionRequest) {
         Log.d(TAG, "onPermissionRequest")
-        super.onPermissionRequest(request)
+        mChromeClient?.onPermissionRequest(request) ?: run {
+            super.onPermissionRequest(request)
+        }
     }
 
     /* 클라이언트에 권한요청을 취소하는 경우. UI로 노출하여 주었던 부분을 없애주면 됨. */
     override fun onPermissionRequestCanceled(request: PermissionRequest) {
         Log.d(TAG, "onPermissionRequestCanceled")
-        super.onPermissionRequestCanceled(request)
+        mChromeClient?.onPermissionRequestCanceled(request) ?: run {
+            super.onPermissionRequestCanceled(request)
+        }
     }
 
     /* 페이지가 로드됨에 따른 퍼센트를 보여주는 부분 */
     override fun onProgressChanged(view: WebView, newProgress: Int) {
         Log.d(TAG, "onProgressChanged Progress[$newProgress]")
-        super.onProgressChanged(view, newProgress)
+        mChromeClient?.onProgressChanged(view, newProgress) ?: run {
+            super.onProgressChanged(view, newProgress)
+        }
     }
 
     /* 파비콘이 들어올 경우 호출 */
     override fun onReceivedIcon(view: WebView, icon: Bitmap) {
         Log.d(TAG, "onReceivedIcon")
-        super.onReceivedIcon(view, icon)
+        mChromeClient?.onReceivedIcon(view, icon) ?: run {
+            super.onReceivedIcon(view, icon)
+        }
     }
 
     /* 타이틀이 있는 경우 호출. 네비게이션에 타이틀 넣을때 */
     override fun onReceivedTitle(view: WebView, title: String) {
         Log.d(TAG, "onReceivedTitle Title[$title]")
-        super.onReceivedTitle(view, title)
+        mChromeClient?.onReceivedTitle(view, title) ?: run {
+            super.onReceivedTitle(view, title)
+        }
     }
 
     /* 애플의 터치 아이콘을 눌렀을 경우 호출
@@ -293,29 +310,39 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
     *  */
     override fun onReceivedTouchIconUrl(view: WebView, url: String, precomposed: Boolean) {
         Log.d(TAG, "onReceivedTouchIconUrl")
-        super.onReceivedTouchIconUrl(view, url, precomposed)
+        mChromeClient?.onReceivedTouchIconUrl(view, url, precomposed) ?: run {
+            super.onReceivedTouchIconUrl(view, url, precomposed)
+        }
     }
 
     /* 웹뷰의 포커스가 요청될 경우 호출 */
     override fun onRequestFocus(view: WebView) {
         Log.d(TAG, "onRequestFocus")
-        super.onRequestFocus(view)
+        mChromeClient?.onRequestFocus(view) ?: run {
+            super.onRequestFocus(view)
+        }
     }
 
     override fun getDefaultVideoPoster(): Bitmap? {
         Log.d(TAG, "getDefaultVideoPoster")
-        val bitmap = super.getDefaultVideoPoster()
+        val bitmap = mChromeClient?.getDefaultVideoPoster() ?: run {
+            super.getDefaultVideoPoster()
+        }
         return bitmap
     }
 
     override fun getVideoLoadingProgressView(): View? {
         Log.d(TAG, "getVideoLoadingProgressView")
-        return super.getVideoLoadingProgressView()
+        return mChromeClient?.videoLoadingProgressView ?: run {
+            super.getVideoLoadingProgressView()
+        }
     }
 
     override fun getVisitedHistory(callback: ValueCallback<Array<String?>?>?) {
         Log.d(TAG, "getVisitedHistory")
-        super.getVisitedHistory(callback)
+        mChromeClient?.getVisitedHistory(callback) ?: run {
+            super.getVisitedHistory(callback)
+        }
     }
 
 }
