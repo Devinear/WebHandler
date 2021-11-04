@@ -57,15 +57,20 @@ internal object WebViewUtils {
     private fun isUrlScheme(context: Context, url: String): Boolean {
         Log.e(TAG, "isUrlScheme URL[$url]")
 
+        val newUrl =
+            if(url.indexOf("://") > 0) { url.substring(url.indexOf("://") + 1) }
+            else { url }
+        Log.e(TAG, "isUrlScheme NEW[$url]")
+
         val packageName = context.packageName
-        val schemeDownload = "$packageName://download"
-        val schemeBrowser = "$packageName://browser"
+        val schemeDownload = "//download" // "$packageName://download"
+        val schemeBrowser = "//browser" // "$packageName://browser"
 
         return try {
             val packageManager = context.packageManager
             when {
-                url.startsWith("intent:") -> {
-                    val intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME)
+                newUrl.startsWith("intent:") -> {
+                    val intent = Intent.parseUri(newUrl, Intent.URI_INTENT_SCHEME)
                     val intentPackageName = intent.getPackage()
                     val existPackage = packageManager.getLaunchIntentForPackage(intentPackageName!!)
 
@@ -100,20 +105,21 @@ internal object WebViewUtils {
                     false
                 }
                 // 마켓
-                url.startsWith("market://") -> {
-                    Log.i(TAG, "market url : $url")
-                    context.startActivity(Intent.parseUri(url, Intent.URI_INTENT_SCHEME))
+                newUrl.startsWith("market://") -> {
+                    Log.i(TAG, "market url : $newUrl")
+                    context.startActivity(Intent.parseUri(newUrl, Intent.URI_INTENT_SCHEME))
                     true
                 }
                 // 다운로드
-                url.startsWith(schemeDownload) -> {
+                newUrl.startsWith(schemeDownload) -> {
                     Log.i(TAG, "schemeDownload url : $schemeDownload")
-                    val downloadUrl = url.replace("$schemeDownload?url=", "")
+                    val downloadUrl = newUrl.replace("$schemeDownload?url=", "")
                     if (downloadUrl.isNotEmpty()) {
                         if (!downloadUrl.contains(schemeDownload)) {
                             /**
                              * 다운로드 동작 구현 필요
                              * */
+                            Toast.makeText(context, "DOWNLOAD 구현 필요", Toast.LENGTH_SHORT).show()
                         }
                         else {
                             Toast.makeText(context, context.getString(R.string.invalid_link), Toast.LENGTH_SHORT).show()
@@ -125,9 +131,9 @@ internal object WebViewUtils {
                     true
                 }
                 // 시스템 브라우져
-                url.startsWith(schemeBrowser) -> {
+                newUrl.startsWith(schemeBrowser) -> {
                     Log.i(TAG, "schemeBrowser url : $schemeBrowser")
-                    val browserUrl = url.replace("$schemeBrowser?url=", "")
+                    val browserUrl = newUrl.replace("$schemeBrowser?url=", "")
                     if (browserUrl.isNotEmpty()) {
                         if (!browserUrl.contains(schemeBrowser))
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(browserUrl)))
@@ -141,8 +147,8 @@ internal object WebViewUtils {
                 }
                 else -> {
                     Log.i(TAG, "else url : $schemeBrowser")
-                    Log.e(TAG, "else => $url")
-                    context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
+                    Log.e(TAG, "else => $newUrl")
+                    context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(newUrl) })
                     true
                 }
             }
