@@ -77,16 +77,17 @@ internal object WebViewUtils {
                         return true
                     }
                     catch (e: ActivityNotFoundException) {
-                        val builder = AlertDialog.Builder(context)
-                        builder.setTitle(context.getText(R.string.app_install_title))
-                        builder.setMessage(context.getText(R.string.app_install_message))
-                        builder.setPositiveButton(context.getText(R.string.confirm)) { _, _ ->
-                            val marketIntent = Intent(Intent.ACTION_VIEW)
-                            marketIntent.data = Uri.parse("market://details?id=$intentPackageName")
-                            context.startActivity(marketIntent)
+                        val builder = AlertDialog.Builder(context).apply {
+                            setTitle(context.getText(R.string.app_install_title))
+                            setMessage(context.getText(R.string.app_install_message))
+                            setPositiveButton(context.getText(R.string.confirm)) { _, _ ->
+                                val marketIntent = Intent(Intent.ACTION_VIEW)
+                                marketIntent.data = Uri.parse("market://details?id=$intentPackageName")
+                                context.startActivity(marketIntent)
+                            }
+//                            setNegativeButton(view.context.getText(R.string.cancel)) { _, _ -> }
+                            setCancelable(false)
                         }
-//                      builder.setNegativeButton(view.context.getText(R.string.cancel)) { _, _ -> }
-                        builder.setCancelable(false)
 
                         val dialog = builder.create()
                         dialog.show()
@@ -97,14 +98,11 @@ internal object WebViewUtils {
                         e.printStackTrace()
                     }
                     false
-
-
                 }
                 // 마켓
                 url.startsWith("market://") -> {
                     Log.i(TAG, "market url : $url")
-                    val intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME)
-                    context.startActivity(intent)
+                    context.startActivity(Intent.parseUri(url, Intent.URI_INTENT_SCHEME))
                     true
                 }
                 // 다운로드
@@ -131,13 +129,10 @@ internal object WebViewUtils {
                     Log.i(TAG, "schemeBrowser url : $schemeBrowser")
                     val browserUrl = url.replace("$schemeBrowser?url=", "")
                     if (browserUrl.isNotEmpty()) {
-                        if (!browserUrl.contains(schemeBrowser)) {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(browserUrl))
-                            context.startActivity(intent)
-                        }
-                        else {
+                        if (!browserUrl.contains(schemeBrowser))
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(browserUrl)))
+                        else
                             Toast.makeText(context, context.getString(R.string.invalid_link), Toast.LENGTH_SHORT).show()
-                        }
                     }
                     else {
                         Toast.makeText(context, context.getString(R.string.invalid_link), Toast.LENGTH_SHORT).show()
@@ -147,9 +142,7 @@ internal object WebViewUtils {
                 else -> {
                     Log.i(TAG, "else url : $schemeBrowser")
                     Log.e(TAG, "else => $url")
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.data = Uri.parse(url)
-                    context.startActivity(intent)
+                    context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
                     true
                 }
             }

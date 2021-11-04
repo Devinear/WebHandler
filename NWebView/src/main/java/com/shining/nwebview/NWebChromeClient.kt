@@ -45,15 +45,14 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    // 확인해봐야 함
-                    (context as Activity).window.setDecorFitsSystemWindows(false)
-                    val controller = context.window.insetsController
-                    controller?.apply {
-                        hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-                        // 화면 끝의 스와이프 등 특정 동작시 시스템 바가 나타
-                        systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE
-                    }
-
+                // 확인해봐야 함
+                (context as Activity).window.setDecorFitsSystemWindows(false)
+                val controller = context.window.insetsController
+                controller?.apply {
+                    hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+                    // 화면 끝의 스와이프 등 특정 동작시 시스템 바가 나타
+                    systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE
+                }
             } else {
                 // KITKAT
                 mVideoView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
@@ -142,11 +141,16 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
             newWebView.webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                     Log.d(TAG, "ChildView onCreateWindow shouldOverrideUrlLoading URL[$url]")
+                    view ?: return false
+                    url ?: return false
 
-                    if (!url!!.startsWith("http://") && !url.startsWith("https://")) {
-                        //                    isUrlScheme(v, url)
+                    return if (!WebViewUtils.isPermittedUrl(view.context, url)) {
+                        false
                     }
-                    return false
+                    else {
+                        view.loadUrl(url)
+                        true
+                    }
                 }
             }
             newWebView.webChromeClient = object : WebChromeClient() {
@@ -162,7 +166,7 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         catch (e: Exception) {
             Log.e(TAG, "ChildView onCreateWindow Exception[${e.message}]")
         }
-        Log.e(TAG, "onCreateWindow end ");
+        Log.e(TAG, "onCreateWindow end");
         return true
     }
 
@@ -344,5 +348,4 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
             super.getVisitedHistory(callback)
         }
     }
-
 }

@@ -66,20 +66,19 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
     override fun onPageFinished(view: WebView?, url: String?) {
         Log.d(TAG, "onPageFinished URL[$url]")
 
-        // Myapp
         try {
             // 앱을 종료 후에도 쿠키값이 저장되어 있어 앱을 재실행시 쿠키를 다시 사용 가능함.
             CookieManager.getInstance().flush()
         } catch (e: Exception) {
             Log.e(TAG, "onPageFinished Exception[${e.message}]")
         }
+
         if (!mLastLoadFailed) {
 //            webView.callInjectedJavaScript()
 //            webView.linkBridge()
 //            emitFinishEvent(webView, url)
         }
 
-        // AA
         if (!webView.hasError()) {
             mListener?.onPageFinished(url)
         }

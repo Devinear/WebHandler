@@ -50,19 +50,35 @@ class WebViewFragment : BaseFragment(), NWebListener {
         super.initUi()
         Log.d(TAG, "initUi")
 
+        binding.webView.settings.apply {
+            builtInZoomControls = true                      // 화면 줌 동작
+            displayZoomControls = false                     // 화면 줌 동작시, WebView 에서 줌 컨트롤 표시
+            domStorageEnabled = true                        // 내부저장소
+            allowFileAccess = false                         // File 엑세스
+            allowContentAccess = false
+            javaScriptCanOpenWindowsAutomatically = true    // JS 에서 새창 실행
+            javaScriptEnabled = true                        // JS 허용여부
+            setSupportMultipleWindows(true)                 // 새창 허용여부
+
+            textZoom = 100
+            userAgentString = userAgent ?: ""
+
+            // Main WebView Only
+            loadWithOverviewMode = true
+            useWideViewPort = true                          // 화면 맞추기 허용여부
+            cacheMode = WebSettings.LOAD_DEFAULT            // 브라우저 캐시 사용 재정
+
+            // Deprecated
+            allowUniversalAccessFromFileURLs = false
+        }
+
         binding.webView.apply {
             setListener(this@WebViewFragment, this@WebViewFragment)
             addHttpHeader("X-Requested-With", "")
 
-            // Cookie
-            setMixedContentAllowed(allowed = true)
-            setCookiesEnabled(true)
-            setThirdPartyCookiesEnabled(true)
-            addHttpHeader("X-Requested-With", "")
-
-//            loadUrl(MainActivity.TEST_PAGE_URL)
-
+//            loadUrl(cUrl)
             loadUrl(urlTest)
+//            loadUrl("file:///android_asset/WebDeDeTest.html")
 
             // Build.VERSION.SDK_INT >= 19
             setLayerType(View.LAYER_TYPE_HARDWARE, null)

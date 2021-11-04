@@ -80,11 +80,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     @SuppressLint("SetJavaScriptEnabled")
     private fun initContext(context: Context) {
         Log.d(TAG, "initContext")
-        // in IDE's preview mode
-        if (isInEditMode) {
-            // do not run the code from this method
-            return
-        }
+        if (isInEditMode) return
 
         if (context is Activity) {
             // WeakReference로 구성하여도 문제가 없을까...?
@@ -98,19 +94,13 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
 
         isSaveEnabled = true
 
-        val filesDir = context.filesDir.path
-        val databaseDir = filesDir.substring(0, filesDir.lastIndexOf("/")) + DATABASES_SUB_FOLDER
-        val webSettings = settings
-        webSettings.allowFileAccess = false
-//        setAllowAccessFromFileUrls(webSettings, false)
-        webSettings.builtInZoomControls = false
-        webSettings.javaScriptEnabled = true
-        webSettings.domStorageEnabled = true
-        webSettings.databaseEnabled = true
-        webSettings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+//        val filesDir = context.filesDir.path
+//        val databaseDir = filesDir.substring(0, filesDir.lastIndexOf("/")) + DATABASES_SUB_FOLDER
 
-//        setCookiesEnabled(true)
-//        setThirdPartyCookiesEnabled(true)
+        // Cookie
+        setMixedContentAllowed(allowed = true)
+        setCookiesEnabled(true)
+        setThirdPartyCookiesEnabled(true)
 
         setDownloadListener { url, userAgent, contentDisposition, mimeType, contentLength ->
             mListener ?: return@setDownloadListener
@@ -131,7 +121,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     fun setListener(activity: Activity, listener: NWebListener)
         = setListener(activity, listener, REQUEST_CODE_FILE_PICKER)
 
-    fun setListener(activity: Activity, listener: NWebListener, requestCodeFilePicker: Int) {
+    private fun setListener(activity: Activity, listener: NWebListener, requestCodeFilePicker: Int) {
         mActivity = WeakReference(activity)
         setListener(listener, requestCodeFilePicker)
     }
@@ -139,39 +129,15 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     fun setListener(fragment: Fragment, listener: NWebListener)
         = setListener(fragment, listener, REQUEST_CODE_FILE_PICKER)
 
-    fun setListener(fragment: Fragment, listener: NWebListener, requestCodeFilePicker: Int) {
+    private fun setListener(fragment: Fragment, listener: NWebListener, requestCodeFilePicker: Int) {
         mFragment = WeakReference(fragment)
         setListener(listener, requestCodeFilePicker)
     }
 
-    internal fun setListener(listener: NWebListener, requestCodeFilePicker: Int) {
+    private fun setListener(listener: NWebListener, requestCodeFilePicker: Int) {
         mListener = listener
         mRequestCodeFilePicker = requestCodeFilePicker
     }
-
-    // 웹뷰를 통해 지도앱이나 위치정보를 사용하는 웹페이지를 이요할 경우
-    // 단말기의 GPS를 통해 얻은 위치 정보를 전달해 주어야 함
-//    fun setGeolocationEnabled(enabled: Boolean) {
-//        if (enabled) {
-//            settings.javaScriptEnabled = true
-//            settings.setGeolocationEnabled(true)
-//            setGeolocationDatabasePath()
-//        }
-//        mGeolocationEnabled = enabled
-//    }
-
-//    @SuppressLint("NewApi")
-//    internal fun setGeolocationDatabasePath() {
-//        val activity =
-//            if (mFragment != null && mFragment!!.get() != null && mFragment!!.get()!!.activity != null) {
-//                mFragment!!.get()!!.activity
-//            } else if (mActivity != null && mActivity!!.get() != null) {
-//                mActivity!!.get()
-//            } else {
-//                return
-//            }
-//        settings.setGeolocationDatabasePath(activity!!.filesDir.path)
-//    }
 
     fun setUploadableFileTypes(mimeType: String) {
         mUploadableFileTypes = mimeType
@@ -238,17 +204,16 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
 
     fun onDestroy() {
         Log.d(TAG, "onDestroy")
-        // try to remove this view from its parent first
         try {
             (parent as ViewGroup).removeView(this)
-        } catch (ignored: Exception) {
+        } catch (e: Exception) {
+            Log.e(TAG, "onDestroy Exception[${e.message}]")
         }
-        // then try to remove all child views from this view
         try {
             removeAllViews()
-        } catch (ignored: Exception) {
+        } catch (e: Exception) {
+            Log.e(TAG, "onDestroy Exception[${e.message}]")
         }
-        // and finally destroy this view
         destroy()
     }
 
@@ -578,10 +543,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
         } // if the download manager app has been disabled on the device
         catch (e: IllegalArgumentException) {
             // show the settings screen where the user can enable the download manager app again
-            openAppSettings(
-                context,
-                PACKAGE_NAME_DOWNLOAD_MANAGER
-            )
+            openAppSettings(context, PACKAGE_NAME_DOWNLOAD_MANAGER)
             false
         }
     }
