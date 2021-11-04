@@ -19,6 +19,7 @@ import java.io.UnsupportedEncodingException
 import java.lang.ref.WeakReference
 import java.nio.charset.Charset
 import java.util.*
+import java.util.regex.Pattern
 import kotlin.collections.ArrayList
 
 /**
@@ -30,10 +31,13 @@ class NWebView
 constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     : WebView(context, attrs, defStyle) {
 
-//    private val nWebChromeClient = WebChromeClientClass()
-//    private val nWebViewClient = WebViewClientClass()
-
     private var mListener : NWebListener? = null
+
+//    private var mWebChromeClient : WebChromeClient? = null
+//    private var mWebViewClient : WebViewClient? = null
+//
+//    private var mNWebChromeClient : NWebChromeClient? = null
+//    private var mNWebViewClient : NWebViewClient? = null
 
     internal val REQUEST_CODE_FILE_PICKER = 51426
     internal var mRequestCodeFilePicker: Int = REQUEST_CODE_FILE_PICKER
@@ -50,17 +54,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     internal val LANGUAGE_DEFAULT_ISO3 = "eng"
     internal val CHARSET_DEFAULT = "UTF-8"
 
-    /** Alternative browsers that have their own rendering engine and *may* be installed on this device  */
-//    internal val ALTERNATIVE_BROWSERS = arrayOf(
-//        "org.mozilla.firefox",
-//        "com.android.chrome",
-//        "com.opera.browser",
-//        "org.mozilla.firefox_beta",
-//        "com.chrome.beta",
-//        "com.opera.browser.beta"
-//    )
-    internal val mPermittedHostnames = ArrayList<String>()
-
     /** File upload callback for platform versions prior to Android 5.0  */
     internal var mFileUploadCallbackFirst: ValueCallback<Uri>? = null
 
@@ -68,8 +61,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     internal var mFileUploadCallbackSecond: ValueCallback<Array<Uri>>? = null
     internal var mLastError: Long = 0
     internal var mLanguageIso3: String? = null
-    internal var mCustomWebViewClient: WebViewClient? = null
-    internal var mCustomWebChromeClient: WebChromeClient? = null
     internal val mHttpHeaders = HashMap<String, String>()
 
     companion object {
@@ -78,9 +69,14 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
 
     init {
         Log.d(TAG, "init")
-        webChromeClient = NWebChromeClient(this@NWebView)
-        webViewClient = NWebViewClient(this@NWebView)
-
+        NWebChromeClient(context, this@NWebView).apply {
+//            mNWebChromeClient = this
+            webChromeClient = this
+        }
+        NWebViewClient(this@NWebView).apply {
+//            mNWebViewClient = this
+            webViewClient = this
+        }
         initContext(context)
     }
 
@@ -94,6 +90,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
         }
 
         if (context is Activity) {
+            // WeakReference로 구성하여도 문제가 없을까...?
             mActivity = WeakReference(context)
         }
 
@@ -114,7 +111,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
         webSettings.domStorageEnabled = true
         webSettings.databaseEnabled = true
         webSettings.mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-        setThirdPartyCookiesEnabled(true)
+
+//        setCookiesEnabled(true)
+//        setThirdPartyCookiesEnabled(true)
 
         setDownloadListener { url, userAgent, contentDisposition, mimeType, contentLength ->
             mListener ?: return@setDownloadListener
@@ -123,6 +122,16 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
             mListener!!.onDownloadRequested(url, suggestedFilename, mimeType, contentLength, contentDisposition, userAgent)
         }
     }
+
+//    override fun setWebViewClient(client: WebViewClient) {
+//        mWebViewClient = client
+//        mNWebViewClient?.mViewClient = client
+//    }
+//
+//    override fun setWebChromeClient(client: WebChromeClient?) {
+//        mWebChromeClient = client
+//        mNWebChromeClient?.mChromeClient = client
+//    }
 
     fun setListener(activity: Activity, listener: NWebListener)
         = setListener(activity, listener, REQUEST_CODE_FILE_PICKER)
@@ -145,27 +154,29 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
         mRequestCodeFilePicker = requestCodeFilePicker
     }
 
-    fun setGeolocationEnabled(enabled: Boolean) {
-        if (enabled) {
-            settings.javaScriptEnabled = true
-            settings.setGeolocationEnabled(true)
-            setGeolocationDatabasePath()
-        }
-        mGeolocationEnabled = enabled
-    }
+    // 웹뷰를 통해 지도앱이나 위치정보를 사용하는 웹페이지를 이요할 경우
+    // 단말기의 GPS를 통해 얻은 위치 정보를 전달해 주어야 함
+//    fun setGeolocationEnabled(enabled: Boolean) {
+//        if (enabled) {
+//            settings.javaScriptEnabled = true
+//            settings.setGeolocationEnabled(true)
+//            setGeolocationDatabasePath()
+//        }
+//        mGeolocationEnabled = enabled
+//    }
 
-    @SuppressLint("NewApi")
-    internal fun setGeolocationDatabasePath() {
-        val activity =
-            if (mFragment != null && mFragment!!.get() != null && mFragment!!.get()!!.activity != null) {
-                mFragment!!.get()!!.activity
-            } else if (mActivity != null && mActivity!!.get() != null) {
-                mActivity!!.get()
-            } else {
-                return
-            }
-        settings.setGeolocationDatabasePath(activity!!.filesDir.path)
-    }
+//    @SuppressLint("NewApi")
+//    internal fun setGeolocationDatabasePath() {
+//        val activity =
+//            if (mFragment != null && mFragment!!.get() != null && mFragment!!.get()!!.activity != null) {
+//                mFragment!!.get()!!.activity
+//            } else if (mActivity != null && mActivity!!.get() != null) {
+//                mActivity!!.get()
+//            } else {
+//                return
+//            }
+//        settings.setGeolocationDatabasePath(activity!!.filesDir.path)
+//    }
 
     fun setUploadableFileTypes(mimeType: String) {
         mUploadableFileTypes = mimeType
@@ -229,16 +240,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
         Log.d(TAG, "evaluateJavascript")
         super.evaluateJavascript(script, resultCallback)
     }
-
-//    override fun loadUrl(url: String, additionalHttpHeaders: MutableMap<String, String>) {
-//        Log.d(TAG, "loadUrl")
-//        super.loadUrl(url, additionalHttpHeaders)
-//    }
-//
-//    override fun loadUrl(url: String) {
-//        Log.d(TAG, "loadUrl")
-//        super.loadUrl(url)
-//    }
 
     fun onDestroy() {
         Log.d(TAG, "onDestroy")
@@ -318,7 +319,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
      * @param value the value of the HTTP header to send
      */
     fun addHttpHeader(name: String, value: String) {
-        mHttpHeaders.put(name, value)
+        mHttpHeaders[name] = value
     }
 
     /**
@@ -334,27 +335,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
         mHttpHeaders.remove(name)
     }
 
-    fun addPermittedHostname(hostname: String) {
-        mPermittedHostnames.add(hostname)
-    }
-
-    fun addPermittedHostnames(collection: Collection<String>) {
-        mPermittedHostnames.addAll(collection)
-    }
-
-    fun getPermittedHostnames(): List<String> {
-        return mPermittedHostnames
-    }
-
-    fun removePermittedHostname(hostname: String) {
-        mPermittedHostnames.remove(hostname)
-    }
-
-    fun clearPermittedHostnames() {
-        mPermittedHostnames.clear()
-    }
-
     fun onBackPressed(): Boolean {
+        Log.d(TAG, "onBackPressed")
         return if (canGoBack()) {
             goBack()
             false
@@ -363,8 +345,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
         }
     }
 
-    //        androidx.webkit.WebViewAssetLoader
     // 대체 사용
+    // androidx.webkit.WebViewAssetLoader
 //    @SuppressLint("NewApi")
 //    private fun setAllowAccessFromFileUrls(webSettings: WebSettings, allowed: Boolean) {
 //        webSettings.allowFileAccessFromFileURLs = allowed
@@ -386,25 +368,10 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     @SuppressLint("NewApi")
     internal fun setMixedContentAllowed(webSettings: WebSettings, allowed: Boolean) {
         webSettings.mixedContentMode =
-            if (allowed) WebSettings.MIXED_CONTENT_ALWAYS_ALLOW else WebSettings.MIXED_CONTENT_NEVER_ALLOW
+            if (allowed) WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            else WebSettings.MIXED_CONTENT_NEVER_ALLOW
     }
 
-//    fun setDesktopMode(enabled: Boolean) {
-//        val webSettings = settings
-//        val newUserAgent: String
-//        newUserAgent = if (enabled) {
-//            webSettings.userAgentString.replace("Mobile", "eliboM").replace("Android", "diordnA")
-//        } else {
-//            webSettings.userAgentString.replace("eliboM", "Mobile").replace("diordnA", "Android")
-//        }
-//        webSettings.userAgentString = newUserAgent
-//        webSettings.useWideViewPort = enabled
-//        webSettings.loadWithOverviewMode = enabled
-//        webSettings.setSupportZoom(enabled)
-//        webSettings.builtInZoomControls = enabled
-//    }
-
-    // override
     override fun loadUrl(url: String, additionalHttpHeaders: MutableMap<String, String>) {
         Log.d(TAG, "loadUrl")
 
@@ -461,45 +428,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
             append(1)
         }
         return unique.toString()
-    }
-
-    fun isPermittedUrl(url: String): Boolean {
-        // if the permitted hostnames have not been restricted to a specific set
-        if (mPermittedHostnames.size == 0) {
-            // all hostnames are allowed
-            return true
-        }
-        val parsedUrl = Uri.parse(url)
-
-        // get the hostname of the URL that is to be checked
-        // if the hostname could not be determined, usually because the URL has been invalid
-        val actualHost = parsedUrl.host ?: return false
-
-        // if the host contains invalid characters (e.g. a backslash)
-        if (!actualHost.matches(Regex("^[a-zA-Z0-9._!~*')(;:&=+$,%\\[\\]-]*$"))) {
-            // prevent mismatches between interpretations by `Uri` and `WebView`, e.g. for `http://evil.example.com\.good.example.com/`
-            return false
-        }
-
-        // get the user information from the authority part of the URL that is to be checked
-        val actualUserInformation = parsedUrl.userInfo
-
-        // if the user information contains invalid characters (e.g. a backslash)
-        if (actualUserInformation != null && !actualUserInformation.matches(Regex("^[a-zA-Z0-9._!~*')(;:&=+$,%-]*$"))) {
-            // prevent mismatches between interpretations by `Uri` and `WebView`, e.g. for `http://evil.example.com\@good.example.com/`
-            return false
-        }
-
-        // for every hostname in the set of permitted hosts
-        for (expectedHost in mPermittedHostnames) {
-            // if the two hostnames match or if the actual host is a subdomain of the expected host
-            if (actualHost == expectedHost || actualHost.endsWith(".$expectedHost")) {
-                // the actual hostname of the URL to be checked is allowed
-                return true
-            }
-        }
-        // the actual hostname of the URL to be checked is not allowed since there were no matches
-        return false
     }
 
     internal fun setLastError() {
@@ -676,69 +604,11 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
         }
     }
 
-    /** Wrapper for methods related to alternative browsers that have their own rendering engines  */
-    /*
-    object Browsers {
-        /** Package name of an alternative browser that is installed on this device  */
-        private var mAlternativePackage: String? = null
-
-        /**
-         * Returns whether there is an alternative browser with its own rendering engine currently installed
-         *
-         * @param context a valid `Context` reference
-         * @return whether there is an alternative browser or not
-         */
-        fun hasAlternative(context: Context): Boolean {
-            return getAlternative(context) != null
-        }
-
-        /**
-         * Returns the package name of an alternative browser with its own rendering engine or `null`
-         *
-         * @param context a valid `Context` reference
-         * @return the package name or `null`
-         */
-        fun getAlternative(context: Context): String? {
-            if (mAlternativePackage != null) {
-                return mAlternativePackage
-            }
-            val alternativeBrowsers = ALTERNATIVE_BROWSERS
-            val apps = context.packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
-            for (app in apps) {
-                if (!app.enabled) {
-                    continue
-                }
-                if (alternativeBrowsers.contains(app.packageName)) {
-                    mAlternativePackage = app.packageName
-                    return app.packageName
-                }
-            }
-            return null
-        }
-        /**
-         * Opens the given URL in an alternative browser
-         *
-         * @param context a valid `Activity` reference
-         * @param url the URL to open
-         * @param withoutTransition whether to switch to the browser `Activity` without a transition
-         */
-        /**
-         * Opens the given URL in an alternative browser
-         *
-         * @param context a valid `Activity` reference
-         * @param url the URL to open
-         */
-        @JvmOverloads
-        fun openUrl(context: Activity, url: String?, withoutTransition: Boolean = false) {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            intent.setPackage(getAlternative(context))
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
-            if (withoutTransition) {
-                context.overridePendingTransition(0, 0)
-            }
-        }
+    fun setUrlPrefixesForDefaultIntent(specialUrls: ArrayList<Any>) {
+        WebViewUtils.mUrlBlacklist = specialUrls
     }
-    */
 
+    fun setOriginWhitelist(originWhitelist: List<Pattern>) {
+        WebViewUtils.mUrlWhitelist = originWhitelist
+    }
 }

@@ -1,81 +1,56 @@
 package com.shining.nwebview
 
 import android.graphics.Bitmap
+import android.net.Uri
 import android.net.http.SslError
 import android.os.Message
 import android.util.Log
 import android.view.KeyEvent
 import android.webkit.*
+import java.util.*
+import java.util.regex.Pattern
 
 class NWebViewClient(private val webView: NWebView) : WebViewClient() {
-    /*
-    * https://developer.android.com/reference/android/webkit/WebViewClient.html
-    * */
+
+    var mListener : NWebListener? = null
+//    var mViewClient : WebViewClient? = null
+
+    private var mLastLoadFailed = false
 
     companion object {
         const val TAG = "[DE][SDK] ViewClient"
     }
 
-    var mListener : NWebListener? = null
-
-    /* url이 웹뷰에서 처리되려고 할 경우에, WebvView에서 노출하지 않고 처리할 수 있음 */
+    /**
+     * url이 웹뷰에서 처리되려고 할 경우에, WebvView에서 노출하지 않고 처리할 수 있음
+     * */
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         Log.d(TAG, "shouldOverrideUrlLoading URL[$url]")
+        view ?: return false
         url ?: return false
+        if(url.isBlank()) return false
 
-        if (!webView.isPermittedUrl(url)) {
+        // 유효한 URL
+        if (!WebViewUtils.isPermittedUrl(view.context, url)) {
             // if a listener is available
             if (mListener != null) {
                 // inform the listener about the request
                 mListener!!.onExternalPageRequest(url)
             }
-
             // cancel the original request
             return true
         }
 
-/*
-        val uri = Uri.parse(url)
-        val scheme = uri.scheme
-
-        if (scheme != null) {
-            val externalSchemeIntent: Intent?
-            if (scheme == "tel") {
-                externalSchemeIntent = Intent(Intent.ACTION_DIAL, uri)
-            } else if (scheme == "sms") {
-                externalSchemeIntent = Intent(Intent.ACTION_SENDTO, uri)
-            } else if (scheme == "mailto") {
-                externalSchemeIntent = Intent(Intent.ACTION_SENDTO, uri)
-            } else if (scheme == "whatsapp") {
-                externalSchemeIntent = Intent(Intent.ACTION_SENDTO, uri)
-                externalSchemeIntent.setPackage("com.whatsapp")
-            } else {
-                externalSchemeIntent = null
-            }
-            if (externalSchemeIntent != null) {
-                externalSchemeIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                try {
-                    if (mActivity != null && mActivity.get() != null) {
-                        mActivity.get().startActivity(externalSchemeIntent)
-                    } else {
-                        getContext().startActivity(externalSchemeIntent)
-                    }
-                } catch (ignored: ActivityNotFoundException) {
-                }
-
-                // cancel the original request
-                return true
-            }
-        }
-*/
-
         // route the request through the custom URL loading method
-        view!!.loadUrl(url)
+        view.loadUrl(url)
         return true
     }
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-        Log.d(TAG, "onPageStarted URL[$url]")
+        val hasCookie = CookieManager.getInstance().hasCookies()
+        Log.d(TAG, "onPageStarted Cookie[$hasCookie] URL[$url]")
+        mLastLoadFailed = false
+
         if (!webView.hasError()) {
             mListener?.onPageStarted(url, favicon)
         }
@@ -84,6 +59,21 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
 
     override fun onPageFinished(view: WebView?, url: String?) {
         Log.d(TAG, "onPageFinished URL[$url]")
+
+        // Myapp
+        try {
+            // 앱을 종료 후에도 쿠키값이 저장되어 있어 앱을 재실행시 쿠키를 다시 사용 가능함.
+            CookieManager.getInstance().flush()
+        } catch (e: Exception) {
+            Log.e(TAG, "onPageFinished Exception[${e.message}]")
+        }
+        if (!mLastLoadFailed) {
+//            webView.callInjectedJavaScript()
+//            webView.linkBridge()
+//            emitFinishEvent(webView, url)
+        }
+
+        // AA
         if (!webView.hasError()) {
             mListener?.onPageFinished(url)
         }
@@ -102,6 +92,10 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         super.doUpdateVisitedHistory(view, url, isReload)
     }
 
+    /**
+     * resource request를 가로채서 응답을 내리기 전에 호출되는 메소드
+     * 이 메소드를 활용하여 특정 요청에 대한 필터링 및 응답 값 커스텀 가능
+     * */
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
         Log.d(TAG, "shouldInterceptRequest Request[$request]")
         return super.shouldInterceptRequest(view, request)
@@ -113,13 +107,16 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
     }
 
     /** 키 입력에 대한 처리
-    * true : 동작을 WebView에 위임하지 않는다.
-     * */
+    * return true 동작을 WebView에 위임하지 않는다.
+    * */
     override fun shouldOverrideKeyEvent(view: WebView?, event: KeyEvent?): Boolean {
         Log.d(TAG, "shouldOverrideKeyEvent")
         return super.shouldOverrideKeyEvent(view, event)
     }
 
+    /**
+     * request 에 대해 에러가 발생했을 때 호출되는 콜백 메소드. error 변수에 에러에 대한 정보가 담겨져있음
+     * */
     override fun onReceivedError(view: WebView?, request: WebResourceRequest?, error: WebResourceError?) {
         Log.d(TAG, "onReceivedError")
 //        super.onReceivedError(view, request, error)
@@ -127,10 +124,9 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         request?: return
         error?: return
 
+        mLastLoadFailed = true
         webView.setLastError()
-
         mListener?.onPageError(error.errorCode, error.description.toString(), request.url.toString())
-
         onReceivedError(view, request.url.toString(), error.errorCode)
     }
 
@@ -181,7 +177,7 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
     }
 
     override fun onReceivedHttpAuthRequest(view: WebView?, handler: HttpAuthHandler?, host: String?, realm: String?) {
-        Log.d(TAG, "onReceivedHttpAuthRequest")
+        Log.d(TAG, "onReceivedHttpAuthRequest Realm[$realm]")
         super.onReceivedHttpAuthRequest(view, handler, host, realm)
     }
 
@@ -199,5 +195,4 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         Log.d(TAG, "onReceivedLoginRequest")
         super.onReceivedLoginRequest(view, realm, account, args)
     }
-
 }

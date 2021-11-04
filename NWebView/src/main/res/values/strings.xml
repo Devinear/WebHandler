@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_install_title">App install instructions</string>
+    <string name="app_install_message">The app you selected is not installed.\nDo you want to go to the installation page?</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="invalid_link">Invalid link.</string>
+</resources>

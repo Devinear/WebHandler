@@ -1,17 +1,89 @@
 package com.shining.nwebview
 
+import android.R
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.AlertDialog
+import android.app.Dialog
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
+import android.os.Build
 import android.os.Message
 import android.util.Log
-import android.view.View
+import android.view.*
 import android.webkit.*
-import com.shining.nwebview.NWebView
 
-class NWebChromeClient(private val webView: NWebView) : WebChromeClient() {
+
+class NWebChromeClient(private val context: Context, private val webView: NWebView) : WebChromeClient() {
+
+    private var mVideoView: View? = null
+    private var mCustomViewCallback: CustomViewCallback? = null
+
+//    private var mNewWebView: NWebView? = null
+//    var mChromeClient : WebChromeClient? = null
 
     companion object {
         const val TAG = "[DE][SDK] ChromeClient"
+    }
+
+    /** Notify the host application that the current page has entered full screen mode.
+     * 커스텀뷰라고 웹뷰를 덮는 형태의 뷰가 보여질때 호출
+     * 예를 들어서 youtube 같은 경우에도 이것에 해당할것 같네요.
+     */
+    override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
+        Log.d(TAG, "onShowCustomView")
+
+        mVideoView?.apply {
+            callback?.onCustomViewHidden()
+            return
+        }
+
+        mVideoView = view
+        mCustomViewCallback = callback
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    // 확인해봐야 함
+                    (context as Activity).window.setDecorFitsSystemWindows(false)
+                    val controller = context.window.insetsController
+                    controller?.apply {
+                        hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+                        // 화면 끝의 스와이프 등 특정 동작시 시스템 바가 나타
+                        systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE
+                    }
+
+            } else {
+                // KITKAT
+                mVideoView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
+                        View.SYSTEM_UI_FLAG_FULLSCREEN or
+                        View.SYSTEM_UI_FLAG_IMMERSIVE or
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                (context as Activity).window.setFlags(
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+                )
+            }
+        }
+        catch (e: Exception) {
+            Log.e(TAG, "onShowCustomView Exception[${e.message}]")
+        }
+
+        mVideoView?.setBackgroundColor(Color.BLACK)
+        webView.rootView
+        webView.visibility = View.GONE
+
+        super.onShowCustomView(view, callback)
+    }
+
+    override fun onHideCustomView() {
+        Log.d(TAG, "onHideCustomView")
+        super.onHideCustomView()
     }
 
     // file upload callback : Android 5.0 (API level 21) -- current
@@ -24,23 +96,101 @@ class NWebChromeClient(private val webView: NWebView) : WebChromeClient() {
         val allowMultiple = fileChooserParams?.mode == FileChooserParams.MODE_OPEN_MULTIPLE
         this.webView.openFileInput(null, filePathCallback, allowMultiple)
         return true
+
+
+//        val acceptTypes = fileChooserParams!!.acceptTypes
+//        val allowMultiple = fileChooserParams!!.mode == FileChooserParams.MODE_OPEN_MULTIPLE
+//        val intent = fileChooserParams!!.createIntent()
+//        return com.godo.myapp.gdmodule.webview.ReactWebViewManager.getModule(mReactContext)
+//            .startPhotoPickerIntent(filePathCallback, intent, acceptTypes, allowMultiple)
     }
 
+    /** Request the host application to create a new window.
+     * 웹뷰내에서 새창을 띄우는 경우 활성화 된다.
+     */
+    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?): Boolean {
-        Log.d(TAG, "onCreateWindow")
-        return super.onCreateWindow(view, isDialog, isUserGesture, resultMsg)
+        Log.e(TAG, "onCreateWindow Dialog[$isDialog] UserGesture[$isUserGesture] ResultMsg[${resultMsg}]")
+
+        view ?: return false
+        resultMsg ?: return false
+
+        val newWebView = NWebView(context)
+        try {
+            val dialog = Dialog(context).apply {
+                setContentView(newWebView)
+
+                window ?: return false
+                window?.also {
+                    it.attributes.width = ViewGroup.LayoutParams.MATCH_PARENT
+                    it.attributes.height = ViewGroup.LayoutParams.MATCH_PARENT
+                    it.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                    it.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+                }
+            }
+            dialog.show()
+
+            newWebView.settings.apply {
+                builtInZoomControls = true                      // 화면 줌 동작
+                displayZoomControls = false                     // 화면 줌 동작시, WebView 에서 줌 컨트롤 표시
+                domStorageEnabled = true                        // 내부저장소
+                allowFileAccess = false
+                allowContentAccess = false
+                javaScriptCanOpenWindowsAutomatically = true    // JS 에서 새창 실행
+                javaScriptEnabled = true                        // JS 허용여부
+                setSupportMultipleWindows(true)                 // 새창 허용여부
+                textZoom = 100
+                userAgentString = webView.settings.userAgentString
+            }
+
+            newWebView.webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                    Log.d(TAG, "ChildView onCreateWindow shouldOverrideUrlLoading URL[$url]")
+
+                    if (!url!!.startsWith("http://") && !url.startsWith("https://")) {
+                        //                    isUrlScheme(v, url)
+                    }
+                    return false
+                }
+            }
+            newWebView.webChromeClient = object : WebChromeClient() {
+                override fun onCloseWindow(window: WebView?) {
+                    Log.d(TAG, "ChildView onCreateWindow onCloseWindow")
+                    dialog.dismiss()
+                }
+            }
+
+            (resultMsg.obj as WebView.WebViewTransport).webView = newWebView
+            resultMsg.sendToTarget();
+        }
+        catch (e: Exception) {
+            Log.e(TAG, "ChildView onCreateWindow Exception[${e.message}]")
+        }
+        Log.e(TAG, "onCreateWindow end ");
+        return true
     }
 
     /* 팝업형태나 Webview의 window가 사라지는 경우 */
     override fun onCloseWindow(window: WebView?) {
-        Log.d(TAG, "onCloseWindow")
+        Log.e(TAG, "onCloseWindow")
         super.onCloseWindow(window)
+
+        window ?: return
+        closeWindow(window)
+    }
+
+    private fun closeWindow(window: WebView) {
+        Log.e(TAG, "closeWindow")
+        // 인증 성공 후 window.close(); 가 호출이 되면
+        // 해당 함수로 이벤트 발생
+        // 네이티브로 새창을 닫아 주는 이벤트 호출
     }
 
     /* Javascript console message */
     override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
-        Log.d(TAG, "onConsoleMessage")
-        return super.onConsoleMessage(consoleMessage)
+        val debug = BuildConfig.DEBUG
+        Log.d(TAG, "onConsoleMessage Debug[$debug]")
+        return if (debug) super.onConsoleMessage(consoleMessage) else true
     }
 
     /* Geolocation API 사용을 위한 팝업 노출 */
@@ -61,13 +211,35 @@ class NWebChromeClient(private val webView: NWebView) : WebChromeClient() {
     /* Javascript에서 alert를 이용하여서 팝업을 노출할 경우. 커스텀 가능 */
     override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
         Log.d(TAG, "onJsAlert")
-        return super.onJsAlert(view, url, message, result)
+
+        //AlertDialog 생성
+        AlertDialog.Builder(view.context)
+            .setMessage(message)
+            .setPositiveButton(R.string.ok) { dialog, which ->
+
+            }
+            .setCancelable(false)
+            .create()
+            .show()
+        return true
     }
 
     /* Javascript의 confirm 해당 */
     override fun onJsConfirm(view: WebView, url: String, message: String, result: JsResult): Boolean {
         Log.d(TAG, "onJsConfirm")
-        return super.onJsConfirm(view, url, message, result)
+
+        AlertDialog.Builder(view.context)
+            .setMessage(message)
+            .setPositiveButton(R.string.ok) { dialog, which ->
+                result.confirm()
+            }
+            .setNegativeButton(R.string.cancel) { dialog, which ->
+                result.cancel()
+            }
+            .setCancelable(false)
+            .create()
+            .show()
+        return true
     }
 
     /* 페이지에서 탐색을 확정하는 대화 상자가 노출된다고 클라이언트에게 알리는 역할
@@ -128,19 +300,6 @@ class NWebChromeClient(private val webView: NWebView) : WebChromeClient() {
     override fun onRequestFocus(view: WebView) {
         Log.d(TAG, "onRequestFocus")
         super.onRequestFocus(view)
-    }
-
-    /* 커스텀뷰라고 웹뷰를 덮는 형태의 뷰가 보여질때 호출
-    * 예를 들어서 youtube 같은 경우에도 이것에 해당할것 같네요.
-    * */
-    override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
-        Log.d(TAG, "onShowCustomView")
-        super.onShowCustomView(view, callback)
-    }
-
-    override fun onHideCustomView() {
-        Log.d(TAG, "onHideCustomView")
-        super.onHideCustomView()
     }
 
     override fun getDefaultVideoPoster(): Bitmap? {

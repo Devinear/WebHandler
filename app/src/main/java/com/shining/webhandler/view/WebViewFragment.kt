@@ -1,5 +1,6 @@
 package com.shining.webhandler.view
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -7,8 +8,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebSettings
 import com.shining.nwebview.NWebListener
-import com.shining.nwebview.NWebViewClient
 import com.shining.webhandler.databinding.LayoutWebviewBinding
 import com.shining.webhandler.view.base.BaseFragment
 
@@ -27,6 +28,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
     private val urlG5mdev = "http://m.g5mdev.godomall.com"
     private val urlTest = "https://mobileappdev.godo.co.kr/whysj/urlscheme/index.php"
 
+    var userAgent: String? = ""
 
     companion object {
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { WebViewFragment() }
@@ -43,18 +45,17 @@ class WebViewFragment : BaseFragment(), NWebListener {
         return binding.root
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     override fun initUi() {
         super.initUi()
         Log.d(TAG, "initUi")
 
         binding.webView.apply {
-            settings.useWideViewPort = true     // 화면 맞추기 허용여부
-            settings.javaScriptEnabled = true   // javascript 허용여부
-            settings.domStorageEnabled = true   // 내부저장소 이용여부
-
             setListener(this@WebViewFragment, this@WebViewFragment)
-            setGeolocationEnabled(false)
-            setMixedContentAllowed(false)
+            addHttpHeader("X-Requested-With", "")
+
+            // Cookie
+            setMixedContentAllowed(allowed = true)
             setCookiesEnabled(true)
             setThirdPartyCookiesEnabled(true)
             addHttpHeader("X-Requested-With", "")
