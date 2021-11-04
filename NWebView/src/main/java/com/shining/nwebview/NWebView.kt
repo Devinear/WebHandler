@@ -68,13 +68,21 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
         Log.d(TAG, "init")
         NWebChromeClient(context, this@NWebView).apply {
             mNWebChromeClient = this
-            webChromeClient = this
+            super.setWebChromeClient(this)
         }
         NWebViewClient(this@NWebView).apply {
             mNWebViewClient = this
-            webViewClient = this
+            super.setWebViewClient(this)
         }
         initContext(context)
+    }
+
+    override fun setWebViewClient(client: WebViewClient) {
+        mNWebViewClient?.mViewClient = client
+    }
+
+    override fun setWebChromeClient(client: WebChromeClient?) {
+        mNWebChromeClient?.mChromeClient = client
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -108,14 +116,6 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
             val suggestedFilename = URLUtil.guessFileName(url, contentDisposition, mimeType)
             mListener!!.onDownloadRequested(url, suggestedFilename, mimeType, contentLength, contentDisposition, userAgent)
         }
-    }
-
-    override fun setWebViewClient(client: WebViewClient) {
-        mNWebViewClient?.mViewClient = client
-    }
-
-    override fun setWebChromeClient(client: WebChromeClient?) {
-        mNWebChromeClient?.mChromeClient = client
     }
 
     fun setListener(activity: Activity, listener: NWebListener)
