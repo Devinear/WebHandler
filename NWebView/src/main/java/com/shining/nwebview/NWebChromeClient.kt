@@ -15,6 +15,7 @@ import android.os.Message
 import android.util.Log
 import android.view.*
 import android.webkit.*
+import com.shining.nwebview.utils.WebViewUtils
 
 
 class NWebChromeClient(private val context: Context, private val webView: NWebView) : WebChromeClient() {
@@ -112,6 +113,7 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
 
         val newWebView = NWebView(context)
         try {
+
             val dialog = Dialog(context).apply {
                 setContentView(newWebView)
 

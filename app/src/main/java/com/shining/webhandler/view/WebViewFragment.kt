@@ -1,6 +1,7 @@
 package com.shining.webhandler.view
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebSettings
 import com.shining.nwebview.NWebListener
+import com.shining.nwebview.utils.WebViewSetting
 import com.shining.webhandler.databinding.LayoutWebviewBinding
 import com.shining.webhandler.view.base.BaseFragment
 
@@ -77,12 +79,29 @@ class WebViewFragment : BaseFragment(), NWebListener {
             addHttpHeader("X-Requested-With", "")
 
 //            loadUrl(cUrl)
-            loadUrl(urlTest)
-//            loadUrl("file:///android_asset/WebDeDeTest.html")
+//            loadUrl(urlTest)
+            loadUrl("file:///android_asset/WebDeDeTest.html")
 
             // Build.VERSION.SDK_INT >= 19
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
         }
+
+        initResult()
+    }
+
+    private fun initResult() {
+        val activityResultLauncher = registerForActivityResult(
+            MainActivityResultContract()
+            /*ActivityResultContracts.StartActivityForResult()*/
+        ) { result ->
+            Log.e(TAG, "ActivityResult [$result]")
+
+            //저장된 값을 불러오기 위해 같은 네임파일을 찾음.
+            val url = context?.
+                getSharedPreferences(WebViewSetting.SHARED_PREF_URL, Context.MODE_PRIVATE)?.
+                getString(WebViewSetting.DOWNLOAD_URL_TITLE, "")
+        }
+        binding.webView.setActivityResult(activityResultLauncher)
     }
 
     override fun onResume() {
@@ -136,6 +155,9 @@ class WebViewFragment : BaseFragment(), NWebListener {
         userAgent: String?
     ) {
         Log.d(TAG, "onDownloadRequested")
+
+
+
     }
 
     override fun onExternalPageRequest(url: String?) {

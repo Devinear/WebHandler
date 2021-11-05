@@ -14,7 +14,10 @@ import android.util.Base64
 import android.util.Log
 import android.view.ViewGroup
 import android.webkit.*
+import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
+import com.shining.nwebview.utils.DownloadUtils
+import com.shining.nwebview.utils.WebViewUtils
 import java.io.UnsupportedEncodingException
 import java.lang.ref.WeakReference
 import java.nio.charset.Charset
@@ -567,5 +570,9 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
 
     fun setOriginWhitelist(originWhitelist: List<Pattern>) {
         WebViewUtils.mUrlWhitelist = originWhitelist
+    }
+
+    fun setActivityResult(activityResultLauncher: ActivityResultLauncher<Intent>) {
+        DownloadUtils.activityResultLauncher = activityResultLauncher
     }
 }

@@ -7,6 +7,7 @@ import android.os.Message
 import android.util.Log
 import android.view.KeyEvent
 import android.webkit.*
+import com.shining.nwebview.utils.WebViewUtils
 import java.util.*
 import java.util.regex.Pattern
 
