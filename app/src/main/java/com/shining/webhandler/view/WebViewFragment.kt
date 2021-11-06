@@ -10,9 +10,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebSettings
+import androidx.core.net.toUri
 import com.shining.nwebview.NWebListener
 import com.shining.nwebview.utils.WebViewSetting
 import com.shining.webhandler.databinding.LayoutWebviewBinding
+import com.shining.webhandler.util.Utils
 import com.shining.webhandler.view.base.BaseFragment
 
 /**
@@ -91,15 +93,20 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     private fun initResult() {
         val activityResultLauncher = registerForActivityResult(
-            MainActivityResultContract()
+            WebViewResultContract()
             /*ActivityResultContracts.StartActivityForResult()*/
-        ) { result ->
-            Log.e(TAG, "ActivityResult [$result]")
+        ) { uri ->
+            Log.e(TAG, "ActivityResult uri [$uri]")
 
-            //저장된 값을 불러오기 위해 같은 네임파일을 찾음.
+            // Shared Preferences 통해 Download Url 확인
             val url = context?.
-                getSharedPreferences(WebViewSetting.SHARED_PREF_URL, Context.MODE_PRIVATE)?.
-                getString(WebViewSetting.DOWNLOAD_URL_TITLE, "")
+            getSharedPreferences(WebViewSetting.SHARED_PREF_URL, Context.MODE_PRIVATE)?.
+            getString(WebViewSetting.DOWNLOAD_URL_TITLE, "")
+            Log.e(TAG, "ActivityResult Download_URL [$url]")
+            url ?: return@registerForActivityResult
+
+            Utils.startDownload(context = requireContext(), uri = uri.toUri(), downloadUrl = url)
+
         }
         binding.webView.setActivityResult(activityResultLauncher)
     }

@@ -5,7 +5,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import com.shining.nwebview.R
@@ -75,10 +74,10 @@ internal object WebViewUtils {
 
         return try {
             when {
-                newUrl.startsWith("intent:") -> return urlIntent(context, url)
-                newUrl.startsWith("market://") -> return urlMarket(context, url)
-                newUrl.startsWith(schemeDownload) -> return urlDownload(context, url, schemeDownload)
-                newUrl.startsWith(schemeBrowser) -> return urlBrowser(context, url, schemeBrowser)
+                newUrl.startsWith("intent:") -> return urlIntent(context, newUrl)
+                newUrl.startsWith("market://") -> return urlMarket(context, newUrl)
+                newUrl.startsWith(schemeDownload) -> return urlDownload(context, newUrl, schemeDownload)
+                newUrl.startsWith(schemeBrowser) -> return urlBrowser(context, newUrl, schemeBrowser)
                 else -> {
                     Log.e(TAG, "else => $newUrl")
                     context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(newUrl) })
@@ -87,7 +86,7 @@ internal object WebViewUtils {
             }
         }
         catch (e: Exception) {
-            Log.e(TAG, "Exception : $e")
+            Log.e(TAG, "Exception[${e.message}]")
             e.printStackTrace()
             false
         }
@@ -124,61 +123,39 @@ internal object WebViewUtils {
             return true
         }
         catch (e: Exception) {
-            Log.e(TAG, "Exception : $e")
+            Log.e(TAG, "Exception[${e.message}]")
             e.printStackTrace()
         }
         return false
     }
 
     private fun urlMarket(context: Context, url: String): Boolean {
-        Log.i(TAG, "market url : $url")
+        Log.i(TAG, "market URL[$url]")
         context.startActivity(Intent.parseUri(url, Intent.URI_INTENT_SCHEME))
         return true
     }
 
     private fun urlDownload(context: Context, url: String, scheme: String): Boolean {
-        Log.i(TAG, "schemeDownload url : $scheme")
+        Log.i(TAG, "schemeDownload URL[$url]")
         val downloadUrl = url.replace("$scheme?url=", "")
-        if (downloadUrl.isNotEmpty()) {
-            if (!downloadUrl.contains(scheme)) {
-                /**
-                 * 다운로드 동작 구현 필요
-                 * */
 
-                DownloadUtils.fileDownloadBySAF(context, downloadUrl)
-
-                // Scoped Storage : SAF 저장하는 동작
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.Q) {
-
-                }
-                // 기존 Download 동작
-                else {
-
-                }
-                Toast.makeText(context, "DOWNLOAD 구현 필요", Toast.LENGTH_SHORT).show()
-            }
-            else {
-                Toast.makeText(context, context.getString(R.string.invalid_link), Toast.LENGTH_SHORT).show()
-            }
-        }
-        else {
+        if (downloadUrl.isEmpty() || downloadUrl.contains(scheme))
             Toast.makeText(context, context.getString(R.string.invalid_link), Toast.LENGTH_SHORT).show()
-        }
+        else
+            DownloadUtils.fileDownload(context, downloadUrl)
+
         return true
     }
 
     private fun urlBrowser(context: Context, url: String, scheme: String): Boolean {
-        Log.i(TAG, "schemeBrowser url : $scheme")
+        Log.i(TAG, "schemeBrowser URL[$scheme]")
         val browserUrl = url.replace("$scheme?url=", "")
-        if (browserUrl.isNotEmpty()) {
-            if (!browserUrl.contains(scheme))
-                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(browserUrl)))
-            else
-                Toast.makeText(context, context.getString(R.string.invalid_link), Toast.LENGTH_SHORT).show()
-        }
-        else {
+
+        if (browserUrl.isEmpty() || browserUrl.contains(scheme))
             Toast.makeText(context, context.getString(R.string.invalid_link), Toast.LENGTH_SHORT).show()
-        }
+        else
+            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(browserUrl)))
+
         return true
     }
 }

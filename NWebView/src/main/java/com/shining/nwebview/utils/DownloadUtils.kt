@@ -22,19 +22,18 @@ object DownloadUtils {
 
     var activityResultLauncher: ActivityResultLauncher<Intent>? = null
 
-    fun fileDownloadBySAF(context: Context, url: String) {
-        Log.d(TAG, "fileDownloadBySAF URL[$url]")
-        val downloadUrl = url
+    fun fileDownload(context: Context, url: String) {
+        Log.d(TAG, "fileDownload URL[$url]")
 
 //        String name = downloadUrl.substring(downloadUrl.lastIndexOf('/') +1);
-        val ext: String = downloadUrl.substring(downloadUrl.lastIndexOf('.')) // '.' 포함된 확장자
+        val ext: String = url.substring(url.lastIndexOf('.')) // '.' 포함된 확장자
 
         // 파일 이름을 날짜 형식으로 변경하여 중복 가능성을 낮춘다.
         val day = Date()
         val sdf = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA)
         val name = sdf.format(day) + ext
 
-        Log.d(TAG, "fileDownloadBySAF fileName : $name")
+        Log.d(TAG, "fileDownload Name[$name]")
         if (name.isEmpty()) return
 
         var isSupportType = false
@@ -45,14 +44,12 @@ object DownloadUtils {
             }
         }
         if (!isSupportType) {
-            Log.d(TAG, "fileDownloadBySAF Not Support")
+            Log.e(TAG, "download not support type Name[$name]")
             val msg = context.getString(R.string.file_type_is_not_support)
             Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
 
             // 해당 URL 이동
-            val i = Intent(Intent.ACTION_VIEW)
-            i.data = Uri.parse(downloadUrl)
-            context.startActivity(i)
+            context.startActivity(Intent(Intent.ACTION_VIEW).apply { data = Uri.parse(url) })
             return
         }
 
@@ -63,8 +60,9 @@ object DownloadUtils {
             putExtra(Intent.EXTRA_TITLE, name)
         }
 
+        // Shared Preferences 에 Download Url 저장
         val sharedPref = context.getSharedPreferences(WebViewSetting.SHARED_PREF_URL, Context.MODE_PRIVATE)
-        with (sharedPref.edit()) {
+        with(sharedPref.edit()) {
             putString(WebViewSetting.DOWNLOAD_URL_TITLE, url)
             commit()
         }
