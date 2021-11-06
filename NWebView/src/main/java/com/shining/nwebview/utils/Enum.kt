@@ -10,8 +10,4 @@ enum class DownloadSupportType {
     JPEG,
     ZIP,
     XLS
-//    ".png",
-//    && !name.contains(".zip") && !name.contains(".xls")
-//    && !name.contains(".jpg") && !name.contains(".jpeg")
-//    ) {
 }

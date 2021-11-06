@@ -1,17 +1,14 @@
 package com.shining.nwebview
 
 import android.graphics.Bitmap
-import android.net.Uri
 import android.net.http.SslError
 import android.os.Message
 import android.util.Log
 import android.view.KeyEvent
 import android.webkit.*
 import com.shining.nwebview.utils.WebViewUtils
-import java.util.*
-import java.util.regex.Pattern
 
-class NWebViewClient(private val webView: NWebView) : WebViewClient() {
+internal class NWebViewClient(private val webView: NWebView) : WebViewClient() {
 
     var mListener : NWebListener? = null
     var mViewClient : WebViewClient? = null
@@ -31,13 +28,14 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         url ?: return false
         if(url.isBlank()) return false
 
+        if (mViewClient?.shouldOverrideUrlLoading(view, url) == true) {
+            Log.d(TAG, "super shouldOverrideUrlLoading URL[$url]")
+            return false
+        }
+
         // 유효한 URL
         if (!WebViewUtils.isPermittedUrl(view.context, url)) {
             mListener?.onExternalPageRequest(url)
-            return true
-        }
-
-        if (mViewClient?.shouldOverrideUrlLoading(view, url) == true) {
             return true
         }
 
@@ -53,13 +51,14 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         val url : String = request.url.toString()
         if(url.isBlank()) return false
 
+        if (mViewClient?.shouldOverrideUrlLoading(view, request) == true) {
+            Log.d(TAG, "super shouldOverrideUrlLoading URL[${request.url}]")
+            return false
+        }
+
         // 유효한 URL
         if (!WebViewUtils.isPermittedUrl(view.context, url)) {
             mListener?.onExternalPageRequest(url)
-            return true
-        }
-
-        if (mViewClient?.shouldOverrideUrlLoading(view, request) == true) {
             return true
         }
 
@@ -82,7 +81,6 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
 
     override fun onPageFinished(view: WebView?, url: String?) {
         Log.d(TAG, "onPageFinished URL[$url]")
-
         try {
             // 앱을 종료 후에도 쿠키값이 저장되어 있어 앱을 재실행시 쿠키를 다시 사용 가능함.
             CookieManager.getInstance().flush()
@@ -91,9 +89,7 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         }
 
         if (!mLastLoadFailed) {
-//            webView.callInjectedJavaScript()
-//            webView.linkBridge()
-//            emitFinishEvent(webView, url)
+
         }
 
         if (!webView.hasError()) {
@@ -104,7 +100,7 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         }
     }
 
-    /* 페이지 내부의 리소스가 로드가 되면서 다수 호출  */
+    /** 페이지 내부의 리소스가 로드가 되면서 다수 호출  */
     override fun onLoadResource(view: WebView?, url: String?) {
         Log.d(TAG, "onLoadResource URL[$url]")
         mViewClient?.onLoadResource(view, url) ?: run {
@@ -112,7 +108,7 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         }
     }
 
-    /* 방문한 링크를 업데이트하는 경우 호출 */
+    /** 방문한 링크를 업데이트하는 경우 호출 */
     override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
         Log.d(TAG, "doUpdateVisitedHistory isReload[$isReload] URL[$url]")
         mViewClient?.doUpdateVisitedHistory(view, url, isReload) ?: run {
@@ -139,8 +135,8 @@ class NWebViewClient(private val webView: NWebView) : WebViewClient() {
     }
 
     /** 키 입력에 대한 처리
-    * return true 동작을 WebView에 위임하지 않는다.
-    * */
+     * return true 동작을 WebView에 위임하지 않는다.
+     * */
     override fun shouldOverrideKeyEvent(view: WebView?, event: KeyEvent?): Boolean {
         Log.d(TAG, "shouldOverrideKeyEvent")
         return mViewClient?.shouldOverrideKeyEvent(view, event) ?: run {

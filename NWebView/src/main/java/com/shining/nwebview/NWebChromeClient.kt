@@ -15,10 +15,8 @@ import android.os.Message
 import android.util.Log
 import android.view.*
 import android.webkit.*
-import com.shining.nwebview.utils.WebViewUtils
 
-
-class NWebChromeClient(private val context: Context, private val webView: NWebView) : WebChromeClient() {
+internal class NWebChromeClient(private val context: Context, private val webView: NWebView) : WebChromeClient() {
 
     private var mVideoView: View? = null
     private var mCustomViewCallback: CustomViewCallback? = null
@@ -29,10 +27,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         const val TAG = "[DE][SDK] ChromeClient"
     }
 
-    /** Notify the host application that the current page has entered full screen mode.
-     * 커스텀뷰라고 웹뷰를 덮는 형태의 뷰가 보여질때 호출
-     * 예를 들어서 youtube 같은 경우에도 이것에 해당할것 같네요.
-     */
+    /**
+     * 커스텀뷰라고 웹뷰를 덮는 형태의 뷰가 보여질때 호출 (ex - youtube) */
     override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
         Log.d(TAG, "onShowCustomView")
 
@@ -82,28 +78,19 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         Log.d(TAG, "onHideCustomView")
     }
 
-    // file upload callback : Android 5.0 (API level 21) -- current
+    /**
+     * file upload callback : Android 5.0 (API level 21) */
     override fun onShowFileChooser(
         webView: WebView?,
         filePathCallback: ValueCallback<Array<Uri>>?,
         fileChooserParams: FileChooserParams?)
-    : Boolean {
+            : Boolean {
         Log.d(TAG, "onShowFileChooser")
-        val allowMultiple = fileChooserParams?.mode == FileChooserParams.MODE_OPEN_MULTIPLE
-        this.webView.openFileInput(null, filePathCallback, allowMultiple)
         return true
-
-
-//        val acceptTypes = fileChooserParams!!.acceptTypes
-//        val allowMultiple = fileChooserParams!!.mode == FileChooserParams.MODE_OPEN_MULTIPLE
-//        val intent = fileChooserParams!!.createIntent()
-//        return com.godo.myapp.gdmodule.webview.ReactWebViewManager.getModule(mReactContext)
-//            .startPhotoPickerIntent(filePathCallback, intent, acceptTypes, allowMultiple)
     }
 
-    /** Request the host application to create a new window.
-     * 웹뷰내에서 새창을 띄우는 경우 활성화 된다.
-     */
+    /**
+     * 웹뷰내에서 새창을 띄우는 경우 활성화 된다. */
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateWindow(view: WebView?, isDialog: Boolean, isUserGesture: Boolean, resultMsg: Message?): Boolean {
         Log.e(TAG, "onCreateWindow Dialog[$isDialog] UserGesture[$isUserGesture] ResultMsg[${resultMsg}]")
@@ -113,7 +100,6 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
 
         val newWebView = NWebView(context)
         try {
-
             val dialog = Dialog(context).apply {
                 setContentView(newWebView)
 
@@ -168,7 +154,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         return true
     }
 
-    /* 팝업형태나 Webview의 window가 사라지는 경우 */
+    /**
+     * 팝업형태나 Webview의 window가 사라지는 경우 */
     override fun onCloseWindow(window: WebView?) {
         Log.e(TAG, "onCloseWindow")
 
@@ -183,7 +170,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         // 네이티브로 새창을 닫아 주는 이벤트 호출
     }
 
-    /* Javascript console message */
+    /**
+     * Javascript console message */
     override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
         val debug = BuildConfig.DEBUG
         Log.d(TAG, "onConsoleMessage Debug[$debug]")
@@ -195,7 +183,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         else true
     }
 
-    /* Geolocation API 사용을 위한 팝업 노출 */
+    /**
+     * Geolocation API 사용을 위한 팝업 노출 */
     override fun onGeolocationPermissionsShowPrompt(origin: String, callback: GeolocationPermissions.Callback) {
         Log.d(TAG, "onGeolocationPermissionsShowPrompt")
         if (webView.mGeolocationEnabled) {
@@ -214,7 +203,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         }
     }
 
-    /* Javascript에서 alert를 이용하여서 팝업을 노출할 경우. 커스텀 가능 */
+    /**
+     * Javascript에서 alert를 이용하여서 팝업을 노출할 경우. 커스텀 가능 */
     override fun onJsAlert(view: WebView, url: String, message: String, result: JsResult): Boolean {
         Log.d(TAG, "onJsAlert")
 
@@ -229,7 +219,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         return true
     }
 
-    /* Javascript의 confirm 해당 */
+    /**
+     * Javascript의 confirm 해당 */
     override fun onJsConfirm(view: WebView, url: String, message: String, result: JsResult): Boolean {
         Log.d(TAG, "onJsConfirm")
 
@@ -247,11 +238,12 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         return true
     }
 
-    /* 페이지에서 탐색을 확정하는 대화 상자가 노출된다고 클라이언트에게 알리는 역할
-    * Javasciprt의 onbeforeunload()에 해당하며 이곳에서 true를 호출하면
-    * 페이지는 탐색을 중지하고 JsResult에서 적절한 값을 호출할 것으로 예상을 하게 됨
-    * 기본값 false
-    * */
+    /**
+     * 페이지에서 탐색을 확정하는 대화 상자가 노출된다고 클라이언트에게 알리는 역할
+     * Javasciprt의 onbeforeunload()에 해당하며 이곳에서 true를 호출하면
+     * 페이지는 탐색을 중지하고 JsResult에서 적절한 값을 호출할 것으로 예상을 하게 됨
+     * 기본값 false
+     * */
     override fun onJsBeforeUnload(view: WebView, url: String, message: String, result: JsResult): Boolean {
         Log.d(TAG, "onJsBeforeUnload")
         return mChromeClient?.onJsBeforeUnload(view, url, message, result) ?: run {
@@ -259,7 +251,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         }
     }
 
-    /* Javascript prompt에 대한하는 기능을 제공 */
+    /**
+     * Javascript prompt에 대한하는 기능을 제공 */
     override fun onJsPrompt(view: WebView, url: String, message: String, defaultValue: String, result: JsPromptResult): Boolean {
         Log.d(TAG, "onJsPrompt")
         return mChromeClient?.onJsPrompt(view, url, message, defaultValue, result) ?: run {
@@ -267,7 +260,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         }
     }
 
-    /* 클라이언트에 권한이 필요할 경우에 호출되는 부분 */
+    /**
+     * 클라이언트에 권한이 필요할 경우에 호출되는 부분 */
     override fun onPermissionRequest(request: PermissionRequest) {
         Log.d(TAG, "onPermissionRequest")
         mChromeClient?.onPermissionRequest(request) ?: run {
@@ -275,7 +269,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         }
     }
 
-    /* 클라이언트에 권한요청을 취소하는 경우. UI로 노출하여 주었던 부분을 없애주면 됨. */
+    /**
+     * 클라이언트에 권한요청을 취소하는 경우. UI로 노출하여 주었던 부분을 없애주면 됨. */
     override fun onPermissionRequestCanceled(request: PermissionRequest) {
         Log.d(TAG, "onPermissionRequestCanceled")
         mChromeClient?.onPermissionRequestCanceled(request) ?: run {
@@ -283,7 +278,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         }
     }
 
-    /* 페이지가 로드됨에 따른 퍼센트를 보여주는 부분 */
+    /**
+     * 페이지가 로드됨에 따른 퍼센트를 보여주는 부분 */
     override fun onProgressChanged(view: WebView, newProgress: Int) {
         Log.d(TAG, "onProgressChanged Progress[$newProgress]")
         mChromeClient?.onProgressChanged(view, newProgress) ?: run {
@@ -291,7 +287,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         }
     }
 
-    /* 파비콘이 들어올 경우 호출 */
+    /**
+     * 파비콘이 들어올 경우 호출 */
     override fun onReceivedIcon(view: WebView, icon: Bitmap) {
         Log.d(TAG, "onReceivedIcon")
         mChromeClient?.onReceivedIcon(view, icon) ?: run {
@@ -299,7 +296,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         }
     }
 
-    /* 타이틀이 있는 경우 호출. 네비게이션에 타이틀 넣을때 */
+    /**
+     * 타이틀이 있는 경우 호출. 네비게이션에 타이틀 넣을때 */
     override fun onReceivedTitle(view: WebView, title: String) {
         Log.d(TAG, "onReceivedTitle Title[$title]")
         mChromeClient?.onReceivedTitle(view, title) ?: run {
@@ -307,9 +305,10 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         }
     }
 
-    /* 애플의 터치 아이콘을 눌렀을 경우 호출
-    *  https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html
-    *  */
+    /**
+     * 애플의 터치 아이콘을 눌렀을 경우 호출
+     * https://developer.apple.com/library/content/documentation/AppleApplications/Reference/SafariWebContent/ConfiguringWebApplications/ConfiguringWebApplications.html
+     */
     override fun onReceivedTouchIconUrl(view: WebView, url: String, precomposed: Boolean) {
         Log.d(TAG, "onReceivedTouchIconUrl")
         mChromeClient?.onReceivedTouchIconUrl(view, url, precomposed) ?: run {
@@ -317,7 +316,8 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
         }
     }
 
-    /* 웹뷰의 포커스가 요청될 경우 호출 */
+    /**
+     * 웹뷰의 포커스가 요청될 경우 호출 */
     override fun onRequestFocus(view: WebView) {
         Log.d(TAG, "onRequestFocus")
         mChromeClient?.onRequestFocus(view) ?: run {

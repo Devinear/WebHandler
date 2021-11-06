@@ -2,13 +2,9 @@ package com.shining.nwebview
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.DownloadManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
-import android.os.Environment
-import android.provider.Settings
 import android.util.AttributeSet
 import android.util.Base64
 import android.util.Log
@@ -39,29 +35,29 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     private var mNWebChromeClient : NWebChromeClient? = null
     private var mNWebViewClient : NWebViewClient? = null
 
-    internal val REQUEST_CODE_FILE_PICKER = 51426
-    internal var mRequestCodeFilePicker: Int = REQUEST_CODE_FILE_PICKER
+    private val REQUEST_CODE_FILE_PICKER = 51426
+    private var mRequestCodeFilePicker: Int = REQUEST_CODE_FILE_PICKER
 
-    internal var mActivity: WeakReference<Activity>? = null
-    internal var mFragment: WeakReference<Fragment>? = null
+    private var mActivity: WeakReference<Activity>? = null
+    private var mFragment: WeakReference<Fragment>? = null
 
     internal var mGeolocationEnabled = false
-    internal var mUploadableFileTypes = "*/*"
+    private var mUploadableFileTypes = "*/*"
 
 
     val PACKAGE_NAME_DOWNLOAD_MANAGER = "com.android.providers.downloads"
     internal val DATABASES_SUB_FOLDER = "/databases"
-    internal val LANGUAGE_DEFAULT_ISO3 = "eng"
-    internal val CHARSET_DEFAULT = "UTF-8"
+    private val LANGUAGE_DEFAULT_ISO3 = "eng"
+    private val CHARSET_DEFAULT = "UTF-8"
 
     /** File upload callback for platform versions prior to Android 5.0  */
-    internal var mFileUploadCallbackFirst: ValueCallback<Uri>? = null
+    private var mFileUploadCallbackFirst: ValueCallback<Uri>? = null
 
     /** File upload callback for Android 5.0+  */
-    internal var mFileUploadCallbackSecond: ValueCallback<Array<Uri>>? = null
-    internal var mLastError: Long = 0
-    internal var mLanguageIso3: String? = null
-    internal val mHttpHeaders = HashMap<String, String>()
+    private var mFileUploadCallbackSecond: ValueCallback<Array<Uri>>? = null
+    private var mLastError: Long = 0
+    private var mLanguageIso3: String? = null
+    private val mHttpHeaders = HashMap<String, String>()
 
     companion object {
         const val TAG = "[DE][SDK] NWebView"
@@ -81,10 +77,12 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     }
 
     override fun setWebViewClient(client: WebViewClient) {
+        Log.d(TAG, "setWebViewClient")
         mNWebViewClient?.mViewClient = client
     }
 
     override fun setWebChromeClient(client: WebChromeClient?) {
+        Log.d(TAG, "setWebChromeClient")
         mNWebChromeClient?.mChromeClient = client
     }
 
@@ -122,7 +120,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     }
 
     fun setListener(activity: Activity, listener: NWebListener)
-        = setListener(activity, listener, REQUEST_CODE_FILE_PICKER)
+            = setListener(activity, listener, REQUEST_CODE_FILE_PICKER)
 
     private fun setListener(activity: Activity, listener: NWebListener, requestCodeFilePicker: Int) {
         mActivity = WeakReference(activity)
@@ -130,7 +128,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     }
 
     fun setListener(fragment: Fragment, listener: NWebListener)
-        = setListener(fragment, listener, REQUEST_CODE_FILE_PICKER)
+            = setListener(fragment, listener, REQUEST_CODE_FILE_PICKER)
 
     private fun setListener(fragment: Fragment, listener: NWebListener, requestCodeFilePicker: Int) {
         mFragment = WeakReference(fragment)
@@ -488,38 +486,8 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
     }
 
     /**
-     * Returns whether file uploads can be used on the current device (generally all platform versions except for 4.4)
-     *
-     * @return whether file uploads can be used
-     */
-    fun isFileUploadAvailable(): Boolean {
-        return isFileUploadAvailable(false)
-    }
-
-    /**
-     * Returns whether file uploads can be used on the current device (generally all platform versions except for 4.4)
-     *
-     * On Android 4.4.3/4.4.4, file uploads may be possible but will come with a wrong MIME type
-     *
-     * @param needsCorrectMimeType whether a correct MIME type is required for file uploads or `application/octet-stream` is acceptable
-     * @return whether file uploads can be used
-     */
-    fun isFileUploadAvailable(needsCorrectMimeType: Boolean): Boolean {
-        return if (Build.VERSION.SDK_INT == 19) {
-            val platformVersion = if (Build.VERSION.RELEASE == null) "" else Build.VERSION.RELEASE
-            !needsCorrectMimeType && (platformVersion.startsWith("4.4.3") || platformVersion.startsWith(
-                "4.4.4"
-            ))
-        } else {
-            true
-        }
-    }
-
-    /**
      * Handles a download by loading the file from `fromUrl` and saving it to `toFilename` on the external storage
-     *
      * This requires the two permissions `android.permission.INTERNET` and `android.permission.WRITE_EXTERNAL_STORAGE`
-     *
      * Only supported on API level 9 (Android 2.3) and above
      *
      * @param context a valid `Context` reference
@@ -528,41 +496,39 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
      * @return whether the download has been successfully handled or not
      * @throws IllegalStateException if the storage or the target directory could not be found or accessed
      */
-    @SuppressLint("NewApi")
-    fun handleDownload(context: Context, fromUrl: String?, toFilename: String?): Boolean {
-        val request = DownloadManager.Request(Uri.parse(fromUrl))
-        request.allowScanningByMediaScanner()
-        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, toFilename)
-        val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-        return try {
-            try {
-                dm.enqueue(request)
-            } catch (e: SecurityException) {
-                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-                dm.enqueue(request)
-            }
-            true
-        } // if the download manager app has been disabled on the device
-        catch (e: IllegalArgumentException) {
-            // show the settings screen where the user can enable the download manager app again
-            openAppSettings(context, PACKAGE_NAME_DOWNLOAD_MANAGER)
-            false
-        }
-    }
-
-    @SuppressLint("NewApi")
-    private fun openAppSettings(context: Context, packageName: String): Boolean {
-        return try {
-            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            intent.data = Uri.parse("package:$packageName")
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            context.startActivity(intent)
-            true
-        } catch (e: Exception) {
-            false
-        }
-    }
+//    fun handleDownload(context: Context, fromUrl: String?, toFilename: String?): Boolean {
+//        val request = DownloadManager.Request(Uri.parse(fromUrl))
+//        request.allowScanningByMediaScanner()
+//        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+//        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, toFilename)
+//        val dm = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+//        return try {
+//            try {
+//                dm.enqueue(request)
+//            } catch (e: SecurityException) {
+//                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+//                dm.enqueue(request)
+//            }
+//            true
+//        } // if the download manager app has been disabled on the device
+//        catch (e: IllegalArgumentException) {
+//            // show the settings screen where the user can enable the download manager app again
+//            openAppSettings(context, PACKAGE_NAME_DOWNLOAD_MANAGER)
+//            false
+//        }
+//    }
+//
+//    private fun openAppSettings(context: Context, packageName: String): Boolean {
+//        return try {
+//            val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+//            intent.data = Uri.parse("package:$packageName")
+//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//            context.startActivity(intent)
+//            true
+//        } catch (e: Exception) {
+//            false
+//        }
+//    }
 
     fun setUrlPrefixesForDefaultIntent(specialUrls: ArrayList<Any>) {
         WebViewUtils.mUrlBlacklist = specialUrls
