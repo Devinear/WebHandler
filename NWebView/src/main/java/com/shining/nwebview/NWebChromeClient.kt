@@ -142,17 +142,13 @@ class NWebChromeClient(private val context: Context, private val webView: NWebVi
 
             newWebView.webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                    Log.d(TAG, "ChildView onCreateWindow shouldOverrideUrlLoading URL[$url]")
-                    view ?: return false
-                    url ?: return false
+                    Log.d(TAG, "ChildView onCreateWindow shouldOverrideUrlLoading F URL[$url]")
+                    return true
+                }
 
-                    return if (!WebViewUtils.isPermittedUrl(view.context, url)) {
-                        false
-                    }
-                    else {
-                        view.loadUrl(url)
-                        true
-                    }
+                override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                    Log.d(TAG, "ChildView onCreateWindow shouldOverrideUrlLoading S URL[${request?.url}]")
+                    return true
                 }
             }
             newWebView.webChromeClient = object : WebChromeClient() {
