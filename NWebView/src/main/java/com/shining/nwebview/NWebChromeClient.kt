@@ -15,11 +15,27 @@ import android.os.Message
 import android.util.Log
 import android.view.*
 import android.webkit.*
+import android.widget.FrameLayout
+import android.view.ViewGroup
+import android.view.MotionEvent
+
+import androidx.core.content.ContextCompat
+
+import android.view.WindowManager
 
 internal class NWebChromeClient(private val context: Context, private val webView: NWebView) : WebChromeClient() {
 
-    private var mVideoView: View? = null
+    private var mActivity = context as Activity
+    private var mCustomView: View? = null
     private var mCustomViewCallback: CustomViewCallback? = null
+
+    private var mOriginalOrientation = 0
+    private var mFullscreenContainer: FrameLayout? = null
+    private val COVER_SCREEN_PARAMS = FrameLayout.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.MATCH_PARENT
+    )
+
 
     var mChromeClient : WebChromeClient? = null
 
@@ -32,50 +48,59 @@ internal class NWebChromeClient(private val context: Context, private val webVie
     override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
         Log.d(TAG, "onShowCustomView")
 
-        mVideoView?.apply {
+        mCustomView?.apply {
             callback?.onCustomViewHidden()
             return
         }
 
-        mVideoView = view
+        mCustomView = view
         mCustomViewCallback = callback
 
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                // 확인해봐야 함
-                (context as Activity).window.setDecorFitsSystemWindows(false)
-                val controller = context.window.insetsController
-                controller?.apply {
-                    hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
-                    // 화면 끝의 스와이프 등 특정 동작시 시스템 바가 나타
-                    systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE
-                }
-            } else {
-                // KITKAT
-                mVideoView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_IMMERSIVE or
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                (context as Activity).window.setFlags(
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
-                )
-            }
-        }
-        catch (e: Exception) {
-            Log.e(TAG, "onShowCustomView Exception[${e.message}]")
-        }
+        mOriginalOrientation = mActivity.requestedOrientation
+        mFullscreenContainer = FullscreenHolder(mActivity)
+        mFullscreenContainer?.addView(view, COVER_SCREEN_PARAMS)
 
-        mVideoView?.setBackgroundColor(Color.BLACK)
-        webView.rootView
-        webView.visibility = View.GONE
+        val decor = mActivity.window.decorView as FrameLayout
+        decor.addView(mFullscreenContainer, COVER_SCREEN_PARAMS)
+
+        mCustomView = view
+        setFullscreen(true)
+        mCustomViewCallback = callback
     }
 
     override fun onHideCustomView() {
         Log.d(TAG, "onHideCustomView")
+
+        setFullscreen(false)
+        val decor = mActivity.window.decorView as FrameLayout
+        decor.removeView(mFullscreenContainer)
+
+        mFullscreenContainer = null
+        mCustomView = null
+        mCustomViewCallback?.onCustomViewHidden()
+
+        mActivity.requestedOrientation = mOriginalOrientation
+    }
+
+    private fun setFullscreen(enabled: Boolean) {
+        val params = mActivity.window.attributes
+        val bits = WindowManager.LayoutParams.FLAG_FULLSCREEN
+        if (enabled) {
+            params.flags = params.flags or bits
+        } else {
+            params.flags = params.flags and bits.inv()
+            if (mCustomView != null) {
+                mCustomView!!.systemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE
+            }
+        }
+        mActivity.window.attributes = params
+    }
+
+    inner class FullscreenHolder(context: Context) : FrameLayout(context) {
+        init {
+            setBackgroundColor(ContextCompat.getColor(context, R.color.black))
+        }
+        override fun onTouchEvent(event: MotionEvent): Boolean = true
     }
 
     /**
