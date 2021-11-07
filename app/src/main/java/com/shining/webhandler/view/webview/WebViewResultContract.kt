@@ -1,4 +1,4 @@
-package com.shining.webhandler.view
+package com.shining.webhandler.view.webview
 
 import android.app.Activity
 import android.content.Context

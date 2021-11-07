@@ -1,4 +1,4 @@
-package com.shining.webhandler.view
+package com.shining.webhandler.view.setting
 
 import android.os.Bundle
 import android.view.LayoutInflater

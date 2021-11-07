@@ -1,4 +1,4 @@
-package com.shining.webhandler.view
+package com.shining.webhandler.view.collection
 
 import com.shining.webhandler.view.base.BaseViewModel
 

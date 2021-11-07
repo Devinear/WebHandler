@@ -6,10 +6,10 @@
     <data>
         <variable
             name="fragment"
-            type="com.shining.webhandler.view.SettingFragment" />
+            type="com.shining.webhandler.view.setting.SettingFragment" />
         <variable
             name="vm"
-            type="com.shining.webhandler.view.SettingViewModel" />
+            type="com.shining.webhandler.view.setting.SettingViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

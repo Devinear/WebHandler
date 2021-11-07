@@ -1,4 +1,4 @@
-package com.shining.webhandler.view
+package com.shining.webhandler.view.webview
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,7 +9,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.JavascriptInterface
 import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.core.net.toUri
 import com.shining.nwebview.NWebListener
 import com.shining.nwebview.utils.WebViewSetting
@@ -67,10 +70,13 @@ class WebViewFragment : BaseFragment(), NWebListener {
             textZoom = 100
             userAgentString = userAgent ?: ""
 
+            loadWithOverviewMode = true                     // html의 컨텐츠가 웹뷰보다 클 경우 스크린 크기에 맞게 조정
+            layoutAlgorithm = WebSettings.LayoutAlgorithm.NORMAL
+
             // Main WebView Only
             loadWithOverviewMode = true
-            useWideViewPort = true                          // 화면 맞추기 허용여부
-            cacheMode = WebSettings.LOAD_DEFAULT            // 브라우저 캐시 사용 재정
+            useWideViewPort = true                          // 화면 맞추기 허용여부(html의 viewport)
+            cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK // 브라우저 캐시 사용 재정
 
             // Deprecated
             allowUniversalAccessFromFileURLs = false
@@ -80,15 +86,34 @@ class WebViewFragment : BaseFragment(), NWebListener {
             setListener(this@WebViewFragment, this@WebViewFragment)
             addHttpHeader("X-Requested-With", "")
 
-//            loadUrl(cUrl)
+//            loadUrl("https://topegirl.com/watch/dakota-pink-nude-seduce-120-photos.html")
+            loadUrl("https://xhwebsite.com/photos/gallery/the-beauty-of-blonde-1427226")
 //            loadUrl(urlTest)
-            loadUrl("file:///android_asset/WebDeDeTest.html")
+//            loadUrl("file:///android_asset/WebDeDeTest.html")
 
             // Build.VERSION.SDK_INT >= 19
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
+
+            webViewClient = object: WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    Log.d(TAG, "onPageFinished URL[$url]")
+                    // <html></html> 사이에 있는 html 소스를 넘겨준다.
+                    view?.loadUrl("javascript:window.Android.getHtml(document.getElementsByTagName('html')[0].innerHTML);")
+                }
+            }
+            addJavascriptInterface(MyJavascriptInterface(), "Android")
         }
 
         initResult()
+    }
+
+    class MyJavascriptInterface {
+        @JavascriptInterface
+        fun getHtml(html: String) {
+//            Log.d(TAG, "html: $html")
+        }
     }
 
     private fun initResult() {

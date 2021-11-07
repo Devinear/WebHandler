@@ -1,4 +1,4 @@
-package com.shining.webhandler.view
+package com.shining.webhandler.view.collection
 
 import android.os.Bundle
 import android.util.Log

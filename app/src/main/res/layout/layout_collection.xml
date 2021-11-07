@@ -6,10 +6,10 @@
     <data>
         <variable
             name="fragment"
-            type="com.shining.webhandler.view.CollectionFragment" />
+            type="com.shining.webhandler.view.collection.CollectionFragment" />
         <variable
             name="vm"
-            type="com.shining.webhandler.view.CollectionViewModel" />
+            type="com.shining.webhandler.view.collection.CollectionViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

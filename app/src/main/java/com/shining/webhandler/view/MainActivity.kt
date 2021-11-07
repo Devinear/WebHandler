@@ -8,19 +8,19 @@ import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
 import android.view.WindowManager
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.shining.nbottombar.BItem
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
 import com.shining.webhandler.databinding.ActivityMainBinding
+import com.shining.webhandler.view.collection.CollectionFragment
 import com.shining.webhandler.view.common.PageAdapter
-import androidx.recyclerview.widget.RecyclerView
-
+import com.shining.webhandler.view.dashboard.DashboardFragment
+import com.shining.webhandler.view.setting.SettingFragment
+import com.shining.webhandler.view.webview.WebViewFragment
 
 class MainActivity : AppCompatActivity() {
 

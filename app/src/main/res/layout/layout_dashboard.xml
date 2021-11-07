@@ -6,10 +6,10 @@
     <data>
         <variable
             name="fragment"
-            type="com.shining.webhandler.view.DashboardFragment" />
+            type="com.shining.webhandler.view.dashboard.DashboardFragment" />
         <variable
             name="vm"
-            type="com.shining.webhandler.view.DashboardViewModel" />
+            type="com.shining.webhandler.view.dashboard.DashboardViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
