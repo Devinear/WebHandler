@@ -14,6 +14,8 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.core.net.toUri
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.shining.nwebview.NWebListener
 import com.shining.nwebview.utils.WebViewSetting
 import com.shining.webhandler.databinding.LayoutWebviewBinding
@@ -27,7 +29,9 @@ import com.shining.webhandler.view.base.BaseFragment
 class WebViewFragment : BaseFragment(), NWebListener {
 
     private lateinit var binding : LayoutWebviewBinding
-    private lateinit var viewModel : WebViewViewModel
+
+    // Kotlin 위임(by) 활용, 초기화되는 Activity 또는 Fragment Lifecycle 종속됨
+    private val viewModel : WebViewViewModel by viewModels()
 
     private val cUrl = "https://www.naver.com/"
 
@@ -65,7 +69,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
             allowContentAccess = false
             javaScriptCanOpenWindowsAutomatically = true    // JS 에서 새창 실행
             javaScriptEnabled = true                        // JS 허용여부
-            setSupportMultipleWindows(true)                 // 새창 허용여부
+            setSupportMultipleWindows(false)                // 새창 허용여부 - false : 현재 창에 로드
 
             textZoom = 100
             userAgentString = userAgent ?: ""
