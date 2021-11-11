@@ -88,19 +88,7 @@ class MainActivity : AppCompatActivity() {
                 }
             })
 
-            try {
-                // 민감도 조절
-                val recyclerViewField = ViewPager2::class.java.getDeclaredField("mRecyclerView")
-                recyclerViewField.isAccessible = true
-
-                val recyclerView = recyclerViewField.get(this)
-                val touchSlopField = RecyclerView::class.java.getDeclaredField("mTouchSlop")
-                touchSlopField.isAccessible = true
-                touchSlopField.set(recyclerView, (touchSlopField.get(recyclerView) as Int)*6)
-            }
-            catch (e: Exception) {
-                Log.e(TAG, "initViewPager Exception[${e.message}]")
-            }
+            isUserInputEnabled = false // 좌우 스와이프 동작
         }
     }
 
