@@ -150,8 +150,13 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     private fun initInput() {
         binding.apply {
-            layoutInput.visibility = View.GONE
+            layoutInput.visibility = View.INVISIBLE
+            ObjectAnimator.ofFloat(layoutInput, "translationY", 100f, 0f).apply {
+                duration = 0
+                start()
+            }
             ibInputBack.setOnClickListener {
+                hideKeyboard()
                 showInputEdit(show = false)
             }
             ibInputSearch.setOnClickListener {
@@ -159,9 +164,12 @@ class WebViewFragment : BaseFragment(), NWebListener {
                 showInputEdit(show = false)
 
                 val input = edInput.text.toString()
+                if (input.isEmpty()) return@setOnClickListener
+
                 webView.loadUrl(input)
                 Toast.makeText(context, input, Toast.LENGTH_SHORT).show()
             }
+            edInput.isSingleLine = true
             fabExplore.visibility = View.VISIBLE
             fabExplore.setOnClickListener {
                 showInputEdit()
@@ -173,12 +181,13 @@ class WebViewFragment : BaseFragment(), NWebListener {
         binding.apply {
             if (show) {
                 layoutInput.visibility = View.VISIBLE
+//                fabExplore.visibility = View.INVISIBLE
                 ObjectAnimator.ofFloat(fabExplore, "alpha", 1f, 0f)
                     .apply { start() }
                     .addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator?) {
                             super.onAnimationEnd(animation)
-                            fabExplore.visibility = View.GONE
+                            fabExplore.visibility = View.INVISIBLE
                         }
                     })
                 ObjectAnimator.ofFloat(layoutInput, "alpha", 0f, 1f).start()
@@ -186,17 +195,18 @@ class WebViewFragment : BaseFragment(), NWebListener {
             }
             else {
                 fabExplore.visibility = View.VISIBLE
+//                layoutInput.visibility = View.INVISIBLE
                 ObjectAnimator.ofFloat(fabExplore, "alpha",0f, 1f).start()
-                ObjectAnimator.ofFloat(layoutInput, "alpha",1f, 0f).start()
-                ObjectAnimator.ofFloat(layoutInput, "translationY",100f)
+                ObjectAnimator.ofFloat(layoutInput, "alpha",1f, 0f)
                     .apply { start() }
                     .addListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator?) {
                             super.onAnimationEnd(animation)
-                            layoutInput.visibility = View.GONE
+                            layoutInput.visibility = View.INVISIBLE
                             edInput.text.clear()
                         }
                     })
+                ObjectAnimator.ofFloat(layoutInput, "translationY",100f).start()
             }
         }
     }
