@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModelProvider
 import com.shining.nwebview.NWebListener
 import com.shining.nwebview.utils.WebViewSetting
 import com.shining.webhandler.databinding.LayoutWebviewBinding
@@ -39,7 +40,8 @@ class WebViewFragment : BaseFragment(), NWebListener {
     private lateinit var binding : LayoutWebviewBinding
 
     // Kotlin 위임(by) 활용, 초기화되는 Activity 또는 Fragment Lifecycle 종속됨
-    private val viewModel : WebViewViewModel by viewModels()
+//    private val viewModel : WebViewViewModel by viewModels()
+    private lateinit var viewModel : WebViewViewModel
 
     private val cUrl = "https://www.naver.com/"
 
@@ -51,7 +53,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     companion object {
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { WebViewFragment() }
-        val TAG = "[DE][FR] WebView"
+        const val TAG = "[DE][FR] WebView"
     }
 
     override fun onCreateView(
@@ -61,6 +63,10 @@ class WebViewFragment : BaseFragment(), NWebListener {
     ): View {
         Log.d(TAG, "onCreateView")
         binding = LayoutWebviewBinding.inflate(layoutInflater, container, false)
+
+        viewModel = ViewModelProvider(this, WebViewViewModelFactory(requireContext()))
+            .get(WebViewViewModel::class.java)
+
         return binding.root
     }
 
@@ -110,22 +116,28 @@ class WebViewFragment : BaseFragment(), NWebListener {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
                     Log.d(TAG, "onPageFinished URL[$url]")
+
                     // <html></html> 사이에 있는 html 소스를 넘겨준다.
+                    // onLoadResource 에서 저장한 image url 과 겹치는 부분이 많이 발생할 것으로 보임.
                     view?.loadUrl("javascript:window.Android.getHtml(document.getElementsByTagName('html')[0].innerHTML);")
                 }
+
+                override fun onLoadResource(view: WebView?, url: String?) {
+                    super.onLoadResource(view, url)
+                    Log.d(TAG, "onLoadResource URL[$url]")
+
+                    url ?: return
+                    viewModel.addUrl(url)
+                }
             }
-            addJavascriptInterface(MyJavascriptInterface(), "Android")
+
+            // JavascriptInterface 설정 - name
+            addJavascriptInterface(JavascriptInterface(viewModel), "Android")
+            overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
         }
 
         initInput()
         initResult()
-    }
-
-    class MyJavascriptInterface {
-        @JavascriptInterface
-        fun getHtml(html: String) {
-//            Log.d(TAG, "html: $html")
-        }
     }
 
     private fun initResult() {
