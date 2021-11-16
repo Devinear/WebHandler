@@ -15,5 +15,6 @@ enum class FragmentType {
 enum class ImageType {
     PNG,
     JPG,
-    JPEG
+    JPEG,
+    GIF
 }
