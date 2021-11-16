@@ -11,3 +11,10 @@ enum class FragmentType {
     Collection,
     Setting
 }
+
+enum class ImageType {
+    PNG,
+    JPG,
+    JPEG,
+    GIF
+}
