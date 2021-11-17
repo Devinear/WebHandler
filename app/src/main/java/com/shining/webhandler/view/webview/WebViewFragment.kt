@@ -40,8 +40,12 @@ class WebViewFragment : BaseFragment(), NWebListener {
     private lateinit var binding : LayoutWebviewBinding
 
     // Kotlin 위임(by) 활용, 초기화되는 Activity 또는 Fragment Lifecycle 종속됨
-//    private val viewModel : WebViewViewModel by viewModels()
-    private lateinit var viewModel : WebViewViewModel
+    private val viewModel : WebViewViewModel by activityViewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T
+                = WebViewViewModel(requireActivity()) as T
+        }
+    }
 
     private val cUrl = "https://www.naver.com/"
 
@@ -63,10 +67,6 @@ class WebViewFragment : BaseFragment(), NWebListener {
     ): View {
         Log.d(TAG, "onCreateView")
         binding = LayoutWebviewBinding.inflate(layoutInflater, container, false)
-
-        viewModel = ViewModelProvider(this, WebViewViewModelFactory(requireContext()))
-            .get(WebViewViewModel::class.java)
-
         return binding.root
     }
 

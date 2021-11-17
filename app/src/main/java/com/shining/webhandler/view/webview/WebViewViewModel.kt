@@ -18,16 +18,16 @@ import com.shining.webhandler.common.data.ImageDataListener
  * WebViewViewModel.kt
  * WebHandler
  */
-class WebViewViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return if (modelClass.isAssignableFrom(WebViewViewModel::class.java)) {
-            WebViewViewModel(context) as T
-        }
-        else {
-            throw IllegalAccessException()
-        }
-    }
-}
+//class WebViewViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+//    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+//        return if (modelClass.isAssignableFrom(WebViewViewModel::class.java)) {
+//            WebViewViewModel(context) as T
+//        }
+//        else {
+//            throw IllegalAccessException()
+//        }
+//    }
+//}
 
 class WebViewViewModel(val context: Context) : BaseViewModel() {
 
