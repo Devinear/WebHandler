@@ -16,6 +16,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
 import com.shining.webhandler.databinding.ActivityMainBinding
+import com.shining.webhandler.view.base.BaseFragment
 import com.shining.webhandler.view.collection.CollectionFragment
 import com.shining.webhandler.view.common.PageAdapter
 import com.shining.webhandler.view.dashboard.DashboardFragment
@@ -166,10 +167,18 @@ class MainActivity : AppCompatActivity() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         }
-        else {
+        else if(!currentFragment().onBackPressed()) {
             super.onBackPressed()
         }
     }
+
+    private fun currentFragment() : BaseFragment =
+        when (showFragment) {
+            FragmentType.Dashboard -> DashboardFragment.INSTANCE
+            FragmentType.WebView -> WebViewFragment.INSTANCE
+            FragmentType.Collection -> CollectionFragment.INSTANCE
+            FragmentType.Setting -> SettingFragment.INSTANCE
+        }
 
     private fun requestFragment(type: FragmentType = FragmentType.Dashboard) {
         showFragment = type
@@ -186,11 +195,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         // WebView BackKey
-        if(keyCode == KeyEvent.KEYCODE_BACK &&
-            showFragment == FragmentType.WebView && WebViewFragment.INSTANCE.webCanGoBack()) {
-            WebViewFragment.INSTANCE.webGoBack()
-            return true
-        }
+//        if(keyCode == KeyEvent.KEYCODE_BACK &&
+//            showFragment == FragmentType.WebView && WebViewFragment.INSTANCE.webCanGoBack()) {
+//            WebViewFragment.INSTANCE.webGoBack()
+//            return true
+//        }
         return super.onKeyDown(keyCode, event)
     }
 

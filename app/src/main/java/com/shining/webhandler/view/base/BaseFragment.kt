@@ -17,4 +17,6 @@ open class BaseFragment : Fragment() {
     }
 
     open fun initUi() { }
+
+    open fun onBackPressed() : Boolean { return false }
 }

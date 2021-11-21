@@ -62,6 +62,14 @@ class CollectionFragment : BaseFragment() {
         }
     }
 
+    override fun onBackPressed(): Boolean {
+        if(binding.ivDetail.visibility == View.VISIBLE) {
+            binding.ivDetail.visibility = View.GONE
+            return true
+        }
+        return super.onBackPressed()
+    }
+
     fun onClickTempAdd() {
 
     }
