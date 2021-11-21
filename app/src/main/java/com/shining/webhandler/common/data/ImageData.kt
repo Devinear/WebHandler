@@ -8,6 +8,7 @@ import android.graphics.Bitmap
  */
 data class ImageData(
     val id: Int,
+    val thumb: Bitmap? = null,
     val image: Bitmap,
     val url: String = ""
 )

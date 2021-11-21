@@ -5,14 +5,15 @@ import android.graphics.Bitmap
 import android.util.Log
 import androidx.databinding.ObservableArrayList
 import androidx.databinding.ObservableList
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.shining.webhandler.common.ImageType
-import com.shining.webhandler.util.GlideListener
-import com.shining.webhandler.util.GlideManager
-import com.shining.webhandler.view.base.BaseViewModel
 import com.shining.webhandler.common.data.ImageData
 import com.shining.webhandler.common.data.ImageDataListener
+import com.shining.webhandler.util.GlideListener
+import com.shining.webhandler.util.GlideManager
+import com.shining.webhandler.util.Utils
+import com.shining.webhandler.view.base.BaseViewModel
+import kotlinx.coroutines.launch
 
 /**
  * WebViewViewModel.kt
@@ -102,8 +103,10 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
 
         GlideManager.getBitmapFromUrl(context, url, object : GlideListener {
             override fun onSuccessResource(url: String, bitmap: Bitmap) {
+                val width = 200
+                val thumb = Bitmap.createScaledBitmap(bitmap, width, (bitmap.height*width)/(bitmap.width), true)
                 Log.d(TAG, "request-onSuccessResource URL[$url]")
-                _images.add(ImageData(id = url.hashCode(), url = url, image = bitmap))
+                _images.add(ImageData(id = url.hashCode(), url = url, image = bitmap, thumb = thumb))
             }
 
             override fun onFailureResource(url: String) {
