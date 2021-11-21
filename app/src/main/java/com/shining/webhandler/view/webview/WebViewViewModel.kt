@@ -51,14 +51,30 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
     init {
         _images.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<ObservableArrayList<ImageData>>() {
             override fun onItemRangeChanged(sender: ObservableArrayList<ImageData>?, positionStart: Int, itemCount: Int) {
-                Log.d(TAG, "Callback-onItemRangeChanged Start[$positionStart] Count[$itemCount]")
-                listener?.onItemRangeChanged(sender, positionStart, itemCount)
+//                sender ?: return
+//                listener?.onItemRangeChanged(sender, positionStart, itemCount)
+                sender?.run { listener?.onChanged(sender.toList()) }
             }
-
-            override fun onChanged(sender: ObservableArrayList<ImageData>?) = Unit
-            override fun onItemRangeInserted(sender: ObservableArrayList<ImageData>?, positionStart: Int, itemCount: Int) = Unit
-            override fun onItemRangeMoved(sender: ObservableArrayList<ImageData>?, fromPosition: Int, toPosition: Int, itemCount: Int) = Unit
-            override fun onItemRangeRemoved(sender: ObservableArrayList<ImageData>?, positionStart: Int, itemCount: Int)  = Unit
+            override fun onChanged(sender: ObservableArrayList<ImageData>?) {
+//                sender ?: return
+//                listener?.onChanged(sender)
+                sender?.run { listener?.onChanged(sender.toList()) }
+            }
+            override fun onItemRangeInserted(sender: ObservableArrayList<ImageData>?, positionStart: Int, itemCount: Int) {
+//                sender ?: return
+//                listener?.onItemRangeInserted(sender, positionStart, itemCount)
+                sender?.run { listener?.onChanged(sender.toList()) }
+            }
+            override fun onItemRangeMoved(sender: ObservableArrayList<ImageData>?, fromPosition: Int, toPosition: Int, itemCount: Int) {
+//                sender ?: return
+//                listener?.onItemRangeMoved(sender, fromPosition, toPosition, itemCount)
+                sender?.run { listener?.onChanged(sender.toList()) }
+            }
+            override fun onItemRangeRemoved(sender: ObservableArrayList<ImageData>?, positionStart: Int, itemCount: Int) {
+//                sender ?: return
+//                listener?.onItemRangeRemoved(sender, positionStart, itemCount)
+                sender?.run { listener?.onChanged(sender.toList()) }
+            }
         } )
     }
 
