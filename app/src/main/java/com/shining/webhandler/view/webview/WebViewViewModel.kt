@@ -119,4 +119,9 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
     }
 
     fun getImageSize() : Int = _images.size
+
+    fun tempAdd() {
+        val data = ImageData(id = (Math.random()*1000).toInt(), image = _images[0].image, thumb = _images[0].thumb, type = _images[0].type)
+        _images.add(data)
+    }
 }

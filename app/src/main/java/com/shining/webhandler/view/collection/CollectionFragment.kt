@@ -5,8 +5,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
+import com.shining.webhandler.common.data.ImageData
 import com.shining.webhandler.databinding.LayoutCollectionBinding
 import com.shining.webhandler.view.base.BaseFragment
+import com.shining.webhandler.view.webview.WebViewViewModel
 
 /**
  * CollectionFragment.kt
@@ -15,7 +21,12 @@ import com.shining.webhandler.view.base.BaseFragment
 class CollectionFragment : BaseFragment() {
 
     private lateinit var binding : LayoutCollectionBinding
-    private lateinit var viewModel: CollectionViewModel
+    private val viewModel : WebViewViewModel by activityViewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T
+                    = WebViewViewModel(requireActivity()) as T
+        }
+    }
 
     companion object {
         private const val TAG = "[DE][FR] Collection"
@@ -27,13 +38,31 @@ class CollectionFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d(TAG, "onCreateView")
         binding = LayoutCollectionBinding.inflate(layoutInflater, container, false)
+        binding.fragment = this
         return binding.root
     }
 
     override fun initUi() {
         super.initUi()
         Log.d(TAG, "initUi")
+
+        initRecycler()
+    }
+
+    private fun initRecycler() {
+        binding.recycler.apply {
+            adapter = CollectionAdapter(viewModel).apply {
+                setHasStableIds(true)
+                setHasFixedSize(true)
+            }
+            layoutManager = GridLayoutManager(requireActivity(), 3)
+
+        }
+    }
+
+    fun onClickTempAdd() {
 
     }
 }

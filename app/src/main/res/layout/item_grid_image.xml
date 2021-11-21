@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
+
+    <data>
+<!--
+        <variable
+            name="image"
+            type="data" />
+-->
+    </data>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/la_border"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_margin="2dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:layout_constraintVertical_weight="1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tv_name" >
+
+        <ImageView
+            android:id="@+id/iv_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            tools:scaleType="centerCrop" />
+
+        <CheckBox
+            android:id="@+id/ckb_checked"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:checked="true" />
+
+    </androidx.cardview.widget.CardView>
+
+</layout>
