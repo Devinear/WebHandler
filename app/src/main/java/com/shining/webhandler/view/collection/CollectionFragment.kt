@@ -52,13 +52,27 @@ class CollectionFragment : BaseFragment() {
     }
 
     private fun initRecycler() {
-        binding.recycler.apply {
-            adapter = CollectionAdapter(viewModel).apply {
-                setHasStableIds(true)
-                setHasFixedSize(true)
+        with(binding) {
+            laDetail/*ivDetail*/.apply {
+                visibility = View.GONE
+                setOnClickListener { visibility = View.GONE }
             }
-            layoutManager = GridLayoutManager(requireActivity(), 3)
+            recycler.apply {
+                adapter = CollectionAdapter(viewModel, object : ItemListener {
+                    override fun clickImageItem(data: ImageData) {
+                        laDetail.visibility = View.VISIBLE
+//                        ivDetail.visibility = View.VISIBLE
+                        ivDetail.setImageBitmap(data.image)
 
+                        tvWidth.text = "W: ${data.image.width}"
+                        tvHeight.text = "H : ${data.image.height}"
+                    }
+                }).apply {
+                    setHasStableIds(true)
+                    setHasFixedSize(true)
+                }
+                layoutManager = GridLayoutManager(requireActivity(), 3)
+            }
         }
     }
 

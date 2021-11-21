@@ -40,26 +40,29 @@ class CollectionAdapter(val vm: WebViewViewModel): ListAdapter<ImageData, Collec
         }
     }
 
-    class ViewHolder(val binding : ItemGridImageBinding) : RecyclerView.ViewHolder(binding.root) {
-
-        fun bind(data: ImageData) {
-            with(binding) {
-                ivImage.setImageBitmap(data.image)
-//                val rnd = Random()
-//                ivImage.setBackgroundColor(Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256)))
+    class ViewHolder(val binding : ItemGridImageBinding, val listener: ItemListener) : RecyclerView.ViewHolder(binding.root) {
+        fun bind(data: ImageData, position: Int) {
+            Log.d(TAG, "bind Position[$position] Checked[${data.checked}]")
+            binding.apply {
+                ivImage.setImageBitmap(data.thumb)
+                ivImage.setOnClickListener {
+                    listener.clickImageItem(data)
+                }
             }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder
-            = ViewHolder(ItemGridImageBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
+        ViewHolder(ItemGridImageBinding.inflate(LayoutInflater.from(parent.context), parent, false), listener)
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         Log.d(TAG, "onBindViewHolder Position[$position]")
         holder.bind(getItem(position))
     }
 
-    override fun getItemId(position: Int): Long {
-        return getItem(position).id.toLong()
-    }
+    override fun getItemId(position: Int): Long =
+        getItem(position).id.toLong()
+
+    override fun getItemCount(): Int =
+        currentList.size
 }
