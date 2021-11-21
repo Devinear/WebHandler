@@ -7,6 +7,7 @@ import android.graphics.Bitmap
  * WebHandler
  */
 data class ImageData(
+    val id: Int,
     val image: Bitmap,
     val url: String = ""
 )

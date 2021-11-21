@@ -87,7 +87,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
         GlideManager.getBitmapFromUrl(context, url, object : GlideListener {
             override fun onSuccessResource(url: String, bitmap: Bitmap) {
                 Log.d(TAG, "request-onSuccessResource URL[$url]")
-                _images.add(ImageData(url = url, image = bitmap))
+                _images.add(ImageData(id = url.hashCode(), url = url, image = bitmap))
             }
 
             override fun onFailureResource(url: String) {
