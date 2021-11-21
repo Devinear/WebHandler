@@ -1,13 +1,23 @@
 package com.shining.webhandler.util
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
+import com.shining.webhandler.common.data.ImageData
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
+import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.*
 
 /**
  * Utils.kt
@@ -64,6 +74,70 @@ object Utils {
                 Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
             }
         }.start()
+    }
+
+//    private static final String DF_GROUP = "yyyy.MM.dd";
+//    private static final String DF_PICTURES = "HHmmss";
+//    private static final String DF_VIDEOS = "yyyyMMddHHmmss";
+
+    private const val DATE_FORMAT_PICTURES = "HHmmss"
+
+    @SuppressLint("SimpleDateFormat")
+    suspend fun imageDownload(context: Context, data: ImageData, name: String = "") {
+
+        val displayName = if (name.isEmpty()) {
+            "${SimpleDateFormat(DATE_FORMAT_PICTURES).format(Date())}.jpg"
+        } else {
+            "$name.jpg"
+        }
+
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, displayName)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpg")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+
+        val contentResolver = context.contentResolver
+        val collection = MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY)
+        val item = contentResolver.insert(collection, values)!!
+
+        contentResolver.openFileDescriptor(item, "w", null).use {
+            // write something to OutputStream
+            FileOutputStream(it!!.fileDescriptor).use { outputStream ->
+//                val imageInputStream = resources.openRawResource(R.raw.my_image)
+                val imageInputStream = getImageInputStream(imageData = data)
+                while (true) {
+                    val data = imageInputStream.read()
+                    if (data == -1) {
+                        break
+                    }
+                    outputStream.write(data)
+                }
+                imageInputStream.close()
+                outputStream.close()
+            }
+        }
+        values.clear()
+        values.put(MediaStore.Images.Media.IS_PENDING, 0)
+        contentResolver.update(item, values, null, null)
+    }
+
+    /** * Get Image InputStream
+     * @param imageData ImageData
+     * @return InputStream from Bitmap
+     */
+    private fun getImageInputStream(imageData: ImageData) : InputStream {
+        val bytes = ByteArrayOutputStream()
+        val bitmap = imageData.image
+
+//        val compressType = when (data.type) {
+//            ImageType.PNG -> Bitmap.CompressFormat.PNG
+//            else -> Bitmap.CompressFormat.JPEG
+//        }
+
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+        val bitmapData = bytes.toByteArray()
+        return ByteArrayInputStream(bitmapData)
     }
 
 }

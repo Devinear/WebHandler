@@ -85,6 +85,6 @@ class CollectionFragment : BaseFragment() {
     }
 
     fun onClickTempAdd() {
-
+        viewModel.checkedImageDownload()
     }
 }

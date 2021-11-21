@@ -86,7 +86,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
         if(imageUrls.add(url)) {
             for (type in ImageType.values()) {
                 if (url.endsWith(type.toString(), ignoreCase = true)) {
-                    request(url)
+                    request(url, type)
                     return true
                 }
             }
@@ -98,7 +98,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
         return false
     }
 
-    private fun request(url: String) {
+    private fun request(url: String, type: ImageType) {
         Log.d(TAG, "request URL[$url]")
 
         GlideManager.getBitmapFromUrl(context, url, object : GlideListener {
@@ -106,13 +106,22 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
                 val width = 200
                 val thumb = Bitmap.createScaledBitmap(bitmap, width, (bitmap.height*width)/(bitmap.width), true)
                 Log.d(TAG, "request-onSuccessResource URL[$url]")
-                _images.add(ImageData(id = url.hashCode(), url = url, image = bitmap, thumb = thumb))
+                _images.add(ImageData(id = url.hashCode(), url = url, image = bitmap, thumb = thumb, type = type))
             }
 
             override fun onFailureResource(url: String) {
                 Log.d(TAG, "request-onFailureResource URL[$url]")
             }
         })
+    }
+
+    fun checkedImageDownload() {
+        val list = _images.filter { it.checked }
+        viewModelScope.launch {
+            list.forEach {
+                Utils.imageDownload(context = context, data = it)
+            }
+        }
     }
 
     fun clear() {
