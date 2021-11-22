@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
+import android.util.TypedValue
 import android.widget.Toast
 import com.shining.webhandler.common.data.ImageData
 import java.io.ByteArrayInputStream
@@ -139,5 +140,16 @@ object Utils {
         val bitmapData = bytes.toByteArray()
         return ByteArrayInputStream(bitmapData)
     }
+
+    fun dpToPx(context: Context, dp: Float) : Int
+            = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, context.resources.displayMetrics).toInt()
+
+    fun pxToDp(context: Context, px: Int) : Float =
+        when(val density = context.resources.displayMetrics.density) {
+            1.0f -> px / 4f
+            1.5f -> px / 8f / 3f
+            2.0f -> px / 2f
+            else -> px / density
+        }
 
 }
