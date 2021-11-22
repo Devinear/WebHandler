@@ -13,6 +13,7 @@ import com.shining.webhandler.util.GlideListener
 import com.shining.webhandler.util.GlideManager
 import com.shining.webhandler.util.Utils
 import com.shining.webhandler.view.base.BaseViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
@@ -117,9 +118,12 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
 
     fun checkedImageDownload() {
         val list = _images.filter { it.checked }
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            var index = 0
             list.forEach {
                 Utils.imageDownload(context = context, data = it)
+                index += 1
+                Log.d(TAG, "checkedImageDownload [$index][${list.size}]")
             }
         }
     }
