@@ -13,7 +13,9 @@ import com.shining.webhandler.util.GlideListener
 import com.shining.webhandler.util.GlideManager
 import com.shining.webhandler.util.Utils
 import com.shining.webhandler.view.base.BaseViewModel
+import com.shining.webhandler.view.collection.ProgressListener
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -116,14 +118,24 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
         })
     }
 
-    fun checkedImageDownload() {
+    fun checkedImageDownload(listener: ProgressListener) {
         val list = _images.filter { it.checked }
+        listener.start(max = list.size)
         viewModelScope.launch(Dispatchers.IO) {
-            var index = 0
+            var progress = 0
             list.forEach {
                 Utils.imageDownload(context = context, data = it)
-                index += 1
-                Log.d(TAG, "checkedImageDownload [$index][${list.size}]")
+                progress += 1
+
+                launch(Dispatchers.Main) {
+                    listener.update(current = progress, max = list.size, url = it.url)
+                    Log.d(TAG, "checkedImageDownload [$progress][${list.size}]")
+                }
+            }
+
+            launch(Dispatchers.Main) {
+                delay(1000)
+                listener.complete()
             }
         }
     }

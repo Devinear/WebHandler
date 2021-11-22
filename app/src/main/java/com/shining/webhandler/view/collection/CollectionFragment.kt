@@ -1,5 +1,6 @@
 package com.shining.webhandler.view.collection
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -85,6 +86,27 @@ class CollectionFragment : BaseFragment() {
     }
 
     fun onClickTempAdd() {
-        viewModel.checkedImageDownload()
+        viewModel.checkedImageDownload(object : ProgressListener {
+            override fun start(max: Int) {
+                binding.apply {
+                    laProgress.visibility = View.VISIBLE
+                    progress.max = max
+                }
+            }
+
+            @SuppressLint("SetTextI18n")
+            override fun update(current: Int, max: Int, url: String) {
+                Log.d(TAG, "ImageDownload_update Progress[$current] Max[$max]")
+                binding.apply {
+                    progress.progress = current
+                    tvProgress.text = if(current != max ) "[ $current / $max ]" else "Complete!"
+                    tvProgressUrl.text = url
+                }
+            }
+
+            override fun complete() {
+                binding.laProgress.visibility = View.GONE
+            }
+        })
     }
 }
