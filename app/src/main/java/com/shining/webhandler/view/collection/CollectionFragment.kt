@@ -1,5 +1,8 @@
 package com.shining.webhandler.view.collection
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
@@ -50,6 +53,7 @@ class CollectionFragment : BaseFragment() {
         Log.d(TAG, "initUi")
 
         initRecycler()
+        initProgress()
     }
 
     private fun initRecycler() {
@@ -77,6 +81,13 @@ class CollectionFragment : BaseFragment() {
         }
     }
 
+    private fun initProgress() {
+        binding.laProgress.apply {
+            visibility = View.GONE
+            translationY = -100f // 최초 Show Animation을 위함
+        }
+    }
+
     override fun onBackPressed(): Boolean {
         if(binding.ivDetail.visibility == View.VISIBLE) {
             binding.ivDetail.visibility = View.GONE
@@ -89,8 +100,10 @@ class CollectionFragment : BaseFragment() {
         viewModel.checkedImageDownload(object : ProgressListener {
             override fun start(max: Int) {
                 binding.apply {
-                    laProgress.visibility = View.VISIBLE
+                    showProgress(show = true)
+                    progress.progress = 0
                     progress.max = max
+                    tvProgress.text = "[ 0 / $max ]"
                 }
             }
 
@@ -105,8 +118,31 @@ class CollectionFragment : BaseFragment() {
             }
 
             override fun complete() {
-                binding.laProgress.visibility = View.GONE
+                showProgress(show = false)
             }
         })
     }
+
+    private fun showProgress(show: Boolean = true) {
+        binding.apply {
+            if (show) {
+                laProgress.visibility = View.VISIBLE
+                ObjectAnimator.ofFloat(laProgress, "alpha", 0f, 1f).start()
+                ObjectAnimator.ofFloat(laProgress, "translationY", 0f).start()
+            }
+            else {
+                ObjectAnimator.ofFloat(laProgress, "alpha",1f, 0f)
+                    .apply { start() }
+                    .addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            super.onAnimationEnd(animation)
+                            laProgress.visibility = View.GONE
+                        }
+                    })
+                ObjectAnimator.ofFloat(laProgress, "translationY",-100f).start()
+            }
+        }
+    }
+
+
 }
