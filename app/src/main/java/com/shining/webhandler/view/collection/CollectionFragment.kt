@@ -103,6 +103,10 @@ class CollectionFragment : BaseFragment() {
             visibility = View.GONE
             translationY = 100f // 최초 Show Animation을 위함
         }
+        binding.tbAllNone.setOnCheckedChangeListener { buttonView, isChecked ->
+            (binding.recycler.adapter as CollectionAdapter).checkItems(isChecked)
+            binding.recycler.visibleItemsChecked(isChecked)
+        }
     }
 
     override fun onBackPressed(): Boolean {
@@ -144,6 +148,7 @@ class CollectionFragment : BaseFragment() {
 
             override fun complete() {
                 showProgress(show = false)
+                (binding.recycler.adapter as CollectionAdapter).setCheckMode(checked = false)
             }
         })
     }

@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import android.widget.CheckBox
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 
@@ -42,6 +43,21 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
             return false
         }
         return true
+    }
+
+    fun visibleItemsChecked(check: Boolean) {
+        if (childCount == 0 || !isCheckMode) return
+
+        try {
+            for(i in 0 until childCount) {
+                (getChildAt(i) as CardView).apply {
+                    (getChildAt(1) as CheckBox).isChecked = check
+                    invalidate()
+                }
+            }
+        }
+        catch (e: Exception) {
+        }
     }
 
     override fun drawChild(canvas: Canvas?, child: View?, drawingTime: Long): Boolean {

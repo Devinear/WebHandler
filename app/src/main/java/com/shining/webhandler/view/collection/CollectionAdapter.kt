@@ -90,6 +90,13 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
         isCheckMode = true
     }
 
+    fun checkItems(all : Boolean = true) {
+        currentList.forEach { data ->
+            data.checked = all
+        }
+        checkedCount.postValue( if(all) currentList.size else 0 )
+    }
+
     fun onBackPressed() : Boolean {
         if(isCheckMode) {
             isCheckMode = false
