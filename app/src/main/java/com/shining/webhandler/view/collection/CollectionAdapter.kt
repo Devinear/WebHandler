@@ -1,6 +1,5 @@
 package com.shining.webhandler.view.collection
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -15,7 +14,9 @@ import com.shining.webhandler.view.webview.WebViewViewModel
  * CollectionAdapter.kt
  * WebHandler
  */
-class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener): ListAdapter<ImageData, CollectionAdapter.ViewHolder>(diffUtil) {
+class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, val longListener: ItemLongListener)
+    : ListAdapter<ImageData, CollectionAdapter.ViewHolder>(diffUtil)
+{
 
     companion object {
         const val TAG = "[DE] CollectionAdapter"
@@ -29,6 +30,8 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener): L
         }
     }
 
+    private var isCheckMode = false
+
     init {
         vm.listener = object : ImageDataListener {
             override fun onChanged(sender: List<ImageData>) =
@@ -36,27 +39,43 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener): L
         }
     }
 
-    class ViewHolder(val binding : ItemGridImageBinding, val listener: ItemListener) : RecyclerView.ViewHolder(binding.root) {
+    class ViewHolder(val binding : ItemGridImageBinding,
+                     val listener: ItemListener,
+                     val longListener: ItemLongListener,
+                     val adapter: CollectionAdapter)
+        : RecyclerView.ViewHolder(binding.root)
+    {
         fun bind(data: ImageData, position: Int) {
-            Log.d(TAG, "bind Position[$position] Checked[${data.checked}]")
+//            Log.d(TAG, "bind Position[$position]")
             binding.apply {
                 ivImage.setImageBitmap(data.thumb)
                 ivImage.setOnClickListener {
-                    listener.clickImageItem(data)
+                    if(!adapter.isCheckMode)
+                        listener.clickImageItem(data)
+                    else {
+                        data.checked = !data.checked
+                        ckbChecked.isChecked = data.checked
+                    }
+                }
+                ivImage.setOnLongClickListener {
+                    if(!adapter.isCheckMode) {
+                        data.checked = true
+                        longListener.longClickImageItem(data)
+                    }
+                    true
                 }
                 ckbChecked.isChecked = data.checked
-                ckbChecked.setOnClickListener {
-                    data.checked = !data.checked
-                }
-                // onCheckedChange 실제 동작이 아닌 뷰가 재사용될때에도 호출되어 기존 체크가 해제
-//                ckbChecked.setOnCheckedChangeListener { _, isChecked ->
-//                }
             }
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(ItemGridImageBinding.inflate(LayoutInflater.from(parent.context), parent, false), listener)
+        ViewHolder(
+            ItemGridImageBinding.inflate(LayoutInflater.from(parent.context), parent, false),
+            listener,
+            longListener,
+            this
+        )
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) =
         holder.bind(getItem(position), position)
@@ -66,4 +85,16 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener): L
 
     override fun getItemCount(): Int =
         currentList.size
+
+    fun setCheckMode(checked: Boolean = true) {
+        isCheckMode = true
+    }
+
+    fun onBackPressed() : Boolean {
+        if(isCheckMode) {
+            isCheckMode = false
+            return true
+        }
+        return false
+    }
 }

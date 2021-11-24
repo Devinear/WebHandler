@@ -9,3 +9,6 @@ import com.shining.webhandler.common.data.ImageData
 interface ItemListener {
     fun clickImageItem(data: ImageData)
 }
+interface ItemLongListener {
+    fun longClickImageItem(data: ImageData)
+}

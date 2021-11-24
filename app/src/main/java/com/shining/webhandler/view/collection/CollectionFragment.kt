@@ -63,19 +63,27 @@ class CollectionFragment : BaseFragment() {
                 setOnClickListener { visibility = View.GONE }
             }
             recycler.apply {
-                adapter = CollectionAdapter(viewModel, object : ItemListener {
-                    override fun clickImageItem(data: ImageData) {
-                        laDetail.visibility = View.VISIBLE
-//                        ivDetail.visibility = View.VISIBLE
-                        ivDetail.setImageBitmap(data.image)
+                showCheckMode(show = false)
 
-                        tvWidth.text = "W: ${data.image.width}"
-                        tvHeight.text = "H : ${data.image.height}"
+                adapter = CollectionAdapter(viewModel,
+                    object : ItemListener {
+                        override fun clickImageItem(data: ImageData) {
+                            laDetail.visibility = View.VISIBLE
+//                            ivDetail.visibility = View.VISIBLE
+                            ivDetail.setImageBitmap(data.image)
+
+                            tvWidth.text = "W: ${data.image.width}"
+                            tvHeight.text = "H : ${data.image.height}"
+                        } },
+                    object : ItemLongListener {
+                        override fun longClickImageItem(data: ImageData) {
+                            binding.recycler.showCheckMode()
+                            (binding.recycler.adapter as CollectionAdapter).setCheckMode()
+                        }
+                    }).apply {
+                        setHasStableIds(true)
+                        setHasFixedSize(true)
                     }
-                }).apply {
-                    setHasStableIds(true)
-                    setHasFixedSize(true)
-                }
                 layoutManager = GridLayoutManager(requireActivity(), 3)
             }
         }
@@ -89,6 +97,12 @@ class CollectionFragment : BaseFragment() {
     }
 
     override fun onBackPressed(): Boolean {
+        // Check Mode 확인
+        if((binding.recycler.adapter as CollectionAdapter).onBackPressed()) {
+            binding.recycler.showCheckMode(show = false)
+            return true
+        }
+        // Detail View 확인
         if(binding.ivDetail.visibility == View.VISIBLE) {
             binding.ivDetail.visibility = View.GONE
             return true
