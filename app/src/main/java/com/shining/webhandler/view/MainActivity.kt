@@ -89,7 +89,23 @@ class MainActivity : AppCompatActivity() {
                 }
             })
 
-            isUserInputEnabled = false // 좌우 스와이프 동작
+//            isUserInputEnabled = false // 좌우 스와이프 동작
+        }
+
+        try {
+            // ViewPager2 Swipe 민감도 조절
+            val field = ViewPager2::class.java.getDeclaredField("mRecyclerView")
+            field.isAccessible = true
+
+            val recyclerView = field[binding.viewPager] as RecyclerView
+            val touchSlopField = RecyclerView::class.java.getDeclaredField("mTouchSlop")
+            touchSlopField.isAccessible = true
+
+            val touchSlop = touchSlopField[recyclerView] as Int
+            touchSlopField[recyclerView] = touchSlop * 6 //6 is empirical value
+        }
+        catch (e: Exception) {
+            Log.e(TAG, "TouchSlop Exception [${e.message}]")
         }
     }
 
