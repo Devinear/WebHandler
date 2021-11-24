@@ -10,6 +10,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -31,6 +33,8 @@ class CollectionFragment : BaseFragment() {
                     = WebViewViewModel(requireActivity()) as T
         }
     }
+
+    private val liveCheckedCount = MutableLiveData<Int>()
 
     companion object {
         private const val TAG = "[DE][FR] Collection"
@@ -82,7 +86,7 @@ class CollectionFragment : BaseFragment() {
                             (binding.recycler.adapter as CollectionAdapter).setCheckMode()
                             showDownload()
                         }
-                    }).apply {
+                    }, liveCheckedCount).apply {
                         setHasStableIds(true)
                         setHasFixedSize(true)
                     }
@@ -99,6 +103,7 @@ class CollectionFragment : BaseFragment() {
     }
 
     private fun initDownload() {
+        liveCheckedCount.observe(viewLifecycleOwner, Observer { binding.tvCount.text = getCheckedCountText(it) })
         binding.laDownload.apply {
             visibility = View.GONE
             translationY = 100f // 최초 Show Animation을 위함
@@ -174,9 +179,12 @@ class CollectionFragment : BaseFragment() {
         }
     }
 
+    private fun getCheckedCountText(count: Int, total: Int = binding.recycler.adapter?.itemCount?:0) : String = "[ $count / $total ]"
+
     private fun showDownload(show: Boolean = true) {
         binding.apply {
             if (show) {
+                tvCount.text = getCheckedCountText(0)
                 laDownload.visibility = View.VISIBLE
                 ObjectAnimator.ofFloat(laDownload, "alpha", 0f, 1f).start()
                 ObjectAnimator.ofFloat(laDownload, "translationY", 0f).start()

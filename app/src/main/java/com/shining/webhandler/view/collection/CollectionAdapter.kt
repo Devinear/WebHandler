@@ -2,6 +2,7 @@ package com.shining.webhandler.view.collection
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -14,7 +15,7 @@ import com.shining.webhandler.view.webview.WebViewViewModel
  * CollectionAdapter.kt
  * WebHandler
  */
-class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, val longListener: ItemLongListener)
+class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, val longListener: ItemLongListener, val checkedCount: MutableLiveData<Int>)
     : ListAdapter<ImageData, CollectionAdapter.ViewHolder>(diffUtil)
 {
 
@@ -55,17 +56,29 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
                     else {
                         data.checked = !data.checked
                         ckbChecked.isChecked = data.checked
+                        count(data.checked)
                     }
                 }
                 ivImage.setOnLongClickListener {
                     if(!adapter.isCheckMode) {
-                        data.checked = true
+//                        data.checked = true
                         longListener.longClickImageItem(data)
                     }
                     true
                 }
                 ckbChecked.isChecked = data.checked
             }
+        }
+
+        private fun count(checked: Boolean) {
+            var count = adapter.checkedCount.value?.toInt() ?: 0
+
+            if(checked)
+                count += 1
+            else
+                count -= 1
+
+            adapter.checkedCount.postValue(count)
         }
     }
 
