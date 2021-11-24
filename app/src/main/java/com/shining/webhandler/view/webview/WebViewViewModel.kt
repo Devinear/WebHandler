@@ -109,7 +109,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
                 val width = 200
                 val thumb = Bitmap.createScaledBitmap(bitmap, width, (bitmap.height*width)/(bitmap.width), true)
                 Log.d(TAG, "request-onSuccessResource URL[$url]")
-                _images.add(ImageData(id = url.hashCode(), url = url, image = bitmap, thumb = thumb, type = type))
+                _images.add(ImageData(id = url.hashCode().toUInt(), url = url, image = bitmap, thumb = thumb, type = type))
             }
 
             override fun onFailureResource(url: String) {
@@ -149,7 +149,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
     fun getImageSize() : Int = _images.size
 
     fun tempAdd() {
-        val data = ImageData(id = (Math.random()*1000).toInt(), image = _images[0].image, thumb = _images[0].thumb, type = _images[0].type)
+        val data = ImageData(id = (Math.random()*1000).toUInt(), image = _images[0].image, thumb = _images[0].thumb, type = _images[0].type)
         _images.add(data)
     }
 }
