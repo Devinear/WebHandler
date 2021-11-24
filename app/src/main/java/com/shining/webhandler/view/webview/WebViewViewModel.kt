@@ -101,7 +101,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
         return false
     }
 
-    private fun request(url: String, type: ImageType) {
+    private fun request(url: String, type: ImageType = ImageType.NONE) {
         Log.d(TAG, "request URL[$url]")
 
         GlideManager.getBitmapFromUrl(context, url, object : GlideListener {
