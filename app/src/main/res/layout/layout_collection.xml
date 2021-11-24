@@ -29,6 +29,52 @@
             tools:spanCount="3"
             tools:listitem="@layout/item_grid_image" />
 
+        <LinearLayout
+            android:id="@+id/la_progress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="vertical"
+            android:background="#AA000000"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="parent" >
+
+            <ProgressBar
+                android:id="@+id/progress"
+                style="@style/Widget.MaterialComponents.LinearProgressIndicator"
+                android:progressDrawable="@drawable/progressbar"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_marginBottom="10dp"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:progress="5"
+                tools:max="10" />
+
+            <TextView
+                android:id="@+id/tv_progress_url"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/white"
+                android:singleLine="true"
+                android:ellipsize="middle"
+                android:layout_gravity="center_horizontal"
+                tools:text="image url"/>
+
+            <TextView
+                android:id="@+id/tv_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:textSize="20sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:layout_gravity="center_horizontal"
+                tools:text="[ 5 / 10 ]"/>
+        </LinearLayout>
+
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
