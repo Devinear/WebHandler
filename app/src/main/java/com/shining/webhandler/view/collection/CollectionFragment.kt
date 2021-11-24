@@ -54,6 +54,7 @@ class CollectionFragment : BaseFragment() {
 
         initRecycler()
         initProgress()
+        initDownload()
     }
 
     private fun initRecycler() {
@@ -79,6 +80,7 @@ class CollectionFragment : BaseFragment() {
                         override fun longClickImageItem(data: ImageData) {
                             binding.recycler.showCheckMode()
                             (binding.recycler.adapter as CollectionAdapter).setCheckMode()
+                            showDownload()
                         }
                     }).apply {
                         setHasStableIds(true)
@@ -96,10 +98,18 @@ class CollectionFragment : BaseFragment() {
         }
     }
 
+    private fun initDownload() {
+        binding.laDownload.apply {
+            visibility = View.GONE
+            translationY = 100f // 최초 Show Animation을 위함
+        }
+    }
+
     override fun onBackPressed(): Boolean {
         // Check Mode 확인
         if((binding.recycler.adapter as CollectionAdapter).onBackPressed()) {
             binding.recycler.showCheckMode(show = false)
+            showDownload(show = false)
             return true
         }
         // Detail View 확인
@@ -110,10 +120,11 @@ class CollectionFragment : BaseFragment() {
         return super.onBackPressed()
     }
 
-    fun onClickTempAdd() {
+    fun checkedItemsDownload() {
         viewModel.checkedImageDownload(object : ProgressListener {
             override fun start(max: Int) {
                 binding.apply {
+                    showDownload(show = false)
                     showProgress(show = true)
                     progress.progress = 0
                     progress.max = max
@@ -154,6 +165,27 @@ class CollectionFragment : BaseFragment() {
                         }
                     })
                 ObjectAnimator.ofFloat(laProgress, "translationY",-100f).start()
+            }
+        }
+    }
+
+    private fun showDownload(show: Boolean = true) {
+        binding.apply {
+            if (show) {
+                laDownload.visibility = View.VISIBLE
+                ObjectAnimator.ofFloat(laDownload, "alpha", 0f, 1f).start()
+                ObjectAnimator.ofFloat(laDownload, "translationY", 0f).start()
+            }
+            else {
+                ObjectAnimator.ofFloat(laDownload, "alpha",1f, 0f)
+                    .apply { start() }
+                    .addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            super.onAnimationEnd(animation)
+                            laDownload.visibility = View.GONE
+                        }
+                    })
+                ObjectAnimator.ofFloat(laDownload, "translationY",100f).start()
             }
         }
     }
