@@ -87,13 +87,16 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
 
         // Returns - true if this set did not already contain the specified element
         if(imageUrls.add(url)) {
-            for (type in ImageType.values()) {
-                if (url.endsWith(type.toString(), ignoreCase = true)) {
-                    request(url, type)
-                    return true
-                }
-            }
-            Log.d(TAG, "addUrl image Not Support Type")
+            request(url)
+            return true
+            // 이미지 경로 중에는 확장자로 판단할 수 없는 경우가 많음..
+//            for (type in ImageType.values()) {
+//                if (url.endsWith(type.toString(), ignoreCase = true)) {
+//                    request(url, type)
+//                    return true
+//                }
+//            }
+//            Log.d(TAG, "addUrl image Not Support Type")
         }
         else {
             Log.d(TAG, "addUrl image already contain")
@@ -106,6 +109,11 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
 
         GlideManager.getBitmapFromUrl(context, url, object : GlideListener {
             override fun onSuccessResource(url: String, bitmap: Bitmap) {
+                if((bitmap.width < 1000 && bitmap.height < 1000) && !bitmap.isRecycled) {
+                    bitmap.recycle()
+                    return
+                }
+
                 val width = 200
                 val thumb = Bitmap.createScaledBitmap(bitmap, width, (bitmap.height*width)/(bitmap.width), true)
                 Log.d(TAG, "request-onSuccessResource URL[$url]")
