@@ -132,6 +132,9 @@ class CollectionFragment : BaseFragment() {
         binding.recycler.apply {
             showCheckMode(show = isCheckMode)
             (adapter as CollectionAdapter).isCheckMode = isCheckMode
+            if(!isCheckMode) {
+                (adapter as CollectionAdapter).checkItems(all = false)
+            }
         }
     }
 
