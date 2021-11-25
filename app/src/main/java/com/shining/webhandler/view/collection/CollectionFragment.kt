@@ -167,6 +167,9 @@ class CollectionFragment : BaseFragment() {
             @SuppressLint("SetTextI18n")
             override fun update(current: Int, max: Int, url: String) {
                 Log.d(TAG, "ImageDownload_update Progress[$current] Max[$max]")
+                if(viewModel.isCanceling)
+                    return
+
                 binding.apply {
                     progress.progress = current
                     tvProgress.text = if(current != max ) "[ $current / $max ]" else "Complete!"
@@ -179,6 +182,12 @@ class CollectionFragment : BaseFragment() {
                 startCheckMode(isCheckMode = false)
             }
         }, name = binding.edtName.text.toString())
+    }
+
+    fun cancelDownload() {
+        Log.d(TAG, "cancelDownload")
+        binding.tvProgress.text = "Canceling..."
+        viewModel.cancelDownload()
     }
 
     private fun showProgress(show: Boolean = true) {

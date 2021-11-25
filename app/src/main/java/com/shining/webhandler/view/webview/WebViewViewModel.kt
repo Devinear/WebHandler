@@ -52,6 +52,10 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
 
     var listener : ImageDataListener? = null
 
+    private var isDownloadCancel = false
+    val isCanceling : Boolean
+        get() = isDownloadCancel
+
     init {
         _images.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<ObservableArrayList<ImageData>>() {
             override fun onItemRangeChanged(sender: ObservableArrayList<ImageData>?, positionStart: Int, itemCount: Int) {
@@ -131,22 +135,32 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
         listener.start(max = list.size)
         viewModelScope.launch(Dispatchers.IO) {
             var progress = 0
-            list.forEach {
-                val rename = if(name.isNotEmpty()) "${name}_${getNameCount(progress, _images.size)}" else ""
-                Utils.imageDownload(context = context, data = it, name = rename)
-                progress += 1
+            run {
+                list.forEach {
+                    val rename = if(name.isNotEmpty()) "${name}_${getNameCount(progress, _images.size)}" else ""
+                    Utils.imageDownload(context = context, data = it, name = rename)
+                    progress += 1
 
-                launch(Dispatchers.Main) {
-                    listener.update(current = progress, max = list.size, url = it.url)
-                    Log.d(TAG, "checkedImageDownload [$progress][${list.size}]")
+                    launch(Dispatchers.Main) {
+                        listener.update(current = progress, max = list.size, url = it.url)
+                        Log.d(TAG, "checkedImageDownload [$progress][${list.size}]")
+                    }
+
+                    if(isDownloadCancel) {
+                        return@run
+                    }
                 }
             }
-
             launch(Dispatchers.Main) {
                 delay(1000)
+                isDownloadCancel = false
                 listener.complete()
             }
         }
+    }
+
+    fun cancelDownload() {
+        isDownloadCancel = true
     }
 
     private fun getNameCount(progress: Int, total: Int) : String {
