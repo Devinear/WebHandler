@@ -40,9 +40,9 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
     }
 
     /**
-    * MutableLiveData : 값의 get/set 모두를 할 수 있다.
-    * LiveData : 값의 get()만을 할 수 있다.
-    * */
+     * MutableLiveData : 값의 get/set 모두를 할 수 있다.
+     * LiveData : 값의 get()만을 할 수 있다.
+     * */
 
     private val imageUrls = HashSet<String>()
 
@@ -126,13 +126,14 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
         })
     }
 
-    fun checkedImageDownload(listener: ProgressListener) {
+    fun checkedImageDownload(listener: ProgressListener, name: String = "") {
         val list = _images.filter { it.checked }
         listener.start(max = list.size)
         viewModelScope.launch(Dispatchers.IO) {
             var progress = 0
             list.forEach {
-                Utils.imageDownload(context = context, data = it)
+                val rename = if(name.isNotEmpty()) "${name}_${getNameCount(progress, _images.size)}" else ""
+                Utils.imageDownload(context = context, data = it, name = rename)
                 progress += 1
 
                 launch(Dispatchers.Main) {
@@ -146,6 +147,27 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
                 listener.complete()
             }
         }
+    }
+
+    private fun getNameCount(progress: Int, total: Int) : String {
+        var p = progress
+        var t = total
+
+        var indexT = 0
+        var indexP = 0
+        while (t / 10 > 0) {
+            t /= 10
+            indexT += 1
+        }
+        while (p / 10 > 0) {
+            p /= 10
+            indexP += 1
+        }
+        var result = ""
+        for(i in 1 .. indexT-indexP) {
+            result = "0$result"
+        }
+        return "$result$progress"
     }
 
     fun clear() {

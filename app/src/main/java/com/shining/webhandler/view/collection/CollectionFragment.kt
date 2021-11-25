@@ -164,7 +164,7 @@ class CollectionFragment : BaseFragment() {
                 showProgress(show = false)
                 startCheckMode(isCheckMode = false)
             }
-        })
+        }, name = binding.edtName.text.toString())
     }
 
     private fun showProgress(show: Boolean = true) {

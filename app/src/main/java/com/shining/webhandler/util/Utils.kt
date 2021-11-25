@@ -87,7 +87,7 @@ object Utils {
     suspend fun imageDownload(context: Context, data: ImageData, name: String = "") {
 
         val displayName = if (name.isEmpty()) {
-            "${SimpleDateFormat(DATE_FORMAT_PICTURES).format(Date())}.jpg"
+            "${SimpleDateFormat(DATE_FORMAT_PICTURES).format(Date())}_${data.id}.jpg"
         } else {
             "$name.jpg"
         }
