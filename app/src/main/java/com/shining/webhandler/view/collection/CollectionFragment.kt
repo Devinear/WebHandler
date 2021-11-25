@@ -7,9 +7,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -18,10 +16,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import com.shining.webhandler.common.FlingType
 import com.shining.webhandler.common.data.ImageData
 import com.shining.webhandler.databinding.LayoutCollectionBinding
+import com.shining.webhandler.view.MainActivity
 import com.shining.webhandler.view.base.BaseFragment
 import com.shining.webhandler.view.webview.WebViewViewModel
+import kotlin.math.abs
 
 /**
  * CollectionFragment.kt
@@ -38,6 +39,7 @@ class CollectionFragment : BaseFragment() {
     }
 
     private val liveCheckedCount = MutableLiveData<Int>()
+    private var detailItemPosition = -1
 
     companion object {
         private const val TAG = "[DE][FR] Collection"
@@ -63,24 +65,17 @@ class CollectionFragment : BaseFragment() {
         initRecycler()
         initProgress()
         initDownload()
+        initDetailView()
     }
 
     private fun initRecycler() {
         with(binding) {
-            laDetail/*ivDetail*/.apply {
-                visibility = View.GONE
-                setOnClickListener { visibility = View.GONE }
-            }
+
             recycler.apply {
                 adapter = CollectionAdapter(viewModel,
                     object : ItemListener {
-                        override fun clickImageItem(data: ImageData) {
-                            laDetail.visibility = View.VISIBLE
-//                            ivDetail.visibility = View.VISIBLE
-                            ivDetail.setImageBitmap(data.image)
-
-                            tvWidth.text = "W: ${data.image.width}"
-                            tvHeight.text = "H : ${data.image.height}"
+                        override fun clickImageItem(data: ImageData, position: Int) {
+                            showDetailView(show = true, data = data, position = position)
                         } },
                     object : ItemLongListener {
                         override fun longClickImageItem(data: ImageData) {
@@ -116,6 +111,68 @@ class CollectionFragment : BaseFragment() {
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initDetailView() {
+
+        val gestureDetector = GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
+            override fun onFling(
+                e1: MotionEvent?,
+                e2: MotionEvent?,
+                velocityX: Float,
+                velocityY: Float
+            ): Boolean {
+                val type = when {
+                    ((abs(velocityX) > abs(velocityY)) && velocityX > 0) -> FlingType.START
+                    ((abs(velocityX) > abs(velocityY)) && velocityX < 0) -> FlingType.END
+                    ((abs(velocityX) < abs(velocityY)) && velocityY > 0) -> FlingType.UP
+                    else -> FlingType.DOWN
+                }
+                val position =
+                    if (type == FlingType.START || type == FlingType.UP) detailItemPosition - 1
+                    else detailItemPosition + 1
+                try {
+                    val data = (binding.recycler.adapter as CollectionAdapter).getItemData(position)
+                    showDetailView(show = true, data = data, position = position)
+                }
+                catch (e: Exception) {
+                    Log.e(TAG, "onFling DetailView Position[$position] Exception[${e.message}]")
+                }
+                finally {
+                    Log.d(TAG, "onFling DetailView Type[$type]")
+                }
+                return true
+            }
+        })
+
+        binding.apply {
+            laDetail/*ivDetail*/.apply {
+                visibility = View.GONE
+                setOnClickListener { visibility = View.GONE }
+            }
+            laDetail.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
+        }
+    }
+
+    fun showDetailView(show : Boolean = true, data: ImageData? = null, position: Int = -1) {
+        Log.d(TAG, "showDetailView Show[$show]")
+        detailItemPosition = if(show) position else -1
+
+        binding.apply {
+            laDetail.visibility = if(show) View.VISIBLE else View.GONE
+
+            data?.run {
+                ivDetail.setImageBitmap(data.image)
+                tvPosition.text = "[ $position ]"
+                tvWidth.text = "W: ${data.image.width}"
+                tvHeight.text = "H : ${data.image.height}"
+            }
+        }
+
+        (requireActivity() as MainActivity).enableViewPagerSwipe(enable = !show)
+    }
+
+    fun closeDetailView() = showDetailView(show = false)
+
     override fun onBackPressed(): Boolean {
         // Check Mode 확인
         if((binding.recycler.adapter as CollectionAdapter).onBackPressed()) {
@@ -125,7 +182,7 @@ class CollectionFragment : BaseFragment() {
         }
         // Detail View 확인
         if(binding.laDetail.visibility == View.VISIBLE) {
-            binding.laDetail.visibility = View.GONE
+            showDetailView(show = false)
             return true
         }
         return super.onBackPressed()

@@ -19,3 +19,10 @@ enum class ImageType {
     JPEG,
     GIF
 }
+
+enum class FlingType {
+    UP,
+    DOWN,
+    START,
+    END
+}
