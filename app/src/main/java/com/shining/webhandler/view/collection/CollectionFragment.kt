@@ -120,8 +120,8 @@ class CollectionFragment : BaseFragment() {
             return true
         }
         // Detail View 확인
-        if(binding.ivDetail.visibility == View.VISIBLE) {
-            binding.ivDetail.visibility = View.GONE
+        if(binding.laDetail.visibility == View.VISIBLE) {
+            binding.laDetail.visibility = View.GONE
             return true
         }
         return super.onBackPressed()
