@@ -53,7 +53,7 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
                 ivImage.setImageBitmap(data.thumb)
                 ivImage.setOnClickListener {
                     if(!adapter.isCheckMode || adapter.isPauseMode)
-                        listener.clickImageItem(data)
+                        listener.clickImageItem(data, position)
                     else {
                         data.checked = !data.checked
                         ckbChecked.isChecked = data.checked
@@ -106,6 +106,8 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
         }
         checkedCount.postValue( if(all) currentList.size else 0 )
     }
+
+    fun getItemData(position: Int) : ImageData = getItem(position)
 
     fun onBackPressed() : Boolean {
         if(isCheckMode) {

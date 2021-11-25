@@ -109,6 +109,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun enableViewPagerSwipe(enable: Boolean = true) {
+        Log.d(TAG, "enableViewPagerSwipe Enable[$enable]")
+        binding.viewPager.isUserInputEnabled = enable
+    }
+
     private fun initDrawerUi() {
         // Drawer 비활성화
         binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)

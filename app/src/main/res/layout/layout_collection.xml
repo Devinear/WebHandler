@@ -194,8 +194,9 @@
                 android:layout_height="match_parent"
                 android:scaleType="fitCenter"
                 tools:src="@drawable/ic_launcher_background"/>
+
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp"
@@ -205,6 +206,14 @@
                 android:background="#55000000"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent">
+                <TextView
+                    android:id="@+id/tv_position"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    tools:text="[ 1 ]"/>
                 <TextView
                     android:id="@+id/tv_width"
                     android:layout_width="wrap_content"
@@ -222,6 +231,17 @@
                     android:textSize="15sp"
                     tools:text="H : 1000"/>
             </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/iv_detail_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="20dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/outline_close_24"
+                android:onClick="@{()->fragment.closeDetailView()}"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
