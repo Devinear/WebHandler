@@ -14,21 +14,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.webkit.JavascriptInterface
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.shining.nwebview.NWebListener
 import com.shining.nwebview.utils.WebViewSetting
 import com.shining.webhandler.databinding.LayoutWebviewBinding
 import com.shining.webhandler.util.Utils
 import com.shining.webhandler.view.base.BaseFragment
-import org.jsoup.Jsoup
 
 
 /**
@@ -40,8 +39,12 @@ class WebViewFragment : BaseFragment(), NWebListener {
     private lateinit var binding : LayoutWebviewBinding
 
     // Kotlin 위임(by) 활용, 초기화되는 Activity 또는 Fragment Lifecycle 종속됨
-//    private val viewModel : WebViewViewModel by viewModels()
-    private lateinit var viewModel : WebViewViewModel
+    private val viewModel : WebViewViewModel by activityViewModels {
+        object : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T
+                = WebViewViewModel(requireActivity()) as T
+        }
+    }
 
     private val cUrl = "https://www.naver.com/"
 
@@ -63,10 +66,6 @@ class WebViewFragment : BaseFragment(), NWebListener {
     ): View {
         Log.d(TAG, "onCreateView")
         binding = LayoutWebviewBinding.inflate(layoutInflater, container, false)
-
-        viewModel = ViewModelProvider(this, WebViewViewModelFactory(requireContext()))
-            .get(WebViewViewModel::class.java)
-
         return binding.root
     }
 
@@ -228,6 +227,14 @@ class WebViewFragment : BaseFragment(), NWebListener {
             (activity?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager)
                 .apply { hideSoftInputFromWindow(it.windowToken, 0) }
         }
+    }
+
+    override fun onBackPressed(): Boolean {
+        if(webCanGoBack()) {
+            webGoBack()
+            return true
+        }
+        return super.onBackPressed()
     }
 
     override fun onResume() {
