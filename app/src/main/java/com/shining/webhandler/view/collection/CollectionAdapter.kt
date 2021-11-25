@@ -32,6 +32,7 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
     }
 
     var isCheckMode = false
+    var isPauseMode = false
 
     init {
         vm.listener = object : ImageDataListener {
@@ -51,7 +52,7 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
             binding.apply {
                 ivImage.setImageBitmap(data.thumb)
                 ivImage.setOnClickListener {
-                    if(!adapter.isCheckMode)
+                    if(!adapter.isCheckMode || adapter.isPauseMode)
                         listener.clickImageItem(data)
                     else {
                         data.checked = !data.checked
@@ -60,7 +61,7 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
                     }
                 }
                 ivImage.setOnLongClickListener {
-                    if(!adapter.isCheckMode) {
+                    if(!adapter.isCheckMode && !adapter.isPauseMode) {
 //                        data.checked = true
                         longListener.longClickImageItem(data)
                     }

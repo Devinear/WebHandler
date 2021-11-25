@@ -9,7 +9,7 @@
             type="com.shining.webhandler.view.collection.CollectionFragment" />
         <variable
             name="vm"
-            type="com.shining.webhandler.view.collection.CollectionViewModel" />
+            type="com.shining.webhandler.view.webview.WebViewViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

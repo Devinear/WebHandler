@@ -4,11 +4,14 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
@@ -49,6 +52,7 @@ class CollectionFragment : BaseFragment() {
         Log.d(TAG, "onCreateView")
         binding = LayoutCollectionBinding.inflate(layoutInflater, container, false)
         binding.fragment = this
+        binding.vm = viewModel
         return binding.root
     }
 
@@ -131,14 +135,24 @@ class CollectionFragment : BaseFragment() {
         Log.d(TAG, "startCheckMode isCheckMode[$isCheckMode]")
         binding.recycler.apply {
             showCheckMode(show = isCheckMode)
-            (adapter as CollectionAdapter).isCheckMode = isCheckMode
-            if(!isCheckMode) {
-                (adapter as CollectionAdapter).checkItems(all = false)
+            (adapter as CollectionAdapter).run {
+                this.isCheckMode = isCheckMode
+                if(!isCheckMode) {
+                    checkItems(all = false)
+                }
             }
         }
+        pauseCheckMode(pause = false)
+    }
+
+    fun pauseCheckMode(pause: Boolean = true) {
+        Log.d(TAG, "pauseCheckMode Pause[$pause]")
+        (binding.recycler.adapter as CollectionAdapter).isPauseMode = pause
     }
 
     fun checkedItemsDownload() {
+        hideKeyboard()
+        pauseCheckMode()
         viewModel.checkedImageDownload(object : ProgressListener {
             override fun start(max: Int) {
                 binding.apply {
@@ -212,5 +226,10 @@ class CollectionFragment : BaseFragment() {
         }
     }
 
-
+    private fun Fragment.hideKeyboard() {
+        view?.let {
+            (activity?.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager)
+                .apply { hideSoftInputFromWindow(it.windowToken, 0) }
+        }
+    }
 }
