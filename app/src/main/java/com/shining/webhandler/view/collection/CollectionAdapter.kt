@@ -31,7 +31,7 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
         }
     }
 
-    private var isCheckMode = false
+    var isCheckMode = false
 
     init {
         vm.listener = object : ImageDataListener {
@@ -98,10 +98,6 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
 
     override fun getItemCount(): Int =
         currentList.size
-
-    fun setCheckMode(checked: Boolean = true) {
-        isCheckMode = true
-    }
 
     fun checkItems(all : Boolean = true) {
         currentList.forEach { data ->

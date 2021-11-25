@@ -68,8 +68,6 @@ class CollectionFragment : BaseFragment() {
                 setOnClickListener { visibility = View.GONE }
             }
             recycler.apply {
-                showCheckMode(show = false)
-
                 adapter = CollectionAdapter(viewModel,
                     object : ItemListener {
                         override fun clickImageItem(data: ImageData) {
@@ -82,15 +80,15 @@ class CollectionFragment : BaseFragment() {
                         } },
                     object : ItemLongListener {
                         override fun longClickImageItem(data: ImageData) {
-                            binding.recycler.showCheckMode()
-                            (binding.recycler.adapter as CollectionAdapter).setCheckMode()
+                            startCheckMode()
                             showDownload()
                         }
                     }, liveCheckedCount).apply {
-                        setHasStableIds(true)
-                        setHasFixedSize(true)
-                    }
+                    setHasStableIds(true)
+                    setHasFixedSize(true)
+                }
                 layoutManager = GridLayoutManager(requireActivity(), 3)
+                startCheckMode(isCheckMode = false)
             }
         }
     }
@@ -117,7 +115,7 @@ class CollectionFragment : BaseFragment() {
     override fun onBackPressed(): Boolean {
         // Check Mode 확인
         if((binding.recycler.adapter as CollectionAdapter).onBackPressed()) {
-            binding.recycler.showCheckMode(show = false)
+            startCheckMode(isCheckMode = false)
             showDownload(show = false)
             return true
         }
@@ -127,6 +125,14 @@ class CollectionFragment : BaseFragment() {
             return true
         }
         return super.onBackPressed()
+    }
+
+    fun startCheckMode(isCheckMode: Boolean = true) {
+        Log.d(TAG, "startCheckMode isCheckMode[$isCheckMode]")
+        binding.recycler.apply {
+            showCheckMode(show = isCheckMode)
+            (adapter as CollectionAdapter).isCheckMode = isCheckMode
+        }
     }
 
     fun checkedItemsDownload() {
@@ -153,7 +159,7 @@ class CollectionFragment : BaseFragment() {
 
             override fun complete() {
                 showProgress(show = false)
-                (binding.recycler.adapter as CollectionAdapter).setCheckMode(checked = false)
+                startCheckMode(isCheckMode = false)
             }
         })
     }
