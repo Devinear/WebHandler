@@ -14,9 +14,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
@@ -42,7 +40,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
     private val viewModel : WebViewViewModel by activityViewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T
-                = WebViewViewModel(requireActivity()) as T
+                    = WebViewViewModel(requireActivity()) as T
         }
     }
 
@@ -118,15 +116,21 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
                     // <html></html> 사이에 있는 html 소스를 넘겨준다.
                     // onLoadResource 에서 저장한 image url 과 겹치는 부분이 많이 발생할 것으로 보임.
-                    view?.loadUrl("javascript:window.Android.getHtml(document.getElementsByTagName('html')[0].innerHTML);")
+//                    view?.loadUrl("javascript:window.Android.getHtml(document.getElementsByTagName('html')[0].innerHTML);")
                 }
 
                 override fun onLoadResource(view: WebView?, url: String?) {
                     super.onLoadResource(view, url)
-                    Log.d(TAG, "onLoadResource URL[$url]")
-
                     url ?: return
-                    viewModel.addUrl(url)
+                    Log.d(TAG, "onLoadResource URL[$url]")
+//                    viewModel.addUrl(url)
+                }
+
+                override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
+                    request ?: return null
+                    Log.d(TAG, "shouldInterceptRequest URL[${request.url}]")
+                    viewModel.addUrl(request.url.toString())
+                    return super.shouldInterceptRequest(view, request)
                 }
             }
 

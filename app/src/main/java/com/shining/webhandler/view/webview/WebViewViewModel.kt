@@ -88,19 +88,20 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
 
     fun addUrl(url: String) : Boolean {
         Log.d(TAG, "addUrl URL[$url]")
+        val newUrl = if(url.indexOf('?') >= 0) url.substring(0, url.lastIndexOf('?')) else url
+        Log.d(TAG, "addUrl NEW_URL[$newUrl]")
 
         // Returns - true if this set did not already contain the specified element
-        if(imageUrls.add(url)) {
-            request(url)
-            return true
-            // 이미지 경로 중에는 확장자로 판단할 수 없는 경우가 많음..
-//            for (type in ImageType.values()) {
-//                if (url.endsWith(type.toString(), ignoreCase = true)) {
-//                    request(url, type)
-//                    return true
-//                }
-//            }
-//            Log.d(TAG, "addUrl image Not Support Type")
+        if(imageUrls.add(newUrl)) {
+//            request(url)
+//            return true
+            for (type in ImageType.values()) {
+                if (newUrl.endsWith(type.toString(), ignoreCase = true)) {
+                    request(newUrl, type)
+                    return true
+                }
+            }
+            Log.d(TAG, "addUrl image Not Support Type")
         }
         else {
             Log.d(TAG, "addUrl image already contain")
