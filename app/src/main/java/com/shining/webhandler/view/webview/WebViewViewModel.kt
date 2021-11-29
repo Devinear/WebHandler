@@ -88,24 +88,32 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
 
     fun addUrl(url: String) : Boolean {
         Log.d(TAG, "addUrl URL[$url]")
-        val newUrl = if(url.indexOf('?') >= 0) url.substring(0, url.lastIndexOf('?')) else url
-        Log.d(TAG, "addUrl NEW_URL[$newUrl]")
 
-        // Returns - true if this set did not already contain the specified element
-        if(imageUrls.add(newUrl)) {
-//            request(url)
-//            return true
+        // 중복 검사
+        if(!imageUrls.add(url)) {
+            Log.d(TAG, "addUrl image already contain")
+            return false
+        }
+
+        // URL 1차 검사
+        for (type in ImageType.values()) {
+            if (url.endsWith(type.toString(), ignoreCase = true)) {
+                request(url, type)
+                return true
+            }
+        }
+
+        // URL 2차 검사
+        if(url.indexOf('?') >= 0) {
+            val rightUrl = url.substring(0, url.lastIndexOf('?'))
             for (type in ImageType.values()) {
-                if (newUrl.endsWith(type.toString(), ignoreCase = true)) {
-                    request(newUrl, type)
+                if (rightUrl.endsWith(type.toString(), ignoreCase = true)) {
+                    request(rightUrl, type)
                     return true
                 }
             }
-            Log.d(TAG, "addUrl image Not Support Type")
         }
-        else {
-            Log.d(TAG, "addUrl image already contain")
-        }
+        Log.d(TAG, "addUrl image Not Support Type")
         return false
     }
 
