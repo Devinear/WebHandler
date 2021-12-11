@@ -89,7 +89,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
         } )
     }
 
-    fun addUrl(url: String) : Boolean {
+    fun addUrl(url: String, imgTag: Boolean = false) : Boolean {
         Log.d(TAG, "addUrl URL[$url]")
 
         // 중복 검사

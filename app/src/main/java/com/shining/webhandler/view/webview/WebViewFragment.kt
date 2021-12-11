@@ -108,32 +108,6 @@ class WebViewFragment : BaseFragment(), NWebListener {
             // Build.VERSION.SDK_INT >= 19
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
-
-            webViewClient = object: WebViewClient() {
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    Log.d(TAG, "onPageFinished URL[$url]")
-
-                    // <html></html> 사이에 있는 html 소스를 넘겨준다.
-                    // onLoadResource 에서 저장한 image url 과 겹치는 부분이 많이 발생할 것으로 보임.
-//                    view?.loadUrl("javascript:window.Android.getHtml(document.getElementsByTagName('html')[0].innerHTML);")
-                }
-
-                override fun onLoadResource(view: WebView?, url: String?) {
-                    super.onLoadResource(view, url)
-                    url ?: return
-                    Log.d(TAG, "onLoadResource URL[$url]")
-//                    viewModel.addUrl(url)
-                }
-
-                override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
-                    request ?: return null
-                    Log.d(TAG, "shouldInterceptRequest URL[${request.url}]")
-                    viewModel.addUrl(request.url.toString())
-                    return super.shouldInterceptRequest(view, request)
-                }
-            }
-
             // JavascriptInterface 설정 - name
             addJavascriptInterface(JavascriptInterface(viewModel), "Android")
             overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
@@ -270,20 +244,25 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     fun webGoForward() = binding.webView.goForward()
 
-    override fun onPageStarted(url: String?, favicon: Bitmap?)  = Unit
+    override fun onPageFinished(view: WebView?, url: String?) {
+        Log.e(TAG, "onPageFinished URL[$url]")
 
-    override fun onPageFinished(url: String?)  = Unit
+        // <html></html> 사이에 있는 html 소스를 넘겨준다.
+        // onLoadResource 에서 저장한 image url 과 겹치는 부분이 많이 발생할 것으로 보임.
+//      view?.loadUrl("javascript:window.Android.getHtml(document.getElementsByTagName('img')[10].innerHTML);")
+        view?.loadUrl("javascript:(function(){" +
+                "var objs = document.getElementsByTagName(\"img\");" +
+                "for(var i=0;i<objs.length;i++)" +
+                "{" +
+                "window.Android.getImgSrc(objs[i].src);" +
+                "}" +
+                "})()")
+        // TODO : Finished 기준으로 이미지 재정렬 동작
+    }
 
-    override fun onPageError(errorCode: Int, description: String?, failingUrl: String?)  = Unit
-
-    override fun onDownloadRequested(
-        url: String?,
-        suggestedFilename: String?,
-        mimeType: String?,
-        contentLength: Long,
-        contentDisposition: String?,
-        userAgent: String?
-    )  = Unit
-
-    override fun onExternalPageRequest(url: String?) = Unit
+    override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?) {
+        request ?: return
+        Log.d(TAG, "shouldInterceptRequest URL[${request.url}]")
+        viewModel.addUrl(request.url.toString())
+    }
 }
