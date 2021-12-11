@@ -71,7 +71,10 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
             override fun onItemRangeInserted(sender: ObservableArrayList<ImageData>?, positionStart: Int, itemCount: Int) {
 //                sender ?: return
 //                listener?.onItemRangeInserted(sender, positionStart, itemCount)
-                sender?.run { listener?.onChanged(sender.toList()) }
+                sender?.run {
+                    listener?.onItemRangeInserted(sender, positionStart, itemCount)
+                    listener?.onChanged(sender.toList())
+                }
             }
             override fun onItemRangeMoved(sender: ObservableArrayList<ImageData>?, fromPosition: Int, toPosition: Int, itemCount: Int) {
 //                sender ?: return
@@ -119,10 +122,12 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
 
     private fun request(url: String, type: ImageType = ImageType.NONE) {
         Log.d(TAG, "request URL[$url]")
+        val data = ImageData(id = url.hashCode().toUInt(), url = url, image = null, thumb = null, type = type)
+        _images.add(data)
 
         GlideManager.getBitmapFromUrl(context, url, object : GlideListener {
             override fun onSuccessResource(url: String, bitmap: Bitmap) {
-                if((bitmap.width < 1000 && bitmap.height < 1000) && !bitmap.isRecycled) {
+                if((bitmap.width < 700 && bitmap.height < 700) && !bitmap.isRecycled) {
                     bitmap.recycle()
                     return
                 }
@@ -130,7 +135,9 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
                 val width = 200
                 val thumb = Bitmap.createScaledBitmap(bitmap, width, (bitmap.height*width)/(bitmap.width), true)
                 Log.d(TAG, "request-onSuccessResource URL[$url]")
-                _images.add(ImageData(id = url.hashCode().toUInt(), url = url, image = bitmap, thumb = thumb, type = type))
+                data.thumb = thumb
+                data.image = bitmap
+                data.isUpdate.postValue(true)
             }
 
             override fun onFailureResource(url: String) {

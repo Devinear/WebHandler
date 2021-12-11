@@ -1,7 +1,11 @@
 package com.shining.webhandler.view.collection
 
+import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.databinding.ObservableArrayList
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -10,12 +14,15 @@ import com.shining.webhandler.common.data.ImageData
 import com.shining.webhandler.common.data.ImageDataListener
 import com.shining.webhandler.databinding.ItemGridImageBinding
 import com.shining.webhandler.view.webview.WebViewViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * CollectionAdapter.kt
  * WebHandler
  */
-class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, val longListener: ItemLongListener, val checkedCount: MutableLiveData<Int>)
+class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewModel, val listener: ItemListener, val longListener: ItemLongListener, val checkedCount: MutableLiveData<Int>)
     : ListAdapter<ImageData, CollectionAdapter.ViewHolder>(diffUtil)
 {
 
@@ -36,6 +43,13 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
 
     init {
         vm.listener = object : ImageDataListener {
+            override fun onItemRangeInserted(sender: ObservableArrayList<ImageData>, positionStart: Int, itemCount: Int) {
+                Log.d(TAG, "onItemRangeInserted Position[$positionStart], Count[$itemCount]")
+                CoroutineScope(Dispatchers.Main).launch {
+                    sender[positionStart].isUpdate.observe(lifecycleOwner, { notifyItemChanged(positionStart) })
+                }
+            }
+
             override fun onChanged(sender: List<ImageData>) =
                 submitList(sender)
         }
@@ -95,7 +109,7 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
         holder.bind(getItem(position), position)
 
     override fun getItemId(position: Int): Long =
-        getItem(position).id.toLong()
+        getItem(position)?.id?.toLong() ?: -1L
 
     override fun getItemCount(): Int =
         currentList.size

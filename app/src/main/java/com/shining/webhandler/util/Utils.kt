@@ -106,7 +106,7 @@ object Utils {
             // write something to OutputStream
             FileOutputStream(it!!.fileDescriptor).use { outputStream ->
 //                val imageInputStream = resources.openRawResource(R.raw.my_image)
-                val imageInputStream = getImageInputStream(imageData = data)
+                val imageInputStream = getImageInputStream(imageData = data) ?: return
                 while (true) {
                     val data = imageInputStream.read()
                     if (data == -1) {
@@ -127,9 +127,9 @@ object Utils {
      * @param imageData ImageData
      * @return InputStream from Bitmap
      */
-    private fun getImageInputStream(imageData: ImageData) : InputStream {
+    private fun getImageInputStream(imageData: ImageData) : InputStream? {
         val bytes = ByteArrayOutputStream()
-        val bitmap = imageData.image
+        val bitmap = imageData.image ?: return null
 
 //        val compressType = when (data.type) {
 //            ImageType.PNG -> Bitmap.CompressFormat.PNG

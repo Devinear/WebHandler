@@ -16,6 +16,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import com.shining.webhandler.R
 import com.shining.webhandler.common.FlingType
 import com.shining.webhandler.common.data.ImageData
 import com.shining.webhandler.databinding.LayoutCollectionBinding
@@ -72,7 +73,7 @@ class CollectionFragment : BaseFragment() {
         with(binding) {
 
             recycler.apply {
-                adapter = CollectionAdapter(viewModel,
+                adapter = CollectionAdapter(viewLifecycleOwner, viewModel,
                     object : ItemListener {
                         override fun clickImageItem(data: ImageData, position: Int) {
                             showDetailView(show = true, data = data, position = position)
@@ -161,10 +162,18 @@ class CollectionFragment : BaseFragment() {
             laDetail.visibility = if(show) View.VISIBLE else View.GONE
 
             data?.run {
-                ivDetail.setImageBitmap(data.image)
                 tvPosition.text = "[ $position ]"
-                tvWidth.text = "W: ${data.image.width}"
-                tvHeight.text = "H : ${data.image.height}"
+                if(image != null) {
+                    ivDetail.setImageBitmap(image)
+                    tvWidth.text = "W: ${image!!.width}"
+                    tvHeight.text = "H : ${image!!.height}"
+                }
+                else {
+                    val drawable = context?.getDrawable(R.drawable.ic_launcher_background)
+                    ivDetail.setImageDrawable(drawable)
+                    tvWidth.text = ""
+                    tvHeight.text = ""
+                }
             }
         }
 
