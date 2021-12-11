@@ -18,7 +18,7 @@ import com.bumptech.glide.request.transition.Transition
 object GlideManager {
 
     fun getBitmapFromUrl(context: Context, url: String, listener: GlideListener) {
-        Glide.with(context as Activity)
+        GlideApp.with(context as Activity)
             .asBitmap()
             .load(url)
             .into(object : CustomTarget<Bitmap>() {
@@ -30,7 +30,7 @@ object GlideManager {
     }
 
     fun setImageViewFromUrl(context: Context, url: String, view: ImageView, placeholder: Int, thumbnailSize: Float = 10f) {
-        Glide.with(context as Activity)
+        GlideApp.with(context as Activity)
             .load(url)
             .placeholder(placeholder)
             .thumbnail(thumbnailSize)
@@ -38,7 +38,7 @@ object GlideManager {
     }
 
     fun setImageViewFromBitmap(context: Context, bitmap: Bitmap, view: ImageView, placeholder: Int, thumbnailSize: Float = 10f) {
-        Glide.with(context as Activity)
+        GlideApp.with(context as Activity)
             .load(bitmap)
             .placeholder(placeholder)
             .thumbnail(thumbnailSize)
