@@ -137,6 +137,7 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0)
 
     private fun setListener(listener: NWebListener, requestCodeFilePicker: Int) {
         mListener = listener
+        mNWebViewClient?.mListener = listener
         mRequestCodeFilePicker = requestCodeFilePicker
     }
 
