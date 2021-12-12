@@ -70,8 +70,8 @@ class DashboardFragment : BaseFragment() {
         binding.reFavorite.apply {
             adapter = DashboardAdapter(
                 listener = object : ItemListener<WebData> {
-                    override fun clickImageItem(dataWeb: WebData, position: Int) {
-
+                    override fun clickImageItem(webData: WebData, position: Int) {
+                        (activity as MainActivity).requestWebLoad(url = webData.url)
                     }
                 },
                 sizeListener = object : ItemSizeListener {
@@ -93,8 +93,8 @@ class DashboardFragment : BaseFragment() {
         binding.reRecent.apply {
             adapter = DashboardAdapter(
                 listener = object : ItemListener<WebData> {
-                    override fun clickImageItem(dataWeb: WebData, position: Int) {
-
+                    override fun clickImageItem(webData: WebData, position: Int) {
+                        (activity as MainActivity).requestWebLoad(url = webData.url)
                     }
                 },
                 sizeListener = object : ItemSizeListener {
