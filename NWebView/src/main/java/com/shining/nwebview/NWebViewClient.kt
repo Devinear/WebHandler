@@ -68,11 +68,11 @@ internal class NWebViewClient(private val webView: NWebView) : WebViewClient() {
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         val hasCookie = CookieManager.getInstance().hasCookies()
-        Log.d(TAG, "onPageStarted Cookie[$hasCookie] URL[$url]")
+//        Log.d(TAG, "onPageStarted Cookie[$hasCookie] URL[$url]")
         mLastLoadFailed = false
 
         if (!webView.hasError()) {
-            mListener?.onPageStarted(url, favicon)
+            mListener?.onPageStarted(view, url, favicon)
         }
         mViewClient?.onPageStarted(view, url, favicon) ?: run {
             super.onPageStarted(view, url, favicon)
@@ -80,7 +80,7 @@ internal class NWebViewClient(private val webView: NWebView) : WebViewClient() {
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
-        Log.d(TAG, "onPageFinished URL[$url]")
+//        Log.d(TAG, "onPageFinished URL[$url]")
         try {
             // 앱을 종료 후에도 쿠키값이 저장되어 있어 앱을 재실행시 쿠키를 다시 사용 가능함.
             CookieManager.getInstance().flush()
@@ -93,7 +93,7 @@ internal class NWebViewClient(private val webView: NWebView) : WebViewClient() {
         }
 
         if (!webView.hasError()) {
-            mListener?.onPageFinished(url)
+            mListener?.onPageFinished(view, url)
         }
         mViewClient?.onPageFinished(view, url) ?: run {
             super.onPageFinished(view, url)
@@ -102,7 +102,7 @@ internal class NWebViewClient(private val webView: NWebView) : WebViewClient() {
 
     /** 페이지 내부의 리소스가 로드가 되면서 다수 호출  */
     override fun onLoadResource(view: WebView?, url: String?) {
-        Log.d(TAG, "onLoadResource URL[$url]")
+//        Log.d(TAG, "onLoadResource URL[$url]")
         mViewClient?.onLoadResource(view, url) ?: run {
             super.onLoadResource(view, url)
         }
@@ -110,7 +110,7 @@ internal class NWebViewClient(private val webView: NWebView) : WebViewClient() {
 
     /** 방문한 링크를 업데이트하는 경우 호출 */
     override fun doUpdateVisitedHistory(view: WebView?, url: String?, isReload: Boolean) {
-        Log.d(TAG, "doUpdateVisitedHistory isReload[$isReload] URL[$url]")
+//        Log.d(TAG, "doUpdateVisitedHistory isReload[$isReload] URL[$url]")
         mViewClient?.doUpdateVisitedHistory(view, url, isReload) ?: run {
             super.doUpdateVisitedHistory(view, url, isReload)
         }
@@ -121,14 +121,15 @@ internal class NWebViewClient(private val webView: NWebView) : WebViewClient() {
      * 이 메소드를 활용하여 특정 요청에 대한 필터링 및 응답 값 커스텀 가능
      * */
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
-        Log.d(TAG, "shouldInterceptRequest Request[$request]")
+//        Log.d(TAG, "shouldInterceptRequest Request[${request?.url}]")
+        mListener?.shouldInterceptRequest(view, request)
         return mViewClient?.shouldInterceptRequest(view, request) ?: run {
             super.shouldInterceptRequest(view, request)
         }
     }
 
     override fun onFormResubmission(view: WebView?, dontResend: Message?, resend: Message?) {
-        Log.d(TAG, "onFormResubmission")
+//        Log.d(TAG, "onFormResubmission")
         mViewClient?.onFormResubmission(view, dontResend, resend) ?: run {
             super.onFormResubmission(view, dontResend, resend)
         }
@@ -138,7 +139,7 @@ internal class NWebViewClient(private val webView: NWebView) : WebViewClient() {
      * return true 동작을 WebView에 위임하지 않는다.
      * */
     override fun shouldOverrideKeyEvent(view: WebView?, event: KeyEvent?): Boolean {
-        Log.d(TAG, "shouldOverrideKeyEvent")
+//        Log.d(TAG, "shouldOverrideKeyEvent")
         return mViewClient?.shouldOverrideKeyEvent(view, event) ?: run {
             super.shouldOverrideKeyEvent(view, event)
         }

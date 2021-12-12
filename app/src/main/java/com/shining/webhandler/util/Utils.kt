@@ -106,7 +106,7 @@ object Utils {
             // write something to OutputStream
             FileOutputStream(it!!.fileDescriptor).use { outputStream ->
 //                val imageInputStream = resources.openRawResource(R.raw.my_image)
-                val imageInputStream = getImageInputStream(imageData = data)
+                val imageInputStream = getImageInputStream(imageData = data) ?: return
                 while (true) {
                     val data = imageInputStream.read()
                     if (data == -1) {
@@ -127,9 +127,9 @@ object Utils {
      * @param imageData ImageData
      * @return InputStream from Bitmap
      */
-    private fun getImageInputStream(imageData: ImageData) : InputStream {
+    private fun getImageInputStream(imageData: ImageData) : InputStream? {
         val bytes = ByteArrayOutputStream()
-        val bitmap = imageData.image
+        val bitmap = imageData.image ?: return null
 
 //        val compressType = when (data.type) {
 //            ImageType.PNG -> Bitmap.CompressFormat.PNG
@@ -151,5 +151,27 @@ object Utils {
             2.0f -> px / 2f
             else -> px / density
         }
+
+
+    fun getNameCount(progress: Int, total: Int) : String {
+        var p = progress
+        var t = total
+
+        var indexT = 0
+        var indexP = 0
+        while (t / 10 > 0) {
+            t /= 10
+            indexT += 1
+        }
+        while (p / 10 > 0) {
+            p /= 10
+            indexP += 1
+        }
+        var result = ""
+        for(i in 1 .. indexT-indexP) {
+            result = "0$result"
+        }
+        return "$result$progress"
+    }
 
 }

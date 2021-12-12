@@ -1,7 +1,11 @@
 package com.shining.webhandler.view.collection
 
+import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.databinding.ObservableArrayList
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -10,12 +14,15 @@ import com.shining.webhandler.common.data.ImageData
 import com.shining.webhandler.common.data.ImageDataListener
 import com.shining.webhandler.databinding.ItemGridImageBinding
 import com.shining.webhandler.view.webview.WebViewViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * CollectionAdapter.kt
  * WebHandler
  */
-class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, val longListener: ItemLongListener, val checkedCount: MutableLiveData<Int>)
+class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewModel, val listener: ItemListener, val longListener: ItemLongListener, val checkedCount: MutableLiveData<Int>)
     : ListAdapter<ImageData, CollectionAdapter.ViewHolder>(diffUtil)
 {
 
@@ -36,6 +43,24 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
 
     init {
         vm.listener = object : ImageDataListener {
+            @SuppressLint("NotifyDataSetChanged")
+            override fun onItemRangeInserted(sender: ObservableArrayList<ImageData>, positionStart: Int, itemCount: Int) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    try {
+                        sender[positionStart].index.observe(lifecycleOwner, { index ->
+                            if(index < 0) return@observe
+                            Log.d(TAG, "notifyItemChanged Index[$index]")
+                            notifyItemChanged(index)
+                        })
+                    }
+                    catch (e: Exception) {
+                        Log.e(TAG, "notifyItemChanged Exception[${e.message}]")
+                        notifyDataSetChanged()
+                    }
+
+                }
+            }
+
             override fun onChanged(sender: List<ImageData>) =
                 submitList(sender)
         }
@@ -95,7 +120,7 @@ class CollectionAdapter(val vm: WebViewViewModel, val listener: ItemListener, va
         holder.bind(getItem(position), position)
 
     override fun getItemId(position: Int): Long =
-        getItem(position).id.toLong()
+        getItem(position)?.id?.toLong() ?: -1L
 
     override fun getItemCount(): Int =
         currentList.size

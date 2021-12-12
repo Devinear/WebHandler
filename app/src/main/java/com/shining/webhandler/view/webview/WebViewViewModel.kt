@@ -9,14 +9,16 @@ import androidx.lifecycle.viewModelScope
 import com.shining.webhandler.common.ImageType
 import com.shining.webhandler.common.data.ImageData
 import com.shining.webhandler.common.data.ImageDataListener
-import com.shining.webhandler.util.GlideListener
-import com.shining.webhandler.util.GlideManager
+import com.shining.webhandler.util.glide.GlideListener
+import com.shining.webhandler.util.glide.GlideManager
 import com.shining.webhandler.util.Utils
 import com.shining.webhandler.view.base.BaseViewModel
 import com.shining.webhandler.view.collection.ProgressListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.util.*
+import kotlin.collections.HashSet
 
 /**
  * WebViewViewModel.kt
@@ -59,73 +61,99 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
     init {
         _images.addOnListChangedCallback(object : ObservableList.OnListChangedCallback<ObservableArrayList<ImageData>>() {
             override fun onItemRangeChanged(sender: ObservableArrayList<ImageData>?, positionStart: Int, itemCount: Int) {
-//                sender ?: return
-//                listener?.onItemRangeChanged(sender, positionStart, itemCount)
                 sender?.run { listener?.onChanged(sender.toList()) }
             }
             override fun onChanged(sender: ObservableArrayList<ImageData>?) {
-//                sender ?: return
-//                listener?.onChanged(sender)
                 sender?.run { listener?.onChanged(sender.toList()) }
             }
             override fun onItemRangeInserted(sender: ObservableArrayList<ImageData>?, positionStart: Int, itemCount: Int) {
-//                sender ?: return
-//                listener?.onItemRangeInserted(sender, positionStart, itemCount)
-                sender?.run { listener?.onChanged(sender.toList()) }
+                sender?.run {
+                    listener?.onItemRangeInserted(sender, positionStart, itemCount)
+                    listener?.onChanged(sender.toList())
+                }
             }
             override fun onItemRangeMoved(sender: ObservableArrayList<ImageData>?, fromPosition: Int, toPosition: Int, itemCount: Int) {
-//                sender ?: return
-//                listener?.onItemRangeMoved(sender, fromPosition, toPosition, itemCount)
                 sender?.run { listener?.onChanged(sender.toList()) }
             }
             override fun onItemRangeRemoved(sender: ObservableArrayList<ImageData>?, positionStart: Int, itemCount: Int) {
-//                sender ?: return
-//                listener?.onItemRangeRemoved(sender, positionStart, itemCount)
                 sender?.run { listener?.onChanged(sender.toList()) }
             }
         } )
     }
 
     fun addUrl(url: String) : Boolean {
-        Log.d(TAG, "addUrl URL[$url]")
+//        Log.d(TAG, "addUrl URL[$url]")
 
-        // Returns - true if this set did not already contain the specified element
-        if(imageUrls.add(url)) {
-            request(url)
-            return true
-            // 이미지 경로 중에는 확장자로 판단할 수 없는 경우가 많음..
+        // 중복 검사
+        if(!imageUrls.add(url)) {
+            Log.d(TAG, "addUrl image already contain")
+            return false
+        }
+
+        request(url)
+        return true
+
+//        if(imgTag) {
+//            request(url)
+//            return true
+//        }
+//
+//        // URL 1차 검사
+//        for (type in ImageType.values()) {
+//            if (url.endsWith(type.toString(), ignoreCase = true)) {
+//                request(url, type)
+//                return true
+//            }
+//        }
+//
+//        // URL 2차 검사
+//        if(url.indexOf('?') >= 0) {
+//            val rightUrl = url.substring(0, url.lastIndexOf('?'))
 //            for (type in ImageType.values()) {
-//                if (url.endsWith(type.toString(), ignoreCase = true)) {
-//                    request(url, type)
+//                if (rightUrl.endsWith(type.toString(), ignoreCase = true)) {
+//                    request(rightUrl, type)
 //                    return true
 //                }
 //            }
-//            Log.d(TAG, "addUrl image Not Support Type")
-        }
-        else {
-            Log.d(TAG, "addUrl image already contain")
-        }
-        return false
+//        }
+//        Log.d(TAG, "addUrl image Not Support Type")
+//        return false
     }
 
     private fun request(url: String, type: ImageType = ImageType.NONE) {
-        Log.d(TAG, "request URL[$url]")
+        val data = ImageData(id = url.hashCode().toUInt(), url = url, image = null, thumb = null, type = type)
+        Log.d(TAG, "request ID[${data.id}] URL[$url]")
+        _images.add(data)
 
         GlideManager.getBitmapFromUrl(context, url, object : GlideListener {
             override fun onSuccessResource(url: String, bitmap: Bitmap) {
-                if((bitmap.width < 1000 && bitmap.height < 1000) && !bitmap.isRecycled) {
-                    bitmap.recycle()
+                if(bitmap.width < 700 && bitmap.height < 700) {
+                    if(!bitmap.isRecycled)
+                        bitmap.recycle()
+                    _images.remove(data)
+                    Log.e(TAG, "request-remove ID[${data.id}] Size[${_images.size}]")
                     return
                 }
-
+                // ImageData가 삭제되는 경우 기존의 Position이 달라지기 때문에 Observe 해놓은 경우 잘못된 Position을 Update하는 경우가 발생한다.
+                val position = _images.indexOf(data)
+                Log.d(TAG, "request-success ID[${data.id}] URL[$url] Position[$position] Size[${_images.size}]")
                 val width = 200
-                val thumb = Bitmap.createScaledBitmap(bitmap, width, (bitmap.height*width)/(bitmap.width), true)
-                Log.d(TAG, "request-onSuccessResource URL[$url]")
-                _images.add(ImageData(id = url.hashCode().toUInt(), url = url, image = bitmap, thumb = thumb, type = type))
+                val thumb =try {
+                    Bitmap.createScaledBitmap(bitmap, width, (bitmap.height*width)/(bitmap.width), true)
+                }
+                catch (e: Exception) {
+                    Log.e(TAG, "request-Exception:${e.message}")
+                    null
+                }
+
+                data.thumb = thumb
+                data.image = bitmap
+                data.index.postValue(position)
             }
 
             override fun onFailureResource(url: String) {
-                Log.d(TAG, "request-onFailureResource URL[$url]")
+                Log.e(TAG, "request-failure ID[${data.id}] URL[$url]")
+                _images.remove(data)
             }
         })
     }
@@ -137,7 +165,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
             var progress = 0
             run {
                 list.forEach {
-                    val rename = if(name.isNotEmpty()) "${name}_${getNameCount(progress, _images.size)}" else ""
+                    val rename = if(name.isNotEmpty()) "${name}_${Utils.getNameCount(progress, _images.size)}" else ""
                     Utils.imageDownload(context = context, data = it, name = rename)
                     progress += 1
 
@@ -163,27 +191,6 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
         isDownloadCancel = true
     }
 
-    private fun getNameCount(progress: Int, total: Int) : String {
-        var p = progress
-        var t = total
-
-        var indexT = 0
-        var indexP = 0
-        while (t / 10 > 0) {
-            t /= 10
-            indexT += 1
-        }
-        while (p / 10 > 0) {
-            p /= 10
-            indexP += 1
-        }
-        var result = ""
-        for(i in 1 .. indexT-indexP) {
-            result = "0$result"
-        }
-        return "$result$progress"
-    }
-
     fun clear() {
         Log.d(TAG, "clear")
         imageUrls.clear()
@@ -192,8 +199,4 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
 
     fun getImageSize() : Int = _images.size
 
-    fun tempAdd() {
-        val data = ImageData(id = (Math.random()*1000).toUInt(), image = _images[0].image, thumb = _images[0].thumb, type = _images[0].type)
-        _images.add(data)
-    }
 }

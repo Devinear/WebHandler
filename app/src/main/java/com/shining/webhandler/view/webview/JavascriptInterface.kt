@@ -23,4 +23,13 @@ class JavascriptInterface(private val viewModel: WebViewViewModel) {
             viewModel.addUrl(src)
         }
     }
+
+    @JavascriptInterface
+    fun getImgSrc(url: String) {
+
+        // Img SRC
+        if(url.startsWith("http")) {
+            viewModel.addUrl(url)
+        }
+    }
 }

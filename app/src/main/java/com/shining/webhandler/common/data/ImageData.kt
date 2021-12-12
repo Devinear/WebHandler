@@ -1,6 +1,7 @@
 package com.shining.webhandler.common.data
 
 import android.graphics.Bitmap
+import androidx.lifecycle.MutableLiveData
 import com.shining.webhandler.common.ImageType
 
 /**
@@ -9,9 +10,10 @@ import com.shining.webhandler.common.ImageType
  */
 data class ImageData(
     val id: UInt,
-    val thumb: Bitmap? = null,
-    val image: Bitmap,
+    var thumb: Bitmap? = null,
+    var image: Bitmap? = null,
     val url: String = "",
     val type: ImageType,
-    var checked: Boolean = false
+    var checked: Boolean = false,
+    var index: MutableLiveData<Int> = MutableLiveData(-1)
 )
