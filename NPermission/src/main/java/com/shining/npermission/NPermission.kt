@@ -1,18 +1,20 @@
 package com.shining.npermission
 
+import android.content.Context
+
 /**
  * NPermission.kt
  * WebHandler
  */
 object NPermission {
 
-    fun create(): NBuilder {
-        return NBuilder()
+    fun create(context: Context): NBuilder {
+        return NBuilder(context)
     }
 
-    class NBuilder : PermissionBuilder<NBuilder>() {
+    class NBuilder(val context: Context) : PermissionBuilder<NBuilder>() {
         fun check() {
-            checkPermissions()
+            checkPermissions(context)
         }
     }
 }

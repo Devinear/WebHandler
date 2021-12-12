@@ -1,5 +1,6 @@
 package com.shining.npermission
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -24,16 +25,18 @@ class PermissionActivity : AppCompatActivity() {
     private var denyTitle: String? = null
     private var denyMessage: String? = null
     private var denyCloseText: String? = null
-    private val context = App.getContext()
 
     var isShownRationaleDialog = false
 
     companion object {
         const val REQ_CODE_PERMISSION_REQUEST = 10
 
+        @SuppressLint("StaticFieldLeak")
+        lateinit var context: Context
         var listener : PermissionListener? = null
         fun startActivity(context: Context, intent: Intent, listener: PermissionListener) {
             this.listener = listener
+            this.context = context
             context.startActivity(intent)
         }
     }

@@ -9,8 +9,6 @@ import android.content.Intent
  */
 abstract class PermissionBuilder<T> {
 
-    private val context : Context = App.getContext()
-
     private var listener : PermissionListener? = null
     private var permissions : Array<String>? = null
     private var rationaleTitle : String? = null
@@ -20,7 +18,7 @@ abstract class PermissionBuilder<T> {
     private var denyMessage: String? = null
     private var denyCloseText: String? = null
 
-    protected fun checkPermissions() {
+    protected fun checkPermissions(context: Context) {
         requireNotNull(listener) { "You must setPermissionListener() on Permission" }
         if(permissions?.isEmpty() == true) {
             listener!!.onPermissionGranted()
