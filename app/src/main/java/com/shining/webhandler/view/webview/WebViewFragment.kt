@@ -32,6 +32,7 @@ import com.shining.webhandler.util.Utils
 import com.shining.webhandler.view.common.base.BaseFragment
 import com.shining.webhandler.view.dashboard.FavoriteViewModel
 import com.shining.webhandler.view.dashboard.RecentViewModel
+import java.net.URLEncoder
 import java.util.*
 
 
@@ -250,6 +251,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
     }
 
     private fun executeWebLoad(url : String = requestUrl) {
+        Log.d(TAG, "executeWebLoad [$url]")
         isUpdate = false
         requestUrl = url
         binding.webView.loadUrl(requestUrl)
@@ -272,6 +274,16 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     fun webGoForward() = binding.webView.goForward()
 
+    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        Log.e(TAG, "onPageStarted URL[$url]")
+
+        url ?: return
+        webData = recent.addWebData(data = WebData(id = url.hashCode().toUInt(), url = url, time = Date().time, icon = favicon))
+
+        val favorite = favorite.isContain(id = webData!!.id)
+        binding.ibFavorite.setImageDrawable(resources.getDrawable(if(favorite) R.drawable.outline_favorite_24 else R.drawable.outline_favorite_border_24))
+    }
+
     override fun onPageFinished(view: WebView?, url: String?) {
         Log.e(TAG, "onPageFinished URL[$url]")
 
@@ -285,12 +297,6 @@ class WebViewFragment : BaseFragment(), NWebListener {
 //                "window.Android.getImgSrc(objs[i].src);" +
 //                "}" +
 //                "})()")
-
-        url ?: return
-        webData = recent.addWebData(data = WebData(id = url.hashCode().toUInt(), url = url, time = Date().time))
-
-        val favorite = favorite.isContain(id = webData!!.id)
-        binding.ibFavorite.setImageDrawable(resources.getDrawable(if(favorite) R.drawable.outline_favorite_24 else R.drawable.outline_favorite_border_24))
     }
 
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?) {
@@ -322,8 +328,9 @@ class WebViewFragment : BaseFragment(), NWebListener {
         var search = binding.edtInput.text.toString()
         if (search.isEmpty()) return
 
-        if(!search.startsWith("http"))
-            search = "${Constants.GOOGLE_WEB}$search"
+        if(!search.startsWith("http")) {
+            search = "${Constants.GOOGLE_WEB}${URLEncoder.encode(search, "UTF-8")}"
+        }
         executeWebLoad(search)
 
         binding.edtInput.text?.clear()

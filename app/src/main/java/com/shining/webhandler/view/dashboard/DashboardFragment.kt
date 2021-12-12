@@ -18,6 +18,7 @@ import com.shining.webhandler.common.Constants
 import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.view.MainActivity
 import com.shining.webhandler.view.collection.ItemSizeListener
+import java.net.URLEncoder
 
 /**
  * DashboardFragment.kt
@@ -112,8 +113,9 @@ class DashboardFragment : BaseFragment() {
 
     fun onClickSearch() {
         var search = binding.edtInput.text.toString()
-        if(!search.startsWith("http"))
-           search = "${Constants.GOOGLE_WEB}$search"
+        if(!search.startsWith("http")) {
+            search = "${Constants.GOOGLE_WEB}${URLEncoder.encode(search, "UTF-8")}"
+        }
         Log.d(TAG, "onClickSearch [$search]")
         binding.edtInput.text?.clear()
         binding.edtInput.clearFocus()
