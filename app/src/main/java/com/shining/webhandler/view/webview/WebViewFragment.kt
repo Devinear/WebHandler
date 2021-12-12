@@ -234,6 +234,8 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     override fun onPause() {
         Log.d(TAG, "onPause")
+        hideKeyboard()
+        showInputEdit(false)
         binding.webView.onPause()
         super.onPause()
     }
