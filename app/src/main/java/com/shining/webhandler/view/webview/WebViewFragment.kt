@@ -249,20 +249,23 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
         // <html></html> 사이에 있는 html 소스를 넘겨준다.
         // onLoadResource 에서 저장한 image url 과 겹치는 부분이 많이 발생할 것으로 보임.
-//      view?.loadUrl("javascript:window.Android.getHtml(document.getElementsByTagName('img')[10].innerHTML);")
-        view?.loadUrl("javascript:(function(){" +
-                "var objs = document.getElementsByTagName(\"img\");" +
-                "for(var i=0;i<objs.length;i++)" +
-                "{" +
-                "window.Android.getImgSrc(objs[i].src);" +
-                "}" +
-                "})()")
+//        view?.loadUrl("javascript:window.Android.getHtml(document.getElementsByTagName('img')[10].innerHTML);")
+//        view?.loadUrl("javascript:(function(){" +
+//                "var objs = document.getElementsByTagName(\"img\");" +
+//                "for(var i=0;i<objs.length;i++)" +
+//                "{" +
+//                "window.Android.getImgSrc(objs[i].src);" +
+//                "}" +
+//                "})()")
         // TODO : Finished 기준으로 이미지 재정렬 동작
     }
 
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?) {
         request ?: return
-        Log.d(TAG, "shouldInterceptRequest URL[${request.url}]")
-        viewModel.addUrl(request.url.toString())
+        val accept = request.requestHeaders["Accept"]
+            Log.d(TAG, "shouldInterceptRequest ACCEPT[$accept] URL[${request.url}]")
+        if(accept?.contains("image", ignoreCase = false) == true) {
+            viewModel.addUrl(request.url.toString())
+        }
     }
 }

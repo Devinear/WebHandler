@@ -20,7 +20,7 @@ class JavascriptInterface(private val viewModel: WebViewViewModel) {
             val src = img.attr("src")
             src ?: continue
 
-            viewModel.addUrl(src, true)
+            viewModel.addUrl(src)
         }
     }
 
@@ -29,7 +29,7 @@ class JavascriptInterface(private val viewModel: WebViewViewModel) {
 
         // Img SRC
         if(url.startsWith("http")) {
-            viewModel.addUrl(url, true)
+            viewModel.addUrl(url)
         }
     }
 }

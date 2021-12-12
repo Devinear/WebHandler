@@ -1,4 +1,4 @@
-package com.shining.webhandler.util
+package com.shining.webhandler.util.glide
 
 
 import android.app.Activity
@@ -6,10 +6,9 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
-import androidx.constraintlayout.widget.Placeholder
-import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.shining.webhandler.util.GlideApp
 
 /**
  * GlideManager.kt
@@ -25,6 +24,8 @@ object GlideManager {
                 override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?)
                         = listener.onSuccessResource(url = url, bitmap = resource)
                 override fun onLoadCleared(placeholder: Drawable?)
+                        = listener.onFailureResource(url = url)
+                override fun onLoadFailed(errorDrawable: Drawable?)
                         = listener.onFailureResource(url = url)
             })
     }

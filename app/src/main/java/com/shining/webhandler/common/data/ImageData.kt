@@ -15,5 +15,5 @@ data class ImageData(
     val url: String = "",
     val type: ImageType,
     var checked: Boolean = false,
-    var isUpdate: MutableLiveData<Boolean> = MutableLiveData(false)
+    var index: MutableLiveData<Int> = MutableLiveData(-1)
 )

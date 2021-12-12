@@ -1,4 +1,4 @@
-package com.shining.webhandler.util
+package com.shining.webhandler.util.glide
 
 import android.graphics.Bitmap
 

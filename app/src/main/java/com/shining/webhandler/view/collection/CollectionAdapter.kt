@@ -1,6 +1,6 @@
 package com.shining.webhandler.view.collection
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -43,10 +43,21 @@ class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewM
 
     init {
         vm.listener = object : ImageDataListener {
+            @SuppressLint("NotifyDataSetChanged")
             override fun onItemRangeInserted(sender: ObservableArrayList<ImageData>, positionStart: Int, itemCount: Int) {
-                Log.d(TAG, "onItemRangeInserted Position[$positionStart], Count[$itemCount]")
                 CoroutineScope(Dispatchers.Main).launch {
-                    sender[positionStart].isUpdate.observe(lifecycleOwner, { notifyItemChanged(positionStart) })
+                    try {
+                        sender[positionStart].index.observe(lifecycleOwner, { index ->
+                            if(index < 0) return@observe
+                            Log.d(TAG, "notifyItemChanged Index[$index]")
+                            notifyItemChanged(index)
+                        })
+                    }
+                    catch (e: Exception) {
+                        Log.e(TAG, "notifyItemChanged Exception[${e.message}]")
+                        notifyDataSetChanged()
+                    }
+
                 }
             }
 

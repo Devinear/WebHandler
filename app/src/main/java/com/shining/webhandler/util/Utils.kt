@@ -152,4 +152,26 @@ object Utils {
             else -> px / density
         }
 
+
+    fun getNameCount(progress: Int, total: Int) : String {
+        var p = progress
+        var t = total
+
+        var indexT = 0
+        var indexP = 0
+        while (t / 10 > 0) {
+            t /= 10
+            indexT += 1
+        }
+        while (p / 10 > 0) {
+            p /= 10
+            indexP += 1
+        }
+        var result = ""
+        for(i in 1 .. indexT-indexP) {
+            result = "0$result"
+        }
+        return "$result$progress"
+    }
+
 }
