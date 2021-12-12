@@ -42,6 +42,12 @@ class WebViewFragment : BaseFragment(), NWebListener {
                     = WebViewViewModel(requireActivity()) as T
         }
     }
+    private var webData : WebData? = null
+    private val favorite : FavoriteViewModel by activityViewModels()
+    private val recent : RecentViewModel by activityViewModels()
+
+    private var isUpdate = false
+    private var requestUrl : String = ""
 
     private val cUrl = "https://www.naver.com/"
 
@@ -72,11 +78,11 @@ class WebViewFragment : BaseFragment(), NWebListener {
         Log.d(TAG, "initUi")
 
         binding.webView.settings.apply {
-            builtInZoomControls = true                      // 화면 줌 동작
+            builtInZoomControls = false                     // 화면 줌 동작
             displayZoomControls = false                     // 화면 줌 동작시, WebView 에서 줌 컨트롤 표시
             domStorageEnabled = true                        // 내부저장소
-            allowFileAccess = false                         // File 엑세스
-            allowContentAccess = false
+            allowFileAccess = true                          // File 엑세스
+            allowContentAccess = true
             javaScriptCanOpenWindowsAutomatically = true    // JS 에서 새창 실행
             javaScriptEnabled = true                        // JS 허용여부
             setSupportMultipleWindows(false)                // 새창 허용여부 - false : 현재 창에 로드
@@ -99,16 +105,11 @@ class WebViewFragment : BaseFragment(), NWebListener {
             setListener(this@WebViewFragment, this@WebViewFragment)
             addHttpHeader("X-Requested-With", "")
 
-//            loadUrl("https://topegirl.com/watch/dakota-pink-nude-seduce-120-photos.html")
-            loadUrl("https://xhwebsite.com/photos/gallery/the-beauty-of-blonde-1427226")
-//            loadUrl(urlTest)
-//            loadUrl("file:///android_asset/WebDeDeTest.html")
-
             // Build.VERSION.SDK_INT >= 19
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
             // JavascriptInterface 설정 - name
-            addJavascriptInterface(JavascriptInterface(viewModel), "Android")
+//            addJavascriptInterface(JavascriptInterface(viewModel), "Android")
             overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
         }
 
@@ -163,6 +164,8 @@ class WebViewFragment : BaseFragment(), NWebListener {
                 showInputEdit()
             }
         }
+        // TODO : 검색창 외부를 클릭시 창이 닫히도록
+        // TODO : 검색창 UI 변경
     }
 
     private fun showInputEdit(show: Boolean = true) {
@@ -215,9 +218,19 @@ class WebViewFragment : BaseFragment(), NWebListener {
     }
 
     override fun onResume() {
-        Log.d(TAG, "onResume")
+        Log.d(TAG, "onResume URL[$requestUrl]")
         super.onResume()
-        binding.webView.onResume()
+        binding.webView.apply {
+            onResume()
+
+            if(isUpdate) {
+                loadUrl(requestUrl)
+                isUpdate = false
+
+                webData = WebData(id = requestUrl.hashCode().toUInt(), url = requestUrl, time = Date().time)
+                recent.addWebData(data = webData!!)
+            }
+        }
     }
 
     override fun onPause() {
@@ -230,6 +243,12 @@ class WebViewFragment : BaseFragment(), NWebListener {
         Log.d(TAG, "onDestroy")
         binding.webView.onDestroy()
         super.onDestroy()
+    }
+
+    fun webLoad(url: String) {
+        Log.d(TAG, "webLoad [$url]")
+        isUpdate = true
+        this.requestUrl = url
     }
 
     fun onWebViewResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -256,15 +275,23 @@ class WebViewFragment : BaseFragment(), NWebListener {
 //                "window.Android.getImgSrc(objs[i].src);" +
 //                "}" +
 //                "})()")
-        // TODO : Finished 기준으로 이미지 재정렬 동작
     }
 
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?) {
         request ?: return
         val accept = request.requestHeaders["Accept"]
-            Log.d(TAG, "shouldInterceptRequest ACCEPT[$accept] URL[${request.url}]")
+//        Log.d(TAG, "shouldInterceptRequest ACCEPT[$accept] URL[${request.url}]")
+
         if(accept?.contains("image", ignoreCase = false) == true) {
             viewModel.addUrl(request.url.toString())
         }
+    }
+
+    override fun onReceivedIcon(view: WebView, icon: Bitmap) {
+        webData?.icon = icon
+    }
+
+    override fun onReceivedTitle(view: WebView, title: String) {
+        webData?.title = title
     }
 }

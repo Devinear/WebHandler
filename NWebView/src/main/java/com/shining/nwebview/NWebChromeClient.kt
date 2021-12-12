@@ -25,6 +25,8 @@ import android.view.WindowManager
 
 internal class NWebChromeClient(private val context: Context, private val webView: NWebView) : WebChromeClient() {
 
+    var mListener : NWebListener? = null
+
     private var mActivity = context as Activity
     private var mCustomView: View? = null
     private var mCustomViewCallback: CustomViewCallback? = null
@@ -316,6 +318,7 @@ internal class NWebChromeClient(private val context: Context, private val webVie
      * 파비콘이 들어올 경우 호출 */
     override fun onReceivedIcon(view: WebView, icon: Bitmap) {
         Log.d(TAG, "onReceivedIcon")
+        mListener?.onReceivedIcon(view, icon)
         mChromeClient?.onReceivedIcon(view, icon) ?: run {
             super.onReceivedIcon(view, icon)
         }
@@ -325,6 +328,7 @@ internal class NWebChromeClient(private val context: Context, private val webVie
      * 타이틀이 있는 경우 호출. 네비게이션에 타이틀 넣을때 */
     override fun onReceivedTitle(view: WebView, title: String) {
         Log.d(TAG, "onReceivedTitle Title[$title]")
+        mListener?.onReceivedTitle(view, title)
         mChromeClient?.onReceivedTitle(view, title) ?: run {
             super.onReceivedTitle(view, title)
         }

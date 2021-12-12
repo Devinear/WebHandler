@@ -212,6 +212,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun requestWebLoad(url: String) {
+        WebViewFragment.INSTANCE.webLoad(url = url)
+        requestFragment(FragmentType.WebView)
+    }
+
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         // WebView BackKey
 //        if(keyCode == KeyEvent.KEYCODE_BACK &&

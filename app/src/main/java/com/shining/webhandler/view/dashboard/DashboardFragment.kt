@@ -12,8 +12,11 @@ import com.shining.webhandler.view.collection.ItemListener
 import android.text.Editable
 
 import android.text.TextWatcher
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.shining.webhandler.common.Constants
 import com.shining.webhandler.common.data.WebData
+import com.shining.webhandler.view.MainActivity
 import com.shining.webhandler.view.collection.ItemSizeListener
 
 /**
@@ -23,8 +26,8 @@ import com.shining.webhandler.view.collection.ItemSizeListener
 class DashboardFragment : BaseFragment() {
 
     private lateinit var binding : LayoutDashboardBinding
-    private val favoriteViewModel: FavoriteViewModel by viewModels()
-    private val recentViewModel: RecentViewModel by viewModels()
+    private val favoriteViewModel: FavoriteViewModel by activityViewModels()
+    private val recentViewModel: RecentViewModel by activityViewModels()
 
     companion object {
         private const val TAG = "[DE][FR] Dashboard"
@@ -108,10 +111,18 @@ class DashboardFragment : BaseFragment() {
     }
 
     fun onClickSearch() {
-        val search = binding.edtInput.text.toString()
+        var search = binding.edtInput.text.toString()
+        if(!search.startsWith("http"))
+           search = "${Constants.GOOGLE_WEB}$search"
         Log.d(TAG, "onClickSearch [$search]")
         binding.edtInput.text?.clear()
         binding.edtInput.clearFocus()
-        recentViewModel.addWebData(WebData(id = search.hashCode().toUInt(), url = search))
+
+        (activity as MainActivity).requestWebLoad(url = search)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume")
     }
 }

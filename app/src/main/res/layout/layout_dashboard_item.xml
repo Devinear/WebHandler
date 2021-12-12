@@ -18,7 +18,7 @@
             android:layout_margin="6dp"
             android:adjustViewBounds="true"
             android:scaleType="fitCenter"
-            android:background="@drawable/outline_image_24"
+            android:src="@drawable/outline_image_24"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -28,7 +28,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:textColor="@color/black"
             android:textStyle="bold"
             android:singleLine="true"
             android:ellipsize="middle"
