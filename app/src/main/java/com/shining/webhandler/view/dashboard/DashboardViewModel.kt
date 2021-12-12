@@ -1,5 +1,6 @@
 package com.shining.webhandler.view.dashboard
 
+import android.util.Log
 import androidx.databinding.ObservableArrayList
 import androidx.databinding.ObservableList
 import com.shining.webhandler.common.data.WebData
@@ -42,13 +43,21 @@ open class DashboardViewModel : BaseViewModel() {
         } )
     }
 
-    fun addWebData(data: WebData) : Boolean {
+    fun addWebData(data: WebData) : WebData {
+        Log.d(TAG, "addWebData ID[${data.id}]")
         _webs.forEach { webData ->
-            if(webData.url == data.url)
-                return false
+            if(webData.id == data.id)
+                return webData
         }
         _webs.add(data)
-        return true
+        return data
+    }
+
+    fun isContain(id: UInt) : Boolean {
+        _webs.forEach { webData ->
+            if(webData.id == id) return true
+        }
+        return false
     }
 
     fun removeWebData(data: WebData) : Boolean {

@@ -213,7 +213,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun requestWebLoad(url: String) {
-        WebViewFragment.INSTANCE.webLoad(url = url)
+        WebViewFragment.INSTANCE.requestWebLoad(url = url)
         requestFragment(FragmentType.WebView)
     }
 

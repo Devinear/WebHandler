@@ -17,7 +17,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.webkit.*
-import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -25,12 +24,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.shining.nwebview.NWebListener
 import com.shining.nwebview.utils.WebViewSetting
+import com.shining.webhandler.R
 import com.shining.webhandler.common.Constants
 import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.databinding.LayoutWebviewBinding
 import com.shining.webhandler.util.Utils
 import com.shining.webhandler.view.common.base.BaseFragment
-import com.shining.webhandler.view.dashboard.DashboardFragment
 import com.shining.webhandler.view.dashboard.FavoriteViewModel
 import com.shining.webhandler.view.dashboard.RecentViewModel
 import java.util.*
@@ -148,7 +147,8 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     private fun initInput() {
         binding.apply {
-            binding.ibSearch.isEnabled = false
+            ibSearch.isEnabled = false
+            ibFavorite.setImageDrawable(resources.getDrawable(R.drawable.outline_favorite_border_24))
             layoutInput.visibility = View.INVISIBLE
             layoutInput.translationY = 100f
             edtInput.addTextChangedListener(object : TextWatcher {
@@ -226,11 +226,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
             onResume()
 
             if(isUpdate) {
-                loadUrl(requestUrl)
-                isUpdate = false
-
-//                webData = WebData(id = requestUrl.hashCode().toUInt(), url = requestUrl, time = Date().time)
-//                recent.addWebData(data = webData!!)
+                executeWebLoad()
             }
         }
     }
@@ -247,10 +243,22 @@ class WebViewFragment : BaseFragment(), NWebListener {
         super.onDestroy()
     }
 
-    fun webLoad(url: String) {
+    fun requestWebLoad(url: String) {
         Log.d(TAG, "webLoad [$url]")
         isUpdate = true
         this.requestUrl = url
+    }
+
+    private fun executeWebLoad(url : String = requestUrl) {
+        isUpdate = false
+        requestUrl = url
+        binding.webView.loadUrl(requestUrl)
+
+        webData = recent.addWebData(data = WebData(id = requestUrl.hashCode().toUInt(), url = requestUrl, time = Date().time))
+
+        val favorite = favorite.isContain(id = webData!!.id)
+        binding.ibFavorite.setImageDrawable(resources.getDrawable(if(favorite) R.drawable.outline_favorite_24 else R.drawable.outline_favorite_border_24))
+
     }
 
     fun onWebViewResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -280,6 +288,9 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
         url ?: return
         webData = recent.addWebData(data = WebData(id = url.hashCode().toUInt(), url = url, time = Date().time))
+
+        val favorite = favorite.isContain(id = webData!!.id)
+        binding.ibFavorite.setImageDrawable(resources.getDrawable(if(favorite) R.drawable.outline_favorite_24 else R.drawable.outline_favorite_border_24))
     }
 
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?) {
@@ -293,10 +304,12 @@ class WebViewFragment : BaseFragment(), NWebListener {
     }
 
     override fun onReceivedIcon(view: WebView, icon: Bitmap) {
+        Log.d(TAG, "onReceivedIcon")
         webData?.icon = icon
     }
 
     override fun onReceivedTitle(view: WebView, title: String) {
+        Log.d(TAG, "onReceivedTitle Title[$title]")
         webData?.title = title
     }
 
@@ -311,13 +324,23 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
         if(!search.startsWith("http"))
             search = "${Constants.GOOGLE_WEB}$search"
-        Log.d(TAG, "onClickSearch [$search]")
-        binding.webView.loadUrl(search)
+        executeWebLoad(search)
 
         binding.edtInput.text?.clear()
         binding.edtInput.clearFocus()
 
         hideKeyboard()
         showInputEdit(show = false)
+    }
+
+    fun onClickFavorite() {
+        webData ?: return
+
+        val isFavorite = favorite.isContain(id = webData!!.id)
+        binding.ibFavorite.setImageDrawable(resources.getDrawable(if(isFavorite) R.drawable.outline_favorite_border_24 else R.drawable.outline_favorite_24))
+
+        if(!isFavorite) {
+            favorite.addWebData(webData!!)
+        }
     }
 }
