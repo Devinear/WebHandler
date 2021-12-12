@@ -7,6 +7,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -22,9 +23,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.shining.nwebview.NWebListener
 import com.shining.nwebview.utils.WebViewSetting
+import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.databinding.LayoutWebviewBinding
 import com.shining.webhandler.util.Utils
 import com.shining.webhandler.view.common.base.BaseFragment
+import com.shining.webhandler.view.dashboard.FavoriteViewModel
+import com.shining.webhandler.view.dashboard.RecentViewModel
+import java.util.*
 
 
 /**
