@@ -8,12 +8,12 @@ import androidx.databinding.ObservableList
 import androidx.lifecycle.viewModelScope
 import com.shining.webhandler.common.ImageType
 import com.shining.webhandler.common.data.ImageData
-import com.shining.webhandler.common.data.ImageDataListener
+import com.shining.webhandler.common.listener.DataListener
 import com.shining.webhandler.util.glide.GlideListener
 import com.shining.webhandler.util.glide.GlideManager
 import com.shining.webhandler.util.Utils
-import com.shining.webhandler.view.base.BaseViewModel
-import com.shining.webhandler.view.collection.ProgressListener
+import com.shining.webhandler.view.common.base.BaseViewModel
+import com.shining.webhandler.common.listener.ProgressListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -24,17 +24,6 @@ import kotlin.collections.HashSet
  * WebViewViewModel.kt
  * WebHandler
  */
-//class WebViewViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
-//    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-//        return if (modelClass.isAssignableFrom(WebViewViewModel::class.java)) {
-//            WebViewViewModel(context) as T
-//        }
-//        else {
-//            throw IllegalAccessException()
-//        }
-//    }
-//}
-
 class WebViewViewModel(val context: Context) : BaseViewModel() {
 
     companion object {
@@ -52,7 +41,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
     val images : List<ImageData>
         get() = _images.toList()
 
-    var listener : ImageDataListener? = null
+    var listener : DataListener<ImageData>? = null
 
     private var isDownloadCancel = false
     val isCanceling : Boolean

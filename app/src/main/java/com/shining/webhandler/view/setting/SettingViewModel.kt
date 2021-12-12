@@ -1,6 +1,6 @@
 package com.shining.webhandler.view.setting
 
-import com.shining.webhandler.view.base.BaseViewModel
+import com.shining.webhandler.view.common.base.BaseViewModel
 
 /**
  * SettingViewModel.kt

@@ -1,4 +1,4 @@
-package com.shining.webhandler.view.base
+package com.shining.webhandler.view.common.base
 
 import androidx.lifecycle.ViewModel
 

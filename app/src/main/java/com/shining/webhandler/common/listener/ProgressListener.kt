@@ -1,4 +1,4 @@
-package com.shining.webhandler.view.collection
+package com.shining.webhandler.common.listener
 
 /**
  * ProgressListener.kt

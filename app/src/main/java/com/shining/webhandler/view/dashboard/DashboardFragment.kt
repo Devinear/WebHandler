@@ -5,11 +5,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.github.mikephil.charting.data.Entry
+import androidx.fragment.app.viewModels
 import com.shining.webhandler.databinding.LayoutDashboardBinding
+import com.shining.webhandler.view.common.base.BaseFragment
+import com.shining.webhandler.view.collection.ItemListener
+import android.text.Editable
 
-import com.shining.webhandler.databinding.ViewMarkerBinding
-import com.shining.webhandler.view.base.BaseFragment
+import android.text.TextWatcher
+import com.shining.webhandler.common.data.WebData
 
 /**
  * DashboardFragment.kt
@@ -18,8 +21,8 @@ import com.shining.webhandler.view.base.BaseFragment
 class DashboardFragment : BaseFragment() {
 
     private lateinit var binding : LayoutDashboardBinding
-    private lateinit var bindingMarker : ViewMarkerBinding
-    private lateinit var viewModel: DashboardViewModel
+    private val favoriteViewModel: DashboardViewModel by viewModels()
+    private val recentViewModel: DashboardViewModel by viewModels()
 
     companion object {
         private const val TAG = "[DE][FR] Dashboard"
@@ -32,7 +35,6 @@ class DashboardFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = LayoutDashboardBinding.inflate(layoutInflater, container, false)
-        bindingMarker = ViewMarkerBinding.inflate(layoutInflater, container, false)
         return binding.root
     }
 
@@ -40,7 +42,52 @@ class DashboardFragment : BaseFragment() {
         super.initUi()
         Log.d(TAG, "initUi")
 
+        initSearch()
+        initFavorite()
+        initRecent()
     }
 
-    private fun entryIntValue(x: Int, y: Int) : Entry = Entry(x.toFloat(), y.toFloat())
+    private fun initSearch() {
+        binding.ibSearch.isEnabled = false
+        binding.edtInput.addTextChangedListener(object : TextWatcher{
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+            override fun afterTextChanged(s: Editable?) {
+                binding.ibSearch.isEnabled = !s.isNullOrEmpty()
+            }
+        })
+    }
+
+    private fun initFavorite() {
+        binding.reFavorite.apply {
+            adapter = DashboardAdapter(
+                listener = object : ItemListener<WebData> {
+                    override fun clickImageItem(dataWeb: WebData, position: Int) {
+
+                    }
+                },
+                viewModel = favoriteViewModel
+            )
+
+        }
+    }
+
+    private fun initRecent() {
+        binding.reRecent.apply {
+            adapter = DashboardAdapter(
+                listener = object : ItemListener<WebData> {
+                    override fun clickImageItem(dataWeb: WebData, position: Int) {
+
+                    }
+                },
+                viewModel = recentViewModel
+            )
+        }
+    }
+
+    fun onClickSearch() {
+        binding.edtInput
+        Log.d(TAG, "onClickSearch")
+
+    }
 }

@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.shining.webhandler.databinding.LayoutSettingBinding
-import com.shining.webhandler.view.base.BaseFragment
+import com.shining.webhandler.view.common.base.BaseFragment
 
 /**
  * SettingFragment.kt
