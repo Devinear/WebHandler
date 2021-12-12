@@ -52,6 +52,9 @@ class DashboardAdapter(val listener: ItemListener<WebData>, val sizeListener: It
                 tvTitle.text = web.title
                 tvUrl.text = web.url
             }
+            itemView.setOnClickListener {
+                listener.clickImageItem(data = web, position = position)
+            }
         }
     }
 
