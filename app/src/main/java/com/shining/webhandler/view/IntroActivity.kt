@@ -37,7 +37,7 @@ class IntroActivity : AppCompatActivity() {
             }
         }
 
-        NPermission.create()
+        NPermission.create(this@IntroActivity)
             .permissionListener(listener)
             .permissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE))
 //            .rationaleTitle("Rationale Title")

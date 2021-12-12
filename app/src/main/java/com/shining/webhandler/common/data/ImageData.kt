@@ -9,7 +9,7 @@ import com.shining.webhandler.common.ImageType
  * WebHandler
  */
 data class ImageData(
-    val id: UInt,
+    val id: Long,
     var thumb: Bitmap? = null,
     var image: Bitmap? = null,
     val url: String = "",

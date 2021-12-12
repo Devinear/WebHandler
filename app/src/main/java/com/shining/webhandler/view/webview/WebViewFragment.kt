@@ -35,7 +35,6 @@ import com.shining.webhandler.view.dashboard.RecentViewModel
 import java.net.URLEncoder
 import java.util.*
 
-
 /**
  * WebViewFragment.kt
  * WebHandler
@@ -57,12 +56,6 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     private var isUpdate = false
     private var requestUrl : String = ""
-
-    private val cUrl = "https://www.naver.com/"
-
-    private val urlShopByLogin = "https://admin.shopby.co.kr/login"
-    private val urlG5mdev = "http://m.g5mdev.godomall.com"
-    private val urlTest = "https://mobileappdev.godo.co.kr/whysj/urlscheme/index.php"
 
     var userAgent: String? = ""
 
@@ -258,7 +251,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
         requestUrl = url
         binding.webView.loadUrl(requestUrl)
 
-        webData = recent.addWebData(data = WebData(id = requestUrl.hashCode().toUInt(), url = requestUrl, time = Date().time))
+        webData = recent.addWebData(data = WebData(id = requestUrl.hashCode().toLong(), url = requestUrl, time = Date().time))
 
         val favorite = favorite.isContain(id = webData!!.id)
         binding.ibFavorite.setImageDrawable(resources.getDrawable(if(favorite) R.drawable.outline_favorite_24 else R.drawable.outline_favorite_border_24))
@@ -280,7 +273,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
         Log.e(TAG, "onPageStarted URL[$url]")
 
         url ?: return
-        webData = recent.addWebData(data = WebData(id = url.hashCode().toUInt(), url = url, time = Date().time, icon = favicon))
+        webData = recent.addWebData(data = WebData(id = url.hashCode().toLong(), url = url, time = Date().time, icon = favicon))
 
         val favorite = favorite.isContain(id = webData!!.id)
         binding.ibFavorite.setImageDrawable(resources.getDrawable(if(favorite) R.drawable.outline_favorite_24 else R.drawable.outline_favorite_border_24))

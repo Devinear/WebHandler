@@ -43,7 +43,7 @@ open class DashboardViewModel : BaseViewModel() {
         } )
     }
 
-    fun addWebData(data: WebData) : WebData {
+    open fun addWebData(data: WebData) : WebData {
         Log.d(TAG, "addWebData ID[${data.id}]")
         _webs.forEach { webData ->
             if(webData.id == data.id)
@@ -53,14 +53,14 @@ open class DashboardViewModel : BaseViewModel() {
         return data
     }
 
-    fun isContain(id: UInt) : Boolean {
+    fun isContain(id: Long) : Boolean {
         _webs.forEach { webData ->
             if(webData.id == id) return true
         }
         return false
     }
 
-    fun removeWebData(data: WebData) : Boolean {
+    open fun removeWebData(data: WebData) : Boolean {
         return _webs.remove(data)
     }
 }

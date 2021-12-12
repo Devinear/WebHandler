@@ -110,7 +110,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
     }
 
     private fun request(url: String, type: ImageType = ImageType.NONE) {
-        val data = ImageData(id = url.hashCode().toUInt(), url = url, image = null, thumb = null, type = type)
+        val data = ImageData(id = url.hashCode().toLong(), url = url, image = null, thumb = null, type = type)
         Log.d(TAG, "request ID[${data.id}] URL[$url]")
         _images.add(data)
 
