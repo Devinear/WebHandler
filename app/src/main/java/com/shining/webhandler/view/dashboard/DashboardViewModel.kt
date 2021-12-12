@@ -10,7 +10,7 @@ import com.shining.webhandler.view.common.base.BaseViewModel
  * DashboardViewModel.kt
  * WebHandler
  */
-class DashboardViewModel : BaseViewModel() {
+open class DashboardViewModel : BaseViewModel() {
 
     companion object {
         const val TAG = "[DE][VM] Dashboard"

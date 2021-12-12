@@ -21,8 +21,8 @@ import com.shining.webhandler.common.data.WebData
 class DashboardFragment : BaseFragment() {
 
     private lateinit var binding : LayoutDashboardBinding
-    private val favoriteViewModel: DashboardViewModel by viewModels()
-    private val recentViewModel: DashboardViewModel by viewModels()
+    private val favoriteViewModel: FavoriteViewModel by viewModels()
+    private val recentViewModel: RecentViewModel by viewModels()
 
     companion object {
         private const val TAG = "[DE][FR] Dashboard"
