@@ -9,6 +9,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -23,10 +25,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.shining.nwebview.NWebListener
 import com.shining.nwebview.utils.WebViewSetting
+import com.shining.webhandler.common.Constants
 import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.databinding.LayoutWebviewBinding
 import com.shining.webhandler.util.Utils
 import com.shining.webhandler.view.common.base.BaseFragment
+import com.shining.webhandler.view.dashboard.DashboardFragment
 import com.shining.webhandler.view.dashboard.FavoriteViewModel
 import com.shining.webhandler.view.dashboard.RecentViewModel
 import java.util.*
@@ -81,7 +85,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
     override fun initUi() {
         super.initUi()
         Log.d(TAG, "initUi")
-
+        binding.fragment = this@WebViewFragment
         binding.webView.settings.apply {
             builtInZoomControls = false                     // 화면 줌 동작
             displayZoomControls = false                     // 화면 줌 동작시, WebView 에서 줌 컨트롤 표시
@@ -144,26 +148,16 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     private fun initInput() {
         binding.apply {
+            binding.ibSearch.isEnabled = false
             layoutInput.visibility = View.INVISIBLE
-            ObjectAnimator.ofFloat(layoutInput, "translationY", 100f, 0f).apply {
-                duration = 0
-                start()
-            }
-            ibInputBack.setOnClickListener {
-                hideKeyboard()
-                showInputEdit(show = false)
-            }
-            ibInputSearch.setOnClickListener {
-                hideKeyboard()
-                showInputEdit(show = false)
-
-                val input = edInput.text.toString()
-                if (input.isEmpty()) return@setOnClickListener
-
-                webView.loadUrl(input)
-                Toast.makeText(context, input, Toast.LENGTH_SHORT).show()
-            }
-            edInput.isSingleLine = true
+            layoutInput.translationY = 100f
+            edtInput.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+                override fun afterTextChanged(s: Editable?) {
+                    binding.ibSearch.isEnabled = !s.isNullOrEmpty()
+                }
+            })
             fabExplore.visibility = View.VISIBLE
             fabExplore.setOnClickListener {
                 showInputEdit()
@@ -174,6 +168,9 @@ class WebViewFragment : BaseFragment(), NWebListener {
     }
 
     private fun showInputEdit(show: Boolean = true) {
+        binding.edtInput.setText(binding.webView.url ?: "")
+        binding.ibSearch.isEnabled = !binding.edtInput.text.isNullOrEmpty()
+
         binding.apply {
             if (show) {
                 layoutInput.visibility = View.VISIBLE
@@ -199,7 +196,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
                         override fun onAnimationEnd(animation: Animator?) {
                             super.onAnimationEnd(animation)
                             layoutInput.visibility = View.INVISIBLE
-                            edInput.text.clear()
+                            edtInput.text?.clear()
                         }
                     })
                 ObjectAnimator.ofFloat(layoutInput, "translationY",100f).start()
@@ -298,5 +295,25 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     override fun onReceivedTitle(view: WebView, title: String) {
         webData?.title = title
+    }
+
+    fun onClickBack() {
+        hideKeyboard()
+        showInputEdit(show = false)
+    }
+
+    fun onClickSearch() {
+        hideKeyboard()
+        showInputEdit(show = false)
+
+        var search = binding.edtInput.text.toString()
+        if (search.isEmpty()) return
+
+        if(!search.startsWith("http"))
+            search = "${Constants.GOOGLE_WEB}$search"
+        Log.d(TAG, "onClickSearch [$search]")
+        binding.edtInput.text?.clear()
+        binding.edtInput.clearFocus()
+        binding.webView.loadUrl(search)
     }
 }
