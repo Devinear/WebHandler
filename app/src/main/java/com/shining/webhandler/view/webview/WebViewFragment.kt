@@ -229,8 +229,8 @@ class WebViewFragment : BaseFragment(), NWebListener {
                 loadUrl(requestUrl)
                 isUpdate = false
 
-                webData = WebData(id = requestUrl.hashCode().toUInt(), url = requestUrl, time = Date().time)
-                recent.addWebData(data = webData!!)
+//                webData = WebData(id = requestUrl.hashCode().toUInt(), url = requestUrl, time = Date().time)
+//                recent.addWebData(data = webData!!)
             }
         }
     }
@@ -277,6 +277,9 @@ class WebViewFragment : BaseFragment(), NWebListener {
 //                "window.Android.getImgSrc(objs[i].src);" +
 //                "}" +
 //                "})()")
+
+        url ?: return
+        webData = recent.addWebData(data = WebData(id = url.hashCode().toUInt(), url = url, time = Date().time))
     }
 
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?) {
@@ -303,17 +306,18 @@ class WebViewFragment : BaseFragment(), NWebListener {
     }
 
     fun onClickSearch() {
-        hideKeyboard()
-        showInputEdit(show = false)
-
         var search = binding.edtInput.text.toString()
         if (search.isEmpty()) return
 
         if(!search.startsWith("http"))
             search = "${Constants.GOOGLE_WEB}$search"
         Log.d(TAG, "onClickSearch [$search]")
+        binding.webView.loadUrl(search)
+
         binding.edtInput.text?.clear()
         binding.edtInput.clearFocus()
-        binding.webView.loadUrl(search)
+
+        hideKeyboard()
+        showInputEdit(show = false)
     }
 }
