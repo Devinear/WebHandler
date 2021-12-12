@@ -45,13 +45,12 @@
         <ImageButton
             android:id="@+id/ib_search"
             android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_height="56dp"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:background="@android:color/transparent"
+            android:background="@drawable/bg_btn"
             android:src="@drawable/outline_search_24"
             android:onClick="@{()->fragment.onClickSearch()}"
-            app:layout_constraintTop_toTopOf="@id/la_input"
             app:layout_constraintBottom_toBottomOf="@id/la_input"
             app:layout_constraintStart_toEndOf="@id/la_input"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -88,6 +87,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="10dp"
+            android:background="@drawable/bg_btn"
             android:scrollbars="vertical"
             android:scrollbarSize="10dp"
             app:layout_constraintBottom_toTopOf="@id/tv_recent"
@@ -102,11 +102,40 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:layout_marginBottom="30dp"
+            android:background="@drawable/bg_btn"
             android:scrollbars="vertical"
             android:scrollbarSize="10dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_recent"
             tools:listitem="@layout/layout_dashboard_item" />
+
+        <TextView
+            android:id="@+id/tv_fe_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EMPTY"
+            android:textStyle="bold"
+            android:textSize="25sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/re_favorite"
+            app:layout_constraintBottom_toBottomOf="@id/re_favorite"
+            app:layout_constraintStart_toStartOf="@id/re_favorite"
+            app:layout_constraintEnd_toEndOf="@id/re_favorite"
+            tools:visibility="visible"/>
+
+        <TextView
+            android:id="@+id/tv_re_empty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="EMPTY"
+            android:textStyle="bold"
+            android:textSize="25sp"
+            android:visibility="gone"
+            app:layout_constraintTop_toTopOf="@id/re_recent"
+            app:layout_constraintBottom_toBottomOf="@id/re_recent"
+            app:layout_constraintStart_toStartOf="@id/re_recent"
+            app:layout_constraintEnd_toEndOf="@id/re_recent"
+            tools:visibility="visible"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

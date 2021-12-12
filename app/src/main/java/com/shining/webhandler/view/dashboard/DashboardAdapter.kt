@@ -9,12 +9,13 @@ import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.common.listener.DataListener
 import com.shining.webhandler.databinding.LayoutDashboardItemBinding
 import com.shining.webhandler.view.collection.ItemListener
+import com.shining.webhandler.view.collection.ItemSizeListener
 
 /**
  * DashboardAdapter.kt
  * WebHandler
  */
-class DashboardAdapter(val listener: ItemListener<WebData>, val viewModel: DashboardViewModel)
+class DashboardAdapter(val listener: ItemListener<WebData>, val sizeListener: ItemSizeListener, val viewModel: DashboardViewModel)
     : ListAdapter<WebData, DashboardAdapter.ViewHolder>(diffUtil)
 {
 
@@ -26,13 +27,14 @@ class DashboardAdapter(val listener: ItemListener<WebData>, val viewModel: Dashb
                 oldItem == newItem
 
             override fun areItemsTheSame(oldItem: WebData, newItem: WebData) =
-                oldItem.url == newItem.url
+                oldItem.id == newItem.id
         }
     }
 
     init {
         viewModel.listener = object : DataListener<WebData> {
             override fun onChanged(sender: List<WebData>) {
+                sizeListener.changedSize(sender.size)
                 submitList(sender)
             }
         }
@@ -52,6 +54,8 @@ class DashboardAdapter(val listener: ItemListener<WebData>, val viewModel: Dashb
             }
         }
     }
+
+    override fun getItemId(position: Int): Long = getItem(position)?.id?.toLong() ?: -1L
 
     override fun getItemCount(): Int = currentList.size
 

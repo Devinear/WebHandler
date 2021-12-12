@@ -12,7 +12,9 @@ import com.shining.webhandler.view.collection.ItemListener
 import android.text.Editable
 
 import android.text.TextWatcher
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.shining.webhandler.common.data.WebData
+import com.shining.webhandler.view.collection.ItemSizeListener
 
 /**
  * DashboardFragment.kt
@@ -41,6 +43,7 @@ class DashboardFragment : BaseFragment() {
     override fun initUi() {
         super.initUi()
         Log.d(TAG, "initUi")
+        binding.fragment = this@DashboardFragment
 
         initSearch()
         initFavorite()
@@ -59,6 +62,7 @@ class DashboardFragment : BaseFragment() {
     }
 
     private fun initFavorite() {
+        binding.tvFeEmpty.visibility = if(favoriteViewModel.webs.isEmpty()) View.VISIBLE else View.GONE
         binding.reFavorite.apply {
             adapter = DashboardAdapter(
                 listener = object : ItemListener<WebData> {
@@ -66,13 +70,22 @@ class DashboardFragment : BaseFragment() {
 
                     }
                 },
+                sizeListener = object : ItemSizeListener {
+                    override fun changedSize(size: Int) {
+                        binding.tvFeEmpty.visibility = if(size == 0) View.VISIBLE else View.GONE
+                    }
+                },
                 viewModel = favoriteViewModel
-            )
-
+            ).apply {
+                setHasStableIds(true)
+                setHasFixedSize(true)
+            }
+            layoutManager = LinearLayoutManager(requireContext())
         }
     }
 
     private fun initRecent() {
+        binding.tvReEmpty.visibility = if(recentViewModel.webs.isEmpty()) View.VISIBLE else View.GONE
         binding.reRecent.apply {
             adapter = DashboardAdapter(
                 listener = object : ItemListener<WebData> {
@@ -80,14 +93,25 @@ class DashboardFragment : BaseFragment() {
 
                     }
                 },
+                sizeListener = object : ItemSizeListener {
+                    override fun changedSize(size: Int) {
+                        binding.tvReEmpty.visibility = if(size == 0) View.VISIBLE else View.GONE
+                    }
+                },
                 viewModel = recentViewModel
-            )
+            ).apply {
+                setHasStableIds(true)
+                setHasFixedSize(true)
+            }
+            layoutManager = LinearLayoutManager(requireContext())
         }
     }
 
     fun onClickSearch() {
-        binding.edtInput
-        Log.d(TAG, "onClickSearch")
-
+        val search = binding.edtInput.text.toString()
+        Log.d(TAG, "onClickSearch [$search]")
+        binding.edtInput.text?.clear()
+        binding.edtInput.clearFocus()
+        recentViewModel.addWebData(WebData(id = search.hashCode().toUInt(), url = search))
     }
 }
