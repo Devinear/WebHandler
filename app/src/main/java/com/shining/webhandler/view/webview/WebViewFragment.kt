@@ -9,13 +9,14 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.webkit.*
-import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -23,10 +24,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.shining.nwebview.NWebListener
 import com.shining.nwebview.utils.WebViewSetting
+import com.shining.webhandler.R
+import com.shining.webhandler.common.Constants
+import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.databinding.LayoutWebviewBinding
 import com.shining.webhandler.util.Utils
-import com.shining.webhandler.view.base.BaseFragment
-
+import com.shining.webhandler.view.common.base.BaseFragment
+import com.shining.webhandler.view.dashboard.FavoriteViewModel
+import com.shining.webhandler.view.dashboard.RecentViewModel
+import java.net.URLEncoder
+import java.util.*
 
 /**
  * WebViewFragment.kt
@@ -43,12 +50,12 @@ class WebViewFragment : BaseFragment(), NWebListener {
                     = WebViewViewModel(requireActivity()) as T
         }
     }
+    private var webData : WebData? = null
+    private val favorite : FavoriteViewModel by activityViewModels()
+    private val recent : RecentViewModel by activityViewModels()
 
-    private val cUrl = "https://www.naver.com/"
-
-    private val urlShopByLogin = "https://admin.shopby.co.kr/login"
-    private val urlG5mdev = "http://m.g5mdev.godomall.com"
-    private val urlTest = "https://mobileappdev.godo.co.kr/whysj/urlscheme/index.php"
+    private var isUpdate = false
+    private var requestUrl : String = ""
 
     var userAgent: String? = ""
 
@@ -71,13 +78,13 @@ class WebViewFragment : BaseFragment(), NWebListener {
     override fun initUi() {
         super.initUi()
         Log.d(TAG, "initUi")
-
+        binding.fragment = this@WebViewFragment
         binding.webView.settings.apply {
-            builtInZoomControls = true                      // 화면 줌 동작
+            builtInZoomControls = false                     // 화면 줌 동작
             displayZoomControls = false                     // 화면 줌 동작시, WebView 에서 줌 컨트롤 표시
             domStorageEnabled = true                        // 내부저장소
-            allowFileAccess = false                         // File 엑세스
-            allowContentAccess = false
+            allowFileAccess = true                          // File 엑세스
+            allowContentAccess = true
             javaScriptCanOpenWindowsAutomatically = true    // JS 에서 새창 실행
             javaScriptEnabled = true                        // JS 허용여부
             setSupportMultipleWindows(false)                // 새창 허용여부 - false : 현재 창에 로드
@@ -100,16 +107,11 @@ class WebViewFragment : BaseFragment(), NWebListener {
             setListener(this@WebViewFragment, this@WebViewFragment)
             addHttpHeader("X-Requested-With", "")
 
-//            loadUrl("https://topegirl.com/watch/dakota-pink-nude-seduce-120-photos.html")
-            loadUrl("https://xhwebsite.com/photos/gallery/the-beauty-of-blonde-1427226")
-//            loadUrl(urlTest)
-//            loadUrl("file:///android_asset/WebDeDeTest.html")
-
             // Build.VERSION.SDK_INT >= 19
             setLayerType(View.LAYER_TYPE_HARDWARE, null)
 
             // JavascriptInterface 설정 - name
-            addJavascriptInterface(JavascriptInterface(viewModel), "Android")
+//            addJavascriptInterface(JavascriptInterface(viewModel), "Android")
             overScrollMode = View.OVER_SCROLL_IF_CONTENT_SCROLLS
         }
 
@@ -139,34 +141,30 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     private fun initInput() {
         binding.apply {
+            ibSearch.isEnabled = false
+            ibFavorite.setImageDrawable(resources.getDrawable(R.drawable.outline_favorite_border_24))
             layoutInput.visibility = View.INVISIBLE
-            ObjectAnimator.ofFloat(layoutInput, "translationY", 100f, 0f).apply {
-                duration = 0
-                start()
-            }
-            ibInputBack.setOnClickListener {
-                hideKeyboard()
-                showInputEdit(show = false)
-            }
-            ibInputSearch.setOnClickListener {
-                hideKeyboard()
-                showInputEdit(show = false)
-
-                val input = edInput.text.toString()
-                if (input.isEmpty()) return@setOnClickListener
-
-                webView.loadUrl(input)
-                Toast.makeText(context, input, Toast.LENGTH_SHORT).show()
-            }
-            edInput.isSingleLine = true
+            layoutInput.translationY = 100f
+            edtInput.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+                override fun afterTextChanged(s: Editable?) {
+                    binding.ibSearch.isEnabled = !s.isNullOrEmpty()
+                }
+            })
             fabExplore.visibility = View.VISIBLE
             fabExplore.setOnClickListener {
                 showInputEdit()
             }
         }
+        // TODO : 검색창 외부를 클릭시 창이 닫히도록
+        // TODO : 검색창 UI 변경
     }
 
     private fun showInputEdit(show: Boolean = true) {
+        binding.edtInput.setText(binding.webView.url ?: "")
+        binding.ibSearch.isEnabled = !binding.edtInput.text.isNullOrEmpty()
+
         binding.apply {
             if (show) {
                 layoutInput.visibility = View.VISIBLE
@@ -192,7 +190,7 @@ class WebViewFragment : BaseFragment(), NWebListener {
                         override fun onAnimationEnd(animation: Animator?) {
                             super.onAnimationEnd(animation)
                             layoutInput.visibility = View.INVISIBLE
-                            edInput.text.clear()
+                            edtInput.text?.clear()
                         }
                     })
                 ObjectAnimator.ofFloat(layoutInput, "translationY",100f).start()
@@ -216,13 +214,21 @@ class WebViewFragment : BaseFragment(), NWebListener {
     }
 
     override fun onResume() {
-        Log.d(TAG, "onResume")
+        Log.d(TAG, "onResume URL[$requestUrl]")
         super.onResume()
-        binding.webView.onResume()
+        binding.webView.apply {
+            onResume()
+
+            if(isUpdate) {
+                executeWebLoad()
+            }
+        }
     }
 
     override fun onPause() {
         Log.d(TAG, "onPause")
+        hideKeyboard()
+        showInputEdit(false)
         binding.webView.onPause()
         super.onPause()
     }
@@ -231,6 +237,25 @@ class WebViewFragment : BaseFragment(), NWebListener {
         Log.d(TAG, "onDestroy")
         binding.webView.onDestroy()
         super.onDestroy()
+    }
+
+    fun requestWebLoad(url: String) {
+        Log.d(TAG, "webLoad [$url]")
+        isUpdate = true
+        this.requestUrl = url
+    }
+
+    private fun executeWebLoad(url : String = requestUrl) {
+        Log.d(TAG, "executeWebLoad [$url]")
+        isUpdate = false
+        requestUrl = url
+        binding.webView.loadUrl(requestUrl)
+
+        webData = recent.addWebData(data = WebData(id = requestUrl.hashCode().toLong(), url = requestUrl, time = Date().time))
+
+        val favorite = favorite.isContain(id = webData!!.id)
+        binding.ibFavorite.setImageDrawable(resources.getDrawable(if(favorite) R.drawable.outline_favorite_24 else R.drawable.outline_favorite_border_24))
+
     }
 
     fun onWebViewResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -243,6 +268,16 @@ class WebViewFragment : BaseFragment(), NWebListener {
     fun webGoBack() = binding.webView.goBack()
 
     fun webGoForward() = binding.webView.goForward()
+
+    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        Log.e(TAG, "onPageStarted URL[$url]")
+
+        url ?: return
+        webData = recent.addWebData(data = WebData(id = url.hashCode().toLong(), url = url, time = Date().time, icon = favicon))
+
+        val favorite = favorite.isContain(id = webData!!.id)
+        binding.ibFavorite.setImageDrawable(resources.getDrawable(if(favorite) R.drawable.outline_favorite_24 else R.drawable.outline_favorite_border_24))
+    }
 
     override fun onPageFinished(view: WebView?, url: String?) {
         Log.e(TAG, "onPageFinished URL[$url]")
@@ -257,15 +292,59 @@ class WebViewFragment : BaseFragment(), NWebListener {
 //                "window.Android.getImgSrc(objs[i].src);" +
 //                "}" +
 //                "})()")
-        // TODO : Finished 기준으로 이미지 재정렬 동작
     }
 
     override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?) {
         request ?: return
         val accept = request.requestHeaders["Accept"]
-            Log.d(TAG, "shouldInterceptRequest ACCEPT[$accept] URL[${request.url}]")
+//        Log.d(TAG, "shouldInterceptRequest ACCEPT[$accept] URL[${request.url}]")
+
         if(accept?.contains("image", ignoreCase = false) == true) {
             viewModel.addUrl(request.url.toString())
+        }
+    }
+
+    override fun onReceivedIcon(view: WebView, icon: Bitmap) {
+        Log.d(TAG, "onReceivedIcon")
+        webData?.icon = icon
+        recent.isCompleted(data = webData)
+    }
+
+    override fun onReceivedTitle(view: WebView, title: String) {
+        Log.d(TAG, " Title[$title]")
+        webData?.title = title
+        recent.isCompleted(data = webData)
+    }
+
+    fun onClickBack() {
+        hideKeyboard()
+        showInputEdit(show = false)
+    }
+
+    fun onClickSearch() {
+        var search = binding.edtInput.text.toString()
+        if (search.isEmpty()) return
+
+        if(!search.startsWith("http")) {
+            search = "${Constants.GOOGLE_WEB}${URLEncoder.encode(search, "UTF-8")}"
+        }
+        executeWebLoad(search)
+
+        binding.edtInput.text?.clear()
+        binding.edtInput.clearFocus()
+
+        hideKeyboard()
+        showInputEdit(show = false)
+    }
+
+    fun onClickFavorite() {
+        webData ?: return
+
+        val isFavorite = favorite.isContain(id = webData!!.id)
+        binding.ibFavorite.setImageDrawable(resources.getDrawable(if(isFavorite) R.drawable.outline_favorite_border_24 else R.drawable.outline_favorite_24))
+
+        if(!isFavorite) {
+            favorite.addWebData(webData!!)
         }
     }
 }

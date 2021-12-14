@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.shining.webhandler.common.data.ImageData
-import com.shining.webhandler.common.data.ImageDataListener
+import com.shining.webhandler.common.listener.DataListener
 import com.shining.webhandler.databinding.ItemGridImageBinding
 import com.shining.webhandler.view.webview.WebViewViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
  * CollectionAdapter.kt
  * WebHandler
  */
-class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewModel, val listener: ItemListener, val longListener: ItemLongListener, val checkedCount: MutableLiveData<Int>)
+class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewModel, val listener: ItemListener<ImageData>, val longListener: ItemLongListener<ImageData>, val checkedCount: MutableLiveData<Int>)
     : ListAdapter<ImageData, CollectionAdapter.ViewHolder>(diffUtil)
 {
 
@@ -42,7 +42,7 @@ class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewM
     var isPauseMode = false
 
     init {
-        vm.listener = object : ImageDataListener {
+        vm.listener = object : DataListener<ImageData> {
             @SuppressLint("NotifyDataSetChanged")
             override fun onItemRangeInserted(sender: ObservableArrayList<ImageData>, positionStart: Int, itemCount: Int) {
                 CoroutineScope(Dispatchers.Main).launch {
@@ -67,8 +67,8 @@ class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewM
     }
 
     class ViewHolder(val binding : ItemGridImageBinding,
-                     val listener: ItemListener,
-                     val longListener: ItemLongListener,
+                     val listener: ItemListener<ImageData>,
+                     val longListener: ItemLongListener<ImageData>,
                      val adapter: CollectionAdapter)
         : RecyclerView.ViewHolder(binding.root)
     {

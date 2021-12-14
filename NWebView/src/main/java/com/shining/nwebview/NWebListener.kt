@@ -16,4 +16,6 @@ interface NWebListener {
     fun onDownloadRequested(url: String?, suggestedFilename: String?, mimeType: String?, contentLength: Long, contentDisposition: String?, userAgent: String?) {}
     fun onExternalPageRequest(url: String?) {}
     fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?) {}
+    fun onReceivedIcon(view: WebView, icon: Bitmap) {}
+    fun onReceivedTitle(view: WebView, title: String) {}
 }

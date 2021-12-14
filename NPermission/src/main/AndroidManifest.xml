@@ -2,8 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.shining.npermission">
 
-    <application
-        android:name=".App">
+    <application >
         <activity android:name=".PermissionActivity"
             android:theme="@style/Theme.Transparent.Permission" />
 

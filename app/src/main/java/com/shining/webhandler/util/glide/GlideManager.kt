@@ -8,7 +8,6 @@ import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.shining.webhandler.util.GlideApp
 
 /**
  * GlideManager.kt

@@ -16,7 +16,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
 import com.shining.webhandler.databinding.ActivityMainBinding
-import com.shining.webhandler.view.base.BaseFragment
+import com.shining.webhandler.view.common.base.BaseFragment
 import com.shining.webhandler.view.collection.CollectionFragment
 import com.shining.webhandler.view.common.PageAdapter
 import com.shining.webhandler.view.dashboard.DashboardFragment
@@ -88,8 +88,6 @@ class MainActivity : AppCompatActivity() {
                         binding.bottomNavigation.selectedItemId = navigation
                 }
             })
-
-//            isUserInputEnabled = false // 좌우 스와이프 동작
         }
 
         try {
@@ -212,6 +210,11 @@ class MainActivity : AppCompatActivity() {
         if(binding.viewPager.currentItem != page) {
             binding.viewPager.currentItem = page
         }
+    }
+
+    fun requestWebLoad(url: String) {
+        WebViewFragment.INSTANCE.requestWebLoad(url = url)
+        requestFragment(FragmentType.WebView)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {

@@ -19,9 +19,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FlingType
 import com.shining.webhandler.common.data.ImageData
+import com.shining.webhandler.common.listener.ProgressListener
 import com.shining.webhandler.databinding.LayoutCollectionBinding
 import com.shining.webhandler.view.MainActivity
-import com.shining.webhandler.view.base.BaseFragment
+import com.shining.webhandler.view.common.base.BaseFragment
 import com.shining.webhandler.view.webview.WebViewViewModel
 import kotlin.math.abs
 
@@ -74,11 +75,11 @@ class CollectionFragment : BaseFragment() {
 
             recycler.apply {
                 adapter = CollectionAdapter(viewLifecycleOwner, viewModel,
-                    object : ItemListener {
+                    object : ItemListener<ImageData> {
                         override fun clickImageItem(data: ImageData, position: Int) {
                             showDetailView(show = true, data = data, position = position)
                         } },
-                    object : ItemLongListener {
+                    object : ItemLongListener<ImageData> {
                         override fun longClickImageItem(data: ImageData) {
                             startCheckMode()
                             showDownload()
