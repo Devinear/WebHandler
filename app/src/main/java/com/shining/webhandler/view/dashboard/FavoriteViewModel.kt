@@ -2,33 +2,22 @@ package com.shining.webhandler.view.dashboard
 
 import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.repository.local.RepositoryListener
-import com.shining.webhandler.repository.local.WebLocalRepository
+import com.shining.webhandler.repository.local.favorite.FavoriteRepository
 
 /**
  * FavoriteViewModel.kt
  * WebHandler
  */
 class FavoriteViewModel : DashboardViewModel() {
-    private val repository = WebLocalRepository.INSTANCE
 
     init {
-        repository.getAll(object : RepositoryListener {
-            override fun requestAll(list: List<WebData>) {
-                list.forEach { data ->
-                    addWebData(data)
-                }
-            }
-        })
+        repository = FavoriteRepository.INSTANCE
+        requestDatabase()
     }
 
     override fun addWebData(data: WebData): WebData {
         val data = super.addWebData(data)
-        repository.insert(data)
+        repository.insert(data = data)
         return data
-    }
-
-    override fun removeWebData(data: WebData): Boolean {
-        repository.remove(data.id)
-        return super.removeWebData(data)
     }
 }

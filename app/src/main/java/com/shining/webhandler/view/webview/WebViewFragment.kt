@@ -307,11 +307,13 @@ class WebViewFragment : BaseFragment(), NWebListener {
     override fun onReceivedIcon(view: WebView, icon: Bitmap) {
         Log.d(TAG, "onReceivedIcon")
         webData?.icon = icon
+        recent.isCompleted(data = webData)
     }
 
     override fun onReceivedTitle(view: WebView, title: String) {
-        Log.d(TAG, "onReceivedTitle Title[$title]")
+        Log.d(TAG, " Title[$title]")
         webData?.title = title
+        recent.isCompleted(data = webData)
     }
 
     fun onClickBack() {

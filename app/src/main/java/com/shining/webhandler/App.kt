@@ -2,7 +2,8 @@ package com.shining.webhandler
 
 import android.app.Application
 import androidx.room.Room
-import com.shining.webhandler.repository.local.WebRepoDB
+import com.shining.webhandler.repository.local.favorite.FavoriteDB
+import com.shining.webhandler.repository.local.recent.RecentDB
 
 /**
  * App.kt
@@ -11,14 +12,18 @@ import com.shining.webhandler.repository.local.WebRepoDB
 open class App : Application() {
 
     companion object {
-        private lateinit var repository: WebRepoDB
+        private lateinit var favoriteDB: FavoriteDB
+        val FAVORITE_DB : FavoriteDB
+            get() = favoriteDB
 
-        val WEB_DATABASE : WebRepoDB
-            get() = repository
+        private lateinit var recentDB : RecentDB
+        val RECENT_DB : RecentDB
+            get() = recentDB
     }
 
     override fun onCreate() {
         super.onCreate()
-        repository = Room.databaseBuilder(this, WebRepoDB::class.java, "webs.db").build()
+        favoriteDB = Room.databaseBuilder(this, FavoriteDB::class.java, "favorites.db").build()
+        recentDB = Room.databaseBuilder(this, RecentDB::class.java, "recent.db").build()
     }
 }

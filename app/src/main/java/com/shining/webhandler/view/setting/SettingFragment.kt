@@ -24,10 +24,14 @@ class SettingFragment : BaseFragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = LayoutSettingBinding.inflate(layoutInflater, container, false)
         val view = binding.root
 
         return view
     }
+
+    // TODO : 추가하지 않을 이미지 크기 설정(Width, Height)
+    // TODO : 최근 내역 삭제
+    // TODO : 즐겨찾기 내역 삭제
 }

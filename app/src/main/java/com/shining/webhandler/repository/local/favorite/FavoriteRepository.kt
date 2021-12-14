@@ -1,7 +1,10 @@
-package com.shining.webhandler.repository.local
+package com.shining.webhandler.repository.local.favorite
 
 import com.shining.webhandler.App
 import com.shining.webhandler.common.data.WebData
+import com.shining.webhandler.repository.local.BaseRepository
+import com.shining.webhandler.repository.local.RepositoryListener
+import com.shining.webhandler.repository.local.WebConverters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -10,18 +13,18 @@ import kotlinx.coroutines.launch
  * WebLocalRepository.kt
  * WebHandler
  */
-class WebLocalRepository {
+class FavoriteRepository : BaseRepository() {
 
-    private val dao = App.WEB_DATABASE.webRepoDao()
+    private val dao = App.FAVORITE_DB.favoriteDao()
 
     companion object {
-        val INSTANCE : WebLocalRepository by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { WebLocalRepository() }
+        val INSTANCE : FavoriteRepository by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { FavoriteRepository() }
     }
 
-    fun insert(data: WebData) {
+    override fun insert(data: WebData) {
         CoroutineScope(Dispatchers.IO).launch {
             dao.insert(
-                WebRepoData(
+                FavoriteData(
                     id = data.id,
                     title = data.title,
                     url = data.url,
@@ -32,13 +35,13 @@ class WebLocalRepository {
         }
     }
 
-    fun remove(id: Long) {
+    override fun remove(id: Long) {
         CoroutineScope(Dispatchers.IO).launch {
             dao.delete(id)
         }
     }
 
-    fun getAll(listener: RepositoryListener) {
+    override fun getAll(listener: RepositoryListener) {
         CoroutineScope(Dispatchers.IO).launch {
             val list = mutableListOf<WebData>()
 

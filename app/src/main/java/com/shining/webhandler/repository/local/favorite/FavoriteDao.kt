@@ -1,4 +1,4 @@
-package com.shining.webhandler.repository.local
+package com.shining.webhandler.repository.local.favorite
 
 import androidx.room.*
 
@@ -7,9 +7,9 @@ import androidx.room.*
  * WebHandler
  */
 @Dao
-interface WebRepoDao {
+interface FavoriteDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(vararg data: WebRepoData)
+    suspend fun insert(vararg data: FavoriteData)
 
     @Query("DELETE FROM WebRepository WHERE id = :id")
     suspend fun delete(id: Long)
@@ -18,5 +18,5 @@ interface WebRepoDao {
     suspend fun deleteAll()
 
     @Query("SELECT * FROM WebRepository")
-    suspend fun getAll(): List<WebRepoData>
+    suspend fun getAll(): List<FavoriteData>
 }

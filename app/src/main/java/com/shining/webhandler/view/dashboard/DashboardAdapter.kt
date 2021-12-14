@@ -1,5 +1,6 @@
 package com.shining.webhandler.view.dashboard
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -34,6 +35,7 @@ class DashboardAdapter(val listener: ItemListener<WebData>, val sizeListener: It
     init {
         viewModel.listener = object : DataListener<WebData> {
             override fun onChanged(sender: List<WebData>) {
+                Log.d(TAG, "onChanged Size[${sender.size}]")
                 sizeListener.changedSize(sender.size)
                 submitList(sender)
             }

@@ -125,6 +125,8 @@ class DashboardFragment : BaseFragment() {
 
     override fun onResume() {
         super.onResume()
+        (binding.reFavorite.adapter as DashboardAdapter).submitList(favoriteViewModel.webs)
+        (binding.reRecent.adapter as DashboardAdapter).submitList(recentViewModel.webs)
         Log.d(TAG, "onResume")
     }
 }

@@ -5,7 +5,11 @@ import androidx.databinding.ObservableArrayList
 import androidx.databinding.ObservableList
 import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.common.listener.DataListener
+import com.shining.webhandler.repository.local.BaseRepository
+import com.shining.webhandler.repository.local.RepositoryListener
+import com.shining.webhandler.repository.local.favorite.FavoriteRepository
 import com.shining.webhandler.view.common.base.BaseViewModel
+import kotlin.properties.Delegates
 
 /**
  * DashboardViewModel.kt
@@ -16,6 +20,8 @@ open class DashboardViewModel : BaseViewModel() {
     companion object {
         const val TAG = "[DE][VM] Dashboard"
     }
+
+    internal lateinit var repository : BaseRepository
 
     private val _webs = ObservableArrayList<WebData>()
     val webs : List<WebData>
@@ -43,6 +49,16 @@ open class DashboardViewModel : BaseViewModel() {
         } )
     }
 
+    fun requestDatabase() {
+        repository.getAll(listener = object : RepositoryListener {
+            override fun requestAll(list: List<WebData>) {
+                list.forEach { data ->
+                    addWebData(data)
+                }
+            }
+        })
+    }
+
     open fun addWebData(data: WebData) : WebData {
         Log.d(TAG, "addWebData ID[${data.id}]")
         _webs.forEach { webData ->
@@ -61,6 +77,7 @@ open class DashboardViewModel : BaseViewModel() {
     }
 
     open fun removeWebData(data: WebData) : Boolean {
+        repository.remove(id = data.id)
         return _webs.remove(data)
     }
 }
