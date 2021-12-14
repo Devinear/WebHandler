@@ -79,7 +79,7 @@ class CollectionFragment : BaseFragment() {
                         override fun clickImageItem(data: ImageData, position: Int) {
                             showDetailView(show = true, data = data, position = position)
                         } },
-                    object : ItemLongListener {
+                    object : ItemLongListener<ImageData> {
                         override fun longClickImageItem(data: ImageData) {
                             startCheckMode()
                             showDownload()

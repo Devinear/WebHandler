@@ -10,13 +10,14 @@ import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.common.listener.DataListener
 import com.shining.webhandler.databinding.LayoutDashboardItemBinding
 import com.shining.webhandler.view.collection.ItemListener
+import com.shining.webhandler.view.collection.ItemLongListener
 import com.shining.webhandler.view.collection.ItemSizeListener
 
 /**
  * DashboardAdapter.kt
  * WebHandler
  */
-class DashboardAdapter(val listener: ItemListener<WebData>, val sizeListener: ItemSizeListener, val viewModel: DashboardViewModel)
+class DashboardAdapter(val listener: ItemListener<WebData>, val longListener: ItemLongListener<WebData>, val sizeListener: ItemSizeListener, val viewModel: DashboardViewModel)
     : ListAdapter<WebData, DashboardAdapter.ViewHolder>(diffUtil)
 {
 
@@ -43,7 +44,8 @@ class DashboardAdapter(val listener: ItemListener<WebData>, val sizeListener: It
     }
 
     class ViewHolder(val binding : LayoutDashboardItemBinding,
-                     val listener: ItemListener<WebData>
+                     val listener: ItemListener<WebData>,
+                     val longListener: ItemLongListener<WebData>
     ) : RecyclerView.ViewHolder(binding.root)
     {
         fun bind(web: WebData, position: Int) {
@@ -57,6 +59,10 @@ class DashboardAdapter(val listener: ItemListener<WebData>, val sizeListener: It
             itemView.setOnClickListener {
                 listener.clickImageItem(data = web, position = position)
             }
+            itemView.setOnLongClickListener {
+                longListener.longClickImageItem(data = web)
+                true
+            }
         }
     }
 
@@ -67,7 +73,7 @@ class DashboardAdapter(val listener: ItemListener<WebData>, val sizeListener: It
     fun getItemData(position: Int) : WebData = getItem(position)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutDashboardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false), listener)
+        ViewHolder(LayoutDashboardItemBinding.inflate(LayoutInflater.from(parent.context), parent, false), listener, longListener)
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) =
         holder.bind(getItem(position), position)

@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
  * CollectionAdapter.kt
  * WebHandler
  */
-class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewModel, val listener: ItemListener<ImageData>, val longListener: ItemLongListener, val checkedCount: MutableLiveData<Int>)
+class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewModel, val listener: ItemListener<ImageData>, val longListener: ItemLongListener<ImageData>, val checkedCount: MutableLiveData<Int>)
     : ListAdapter<ImageData, CollectionAdapter.ViewHolder>(diffUtil)
 {
 
@@ -68,7 +68,7 @@ class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewM
 
     class ViewHolder(val binding : ItemGridImageBinding,
                      val listener: ItemListener<ImageData>,
-                     val longListener: ItemLongListener,
+                     val longListener: ItemLongListener<ImageData>,
                      val adapter: CollectionAdapter)
         : RecyclerView.ViewHolder(binding.root)
     {

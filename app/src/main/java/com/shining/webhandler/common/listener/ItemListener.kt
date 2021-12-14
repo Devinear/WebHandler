@@ -12,6 +12,6 @@ interface ItemListener<T> {
 interface ItemSizeListener {
     fun changedSize(size: Int)
 }
-interface ItemLongListener {
-    fun longClickImageItem(data: ImageData)
+interface ItemLongListener<T> {
+    fun longClickImageItem(data: T)
 }

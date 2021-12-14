@@ -1,5 +1,7 @@
 package com.shining.webhandler.view.dashboard
 
+import android.R
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -17,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.shining.webhandler.common.Constants
 import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.view.MainActivity
+import com.shining.webhandler.view.collection.ItemLongListener
 import com.shining.webhandler.view.collection.ItemSizeListener
 import java.net.URLEncoder
 
@@ -74,6 +77,18 @@ class DashboardFragment : BaseFragment() {
                         (activity as MainActivity).requestWebLoad(url = webData.url)
                     }
                 },
+                longListener = object : ItemLongListener<WebData> {
+                    override fun longClickImageItem(data: WebData) {
+                        AlertDialog.Builder(context)
+                            .setMessage("삭제 하시겠습니까?")
+                            .setPositiveButton(R.string.ok) { _, _ ->
+                                favoriteViewModel.removeWebData(data = data)
+                            }
+                            .setNegativeButton(R.string.cancel) { _, _ -> }
+                            .create()
+                            .show()
+                    }
+                },
                 sizeListener = object : ItemSizeListener {
                     override fun changedSize(size: Int) {
                         binding.tvFeEmpty.visibility = if(size == 0) View.VISIBLE else View.GONE
@@ -95,6 +110,11 @@ class DashboardFragment : BaseFragment() {
                 listener = object : ItemListener<WebData> {
                     override fun clickImageItem(webData: WebData, position: Int) {
                         (activity as MainActivity).requestWebLoad(url = webData.url)
+                    }
+                },
+                longListener = object : ItemLongListener<WebData> {
+                    override fun longClickImageItem(data: WebData) {
+                        recentViewModel.removeWebData(data = data)
                     }
                 },
                 sizeListener = object : ItemSizeListener {
