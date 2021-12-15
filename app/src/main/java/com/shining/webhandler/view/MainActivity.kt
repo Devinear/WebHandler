@@ -48,9 +48,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initUi() {
-        initHeaderUi()
         initViewPager()
-        initDrawerUi()
         initNavigationBar()
 //        initBottomBar()
 
@@ -58,18 +56,6 @@ class MainActivity : AppCompatActivity() {
         window.setFlags(
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
-    }
-
-    private fun initHeaderUi() {
-        setSupportActionBar(binding.toolbar)
-
-        // Toolbar 비활성화
-        binding.toolbar.visibility = View.GONE
-
-        supportActionBar?.apply {
-            setDisplayHomeAsUpEnabled(true) // 왼쪽 상단 버튼
-            setHomeAsUpIndicator(R.drawable.outline_menu_24) // 왼쪽 상단 버튼 아이콘
-        }
     }
 
     private fun initViewPager() {
@@ -110,21 +96,6 @@ class MainActivity : AppCompatActivity() {
     fun enableViewPagerSwipe(enable: Boolean = true) {
         Log.d(TAG, "enableViewPagerSwipe Enable[$enable]")
         binding.viewPager.isUserInputEnabled = enable
-    }
-
-    private fun initDrawerUi() {
-        // Drawer 비활성화
-        binding.drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-        binding.drawerLayout.closeDrawers()
-        binding.drawerNavigation.setNavigationItemSelectedListener {
-            val id = it.itemId
-            when(id) {
-                R.id.dr_first -> { }
-                R.id.dr_second -> { }
-                R.id.dr_third -> { }
-            }
-            true
-        }
     }
 
     private fun initNavigationBar() {
@@ -171,22 +142,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 */
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // 왼쪽 상단 버튼 눌렀을 때
-        if (item.itemId == android.R.id.home) {
-            binding.drawerLayout.openDrawer(GravityCompat.START)
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
     override fun onBackPressed() {
         // 뒤로가기시 Drawer 먼저 처리
-        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            binding.drawerLayout.closeDrawer(GravityCompat.START)
-        }
-        else if(!currentFragment().onBackPressed()) {
+        if(!currentFragment().onBackPressed()) {
             super.onBackPressed()
         }
     }
@@ -215,16 +173,6 @@ class MainActivity : AppCompatActivity() {
     fun requestWebLoad(url: String) {
         WebViewFragment.INSTANCE.requestWebLoad(url = url)
         requestFragment(FragmentType.WebView)
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        // WebView BackKey
-//        if(keyCode == KeyEvent.KEYCODE_BACK &&
-//            showFragment == FragmentType.WebView && WebViewFragment.INSTANCE.webCanGoBack()) {
-//            WebViewFragment.INSTANCE.webGoBack()
-//            return true
-//        }
-        return super.onKeyDown(keyCode, event)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
