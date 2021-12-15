@@ -74,6 +74,7 @@
             android:layout_marginTop="20dp"
             android:orientation="horizontal"
             app:layout_constraintTop_toBottomOf="@id/la_min_size"
+            app:layout_constraintBottom_toTopOf="@id/la_delete_db"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
@@ -84,6 +85,34 @@
             <CheckBox
                 style="@style/Setting.CheckBox"
                 android:id="@+id/ckb_page" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/Setting.Layout"
+            android:id="@+id/la_delete_db"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/la_page"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                style="@style/Setting.MainText"
+                android:layout_width="match_parent"
+                android:layout_marginTop="10dp"
+                android:text="데이터베이스 삭제"/>
+
+            <Button
+                style="@style/Setting.Button"
+                android:id="@+id/bt_favorite"
+                android:layout_marginTop="10dp"
+                android:text="@string/setting_delete_favorite"/>
+
+            <Button
+                style="@style/Setting.Button"
+                android:id="@+id/bt_recent"
+                android:text="@string/setting_delete_recent"/>
 
         </LinearLayout>
 
