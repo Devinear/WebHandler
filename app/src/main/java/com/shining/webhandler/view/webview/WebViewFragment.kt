@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.shining.nwebview.NWebListener
 import com.shining.nwebview.utils.WebViewSetting
+import com.shining.webhandler.App
 import com.shining.webhandler.R
 import com.shining.webhandler.common.Constants
 import com.shining.webhandler.common.data.WebData
@@ -281,6 +282,14 @@ class WebViewFragment : BaseFragment(), NWebListener {
     fun webGoBack() = binding.webView.goBack()
 
     fun webGoForward() = binding.webView.goForward()
+
+    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?) {
+        Log.e(TAG, "shouldOverrideUrlLoading URL[${request?.url}]")
+
+        if(App.SHARED.onlyCurrent) {
+            viewModel.clear()
+        }
+    }
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         Log.e(TAG, "onPageStarted URL[$url]")

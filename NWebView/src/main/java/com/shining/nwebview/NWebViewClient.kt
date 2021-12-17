@@ -44,9 +44,9 @@ internal class NWebViewClient(private val webView: NWebView) : WebViewClient() {
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-        Log.d(TAG, "shouldOverrideUrlLoading URL[${request?.url}]")
         view ?: return false
         request ?: return false
+        mListener?.shouldOverrideUrlLoading(view, request)
 
         val url : String = request.url.toString()
         if(url.isBlank() || url == "about:blank") return false
