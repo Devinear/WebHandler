@@ -27,28 +27,17 @@ import java.net.URLEncoder
  * DashboardFragment.kt
  * WebHandler
  */
-class DashboardFragment : BaseFragment() {
+class DashboardFragment : BaseFragment<LayoutDashboardBinding>(LayoutDashboardBinding::inflate) {
 
-    private lateinit var binding : LayoutDashboardBinding
     private val favoriteViewModel: FavoriteViewModel by activityViewModels()
     private val recentViewModel: RecentViewModel by activityViewModels()
 
     companion object {
-        private const val TAG = "[DE][FR] Dashboard"
+        private const val TAG = "$BASE Dashboard"
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { DashboardFragment() }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = LayoutDashboardBinding.inflate(layoutInflater, container, false)
-        return binding.root
-    }
-
     override fun initUi() {
-        super.initUi()
         Log.d(TAG, "initUi")
         binding.fragment = this@DashboardFragment
 

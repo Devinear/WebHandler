@@ -17,25 +17,14 @@ import com.shining.webhandler.view.dashboard.RecentViewModel
  * SettingFragment.kt
  * WebHandler
  */
-class SettingFragment : BaseFragment() {
+class SettingFragment : BaseFragment<LayoutSettingBinding>(LayoutSettingBinding::inflate) {
 
-    private lateinit var binding : LayoutSettingBinding
     private val favoriteViewModel: FavoriteViewModel by activityViewModels()
     private val recentViewModel: RecentViewModel by activityViewModels()
 
     companion object {
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { SettingFragment() }
-        val TAG = "[DE][FR] Setting"
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = LayoutSettingBinding.inflate(layoutInflater, container, false)
-        val view = binding.root
-        return view
+        const val TAG = "$BASE Setting"
     }
 
     override fun initUi() {

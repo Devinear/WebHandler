@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import androidx.viewpager2.widget.ViewPager2
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
@@ -19,35 +20,23 @@ import com.shining.webhandler.databinding.ActivityMainBinding
 import com.shining.webhandler.view.common.base.BaseFragment
 import com.shining.webhandler.view.collection.CollectionFragment
 import com.shining.webhandler.view.common.PageAdapter
+import com.shining.webhandler.view.common.base.BaseActivity
 import com.shining.webhandler.view.dashboard.DashboardFragment
 import com.shining.webhandler.view.setting.SettingFragment
 import com.shining.webhandler.view.webview.WebViewFragment
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::inflate) {
 
-    private lateinit var binding : ActivityMainBinding
     private var showFragment : FragmentType
-
     init {
         showFragment = FragmentType.Dashboard
     }
 
     companion object {
-        const val TAG = "[DE][AC] Main"
+        const val TAG = "$BASE Main"
     }
 
-    @SuppressLint("SetJavaScriptEnabled")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        initUi()
-        requestFragment()
-    }
-
-    private fun initUi() {
+    override fun initUi() {
         initViewPager()
         initNavigationBar()
 //        initBottomBar()
@@ -56,6 +45,8 @@ class MainActivity : AppCompatActivity() {
         window.setFlags(
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED,
             WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED)
+
+        requestFragment()
     }
 
     private fun initViewPager() {
@@ -143,13 +134,12 @@ class MainActivity : AppCompatActivity() {
     }
 */
     override fun onBackPressed() {
-        // 뒤로가기시 Drawer 먼저 처리
         if(!currentFragment().onBackPressed()) {
             super.onBackPressed()
         }
     }
 
-    private fun currentFragment() : BaseFragment =
+    private fun currentFragment() : BaseFragment<*> =
         when (showFragment) {
             FragmentType.Dashboard -> DashboardFragment.INSTANCE
             FragmentType.WebView -> WebViewFragment.INSTANCE

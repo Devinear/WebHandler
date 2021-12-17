@@ -40,9 +40,7 @@ import java.util.*
  * WebViewFragment.kt
  * WebHandler
  */
-class WebViewFragment : BaseFragment(), NWebListener {
-
-    private lateinit var binding : LayoutWebviewBinding
+class WebViewFragment : BaseFragment<LayoutWebviewBinding>(LayoutWebviewBinding::inflate), NWebListener {
 
     // Kotlin 위임(by) 활용, 초기화되는 Activity 또는 Fragment Lifecycle 종속됨
     private val viewModel : WebViewViewModel by activityViewModels {
@@ -62,22 +60,11 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     companion object {
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { WebViewFragment() }
-        const val TAG = "[DE][FR] WebView"
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        Log.d(TAG, "onCreateView")
-        binding = LayoutWebviewBinding.inflate(layoutInflater, container, false)
-        return binding.root
+        const val TAG = "$BASE WebView"
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun initUi() {
-        super.initUi()
         Log.d(TAG, "initUi")
         binding.fragment = this@WebViewFragment
         binding.webView.settings.apply {
