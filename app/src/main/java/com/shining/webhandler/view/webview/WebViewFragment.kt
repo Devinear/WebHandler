@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.webkit.*
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
@@ -66,6 +67,8 @@ class WebViewFragment : BaseFragment<LayoutWebviewBinding>(LayoutWebviewBinding:
     @SuppressLint("SetJavaScriptEnabled")
     override fun initUi() {
         Log.d(TAG, "initUi")
+        binding.webView.isVisible = false
+
         binding.fragment = this@WebViewFragment
         binding.webView.settings.apply {
             builtInZoomControls = false                     // 화면 줌 동작
@@ -204,6 +207,11 @@ class WebViewFragment : BaseFragment<LayoutWebviewBinding>(LayoutWebviewBinding:
     override fun onResume() {
         Log.d(TAG, "onResume URL[$requestUrl]")
         super.onResume()
+
+        if(requestUrl.isEmpty()) {
+            showInputEdit()
+        }
+
         binding.webView.apply {
             onResume()
 
@@ -280,6 +288,8 @@ class WebViewFragment : BaseFragment<LayoutWebviewBinding>(LayoutWebviewBinding:
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         Log.e(TAG, "onPageStarted URL[$url]")
+        if(!binding.webView.isVisible)
+            binding.webView.isVisible = true
 
         url ?: return
         webData = recent.addWebData(data = WebData(id = url.hashCode().toLong(), url = url, time = Date().time, icon = favicon))
