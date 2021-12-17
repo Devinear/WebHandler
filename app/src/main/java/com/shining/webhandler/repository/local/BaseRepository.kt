@@ -9,5 +9,6 @@ import com.shining.webhandler.common.data.WebData
 abstract class BaseRepository {
     abstract fun insert(data: WebData)
     abstract fun remove(id: Long)
+    abstract fun removeAll(listener: RepositoryListener)
     abstract fun getAll(listener: RepositoryListener)
 }

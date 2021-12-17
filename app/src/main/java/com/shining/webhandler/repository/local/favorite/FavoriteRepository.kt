@@ -41,6 +41,16 @@ class FavoriteRepository : BaseRepository() {
         }
     }
 
+    override fun removeAll(listener: RepositoryListener) {
+        CoroutineScope(Dispatchers.IO).launch {
+            dao.deleteAll()
+
+            launch(Dispatchers.Main) {
+                listener.removeAll()
+            }
+        }
+    }
+
     override fun getAll(listener: RepositoryListener) {
         CoroutineScope(Dispatchers.IO).launch {
             val list = mutableListOf<WebData>()

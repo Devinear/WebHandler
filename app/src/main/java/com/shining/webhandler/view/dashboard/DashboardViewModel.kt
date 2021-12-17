@@ -80,4 +80,11 @@ open class DashboardViewModel : BaseViewModel() {
         repository.remove(id = data.id)
         return _webs.remove(data)
     }
+
+    fun removeAllData(action: ()->Unit) {
+        repository.removeAll(object : RepositoryListener{
+            override fun removeAll() { action() }
+        })
+        _webs.clear()
+    }
 }
