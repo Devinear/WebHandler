@@ -2,6 +2,7 @@ package com.shining.webhandler
 
 import android.app.Application
 import androidx.room.Room
+import com.shining.webhandler.common.Preferences
 import com.shining.webhandler.repository.local.favorite.FavoriteDB
 import com.shining.webhandler.repository.local.recent.RecentDB
 
@@ -19,11 +20,14 @@ open class App : Application() {
         private lateinit var recentDB : RecentDB
         val RECENT_DB : RecentDB
             get() = recentDB
+
+        lateinit var SHARED: Preferences
     }
 
     override fun onCreate() {
         super.onCreate()
         favoriteDB = Room.databaseBuilder(this, FavoriteDB::class.java, "favorites.db").build()
         recentDB = Room.databaseBuilder(this, RecentDB::class.java, "recent.db").build()
+        SHARED = Preferences(applicationContext)
     }
 }

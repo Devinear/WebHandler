@@ -17,9 +17,104 @@
         android:layout_height="match_parent" >
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="SETTING" />
+            style="@style/Setting.MainText"
+            android:id="@+id/tv_title"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="10dp"
+            android:text="SETTING"
+            android:textStyle="bold"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <LinearLayout
+            style="@style/Setting.Layout"
+            android:id="@+id/la_min_size"
+            android:orientation="vertical"
+            android:layout_marginTop="50dp"
+            app:layout_constraintTop_toBottomOf="@id/tv_title"
+            app:layout_constraintBottom_toTopOf="@id/la_page"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                style="@style/Setting.LayoutInner" >
+
+                <TextView
+                    style="@style/Setting.MainText"
+                    android:text="최소 이미지 크기"/>
+
+                <CheckBox
+                    style="@style/Setting.CheckBox"
+                    android:id="@+id/ckb_size" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                style="@style/Setting.LayoutInner" >
+
+                <EditText
+                    style="@style/Setting.EditText"
+                    android:id="@+id/edt_width"
+                    android:layout_marginEnd="10dp"
+                    android:hint="Width" />
+
+                <EditText
+                    style="@style/Setting.EditText"
+                    android:id="@+id/edt_height"
+                    android:layout_marginStart="10dp"
+                    android:hint="Height" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/Setting.Layout"
+            android:id="@+id/la_page"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/la_min_size"
+            app:layout_constraintBottom_toTopOf="@id/la_delete_db"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                style="@style/Setting.MainText"
+                android:text="현재 페이지만 썸네일 추출"/>
+
+            <CheckBox
+                style="@style/Setting.CheckBox"
+                android:id="@+id/ckb_page" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/Setting.Layout"
+            android:id="@+id/la_delete_db"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/la_page"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                style="@style/Setting.MainText"
+                android:layout_width="match_parent"
+                android:layout_marginTop="10dp"
+                android:text="데이터베이스 삭제"/>
+
+            <Button
+                style="@style/Setting.Button"
+                android:id="@+id/bt_favorite"
+                android:layout_marginTop="10dp"
+                android:text="@string/setting_delete_favorite"/>
+
+            <Button
+                style="@style/Setting.Button"
+                android:id="@+id/bt_recent"
+                android:text="@string/setting_delete_recent"/>
+
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

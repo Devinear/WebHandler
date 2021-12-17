@@ -166,7 +166,7 @@
                     android:layout_weight="1"
                     android:layout_height="match_parent"
                     android:textOn="전체"
-                    android:textOff="해제" />
+                    android:textOff="전체" />
 
                 <ImageButton
                     android:id="@+id/ib_download"

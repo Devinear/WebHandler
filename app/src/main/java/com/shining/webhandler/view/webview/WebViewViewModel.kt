@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.databinding.ObservableArrayList
 import androidx.databinding.ObservableList
 import androidx.lifecycle.viewModelScope
+import com.shining.webhandler.App
 import com.shining.webhandler.common.ImageType
 import com.shining.webhandler.common.data.ImageData
 import com.shining.webhandler.common.listener.DataListener
@@ -116,7 +117,7 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
 
         GlideManager.getBitmapFromUrl(context, url, object : GlideListener {
             override fun onSuccessResource(url: String, bitmap: Bitmap) {
-                if(bitmap.width < 700 && bitmap.height < 700) {
+                if(App.SHARED.minEnable && bitmap.width < App.SHARED.minWidth && bitmap.height < App.SHARED.minHeight) {
                     if(!bitmap.isRecycled)
                         bitmap.recycle()
                     _images.remove(data)
@@ -134,10 +135,14 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
                     Log.e(TAG, "request-Exception:${e.message}")
                     null
                 }
-
-                data.thumb = thumb
-                data.image = bitmap
-                data.index.postValue(position)
+                try {
+                    data.thumb = thumb
+                    data.image = bitmap
+                    data.index.postValue(position)
+                }
+                catch (e: Exception) {
+                    Log.e(TAG, "request-data-Exception:${e.message}")
+                }
             }
 
             override fun onFailureResource(url: String) {
@@ -183,6 +188,12 @@ class WebViewViewModel(val context: Context) : BaseViewModel() {
     fun clear() {
         Log.d(TAG, "clear")
         imageUrls.clear()
+        _images.forEach {
+            if(it.image?.isRecycled == false)
+                it.image?.recycle()
+            if(it.thumb?.isRecycled == false)
+                it.thumb?.recycle()
+        }
         _images.clear()
     }
 

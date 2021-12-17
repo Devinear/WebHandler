@@ -7,5 +7,6 @@ import com.shining.webhandler.common.data.WebData
  * WebHandler
  */
 interface RepositoryListener {
-    fun requestAll(list: List<WebData>)
+    fun requestAll(list: List<WebData>) {}
+    fun removeAll() {}
 }

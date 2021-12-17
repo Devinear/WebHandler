@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">WebHandler</string>
+    <string name="setting_delete_favorite"><u>즐겨 찾기 삭제</u></string>
+    <string name="setting_delete_recent"><u>최근 내역 삭제</u></string>
 </resources>
