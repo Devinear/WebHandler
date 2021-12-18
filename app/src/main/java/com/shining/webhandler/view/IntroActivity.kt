@@ -24,12 +24,12 @@ class IntroActivity : BaseActivity<ActivityIntroBinding>(ActivityIntroBinding::i
         val listener : PermissionListener = object : PermissionListener {
 
             override fun onPermissionGranted() {
-                Toast.makeText(this@IntroActivity, "Permission Granted", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this@IntroActivity, "Permission Granted", Toast.LENGTH_SHORT).show()
                 startMainActivity()
             }
 
             override fun onPermissionDenied(deniedPermissions: List<String>) {
-                Toast.makeText(this@IntroActivity, "Permission Denied\n$deniedPermissions", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(this@IntroActivity, "Permission Denied\n$deniedPermissions", Toast.LENGTH_SHORT).show()
                 startMainActivity()
             }
         }
