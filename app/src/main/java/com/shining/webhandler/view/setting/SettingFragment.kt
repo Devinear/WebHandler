@@ -17,25 +17,14 @@ import com.shining.webhandler.view.dashboard.RecentViewModel
  * SettingFragment.kt
  * WebHandler
  */
-class SettingFragment : BaseFragment() {
+class SettingFragment : BaseFragment<LayoutSettingBinding>(LayoutSettingBinding::inflate) {
 
-    private lateinit var binding : LayoutSettingBinding
     private val favoriteViewModel: FavoriteViewModel by activityViewModels()
     private val recentViewModel: RecentViewModel by activityViewModels()
 
     companion object {
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { SettingFragment() }
-        val TAG = "[DE][FR] Setting"
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = LayoutSettingBinding.inflate(layoutInflater, container, false)
-        val view = binding.root
-        return view
+        const val TAG = "$BASE Setting"
     }
 
     override fun initUi() {
@@ -63,13 +52,19 @@ class SettingFragment : BaseFragment() {
                 App.SHARED.minHeight = it.toString().toInt()
             }
         }
-
+        /*
         binding.ckbPage.apply {
             isChecked = App.SHARED.onlyCurrent
             setOnCheckedChangeListener { _, isChecked ->
                 App.SHARED.onlyCurrent = isChecked
             }
         }
+        */
+        /**
+         * OnlyPage 아직 고려가 필요한 사항이 많다.
+         * */
+        binding.laPage.visibility = View.GONE
+        App.SHARED.onlyCurrent = false
 
         binding.btFavorite.setOnClickListener {
             favoriteViewModel.removeAllData() {

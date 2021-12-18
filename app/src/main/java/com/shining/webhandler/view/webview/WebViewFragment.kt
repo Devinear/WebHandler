@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.webkit.*
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModel
@@ -40,9 +41,7 @@ import java.util.*
  * WebViewFragment.kt
  * WebHandler
  */
-class WebViewFragment : BaseFragment(), NWebListener {
-
-    private lateinit var binding : LayoutWebviewBinding
+class WebViewFragment : BaseFragment<LayoutWebviewBinding>(LayoutWebviewBinding::inflate), NWebListener {
 
     // Kotlin 위임(by) 활용, 초기화되는 Activity 또는 Fragment Lifecycle 종속됨
     private val viewModel : WebViewViewModel by activityViewModels {
@@ -62,23 +61,14 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     companion object {
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { WebViewFragment() }
-        const val TAG = "[DE][FR] WebView"
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        Log.d(TAG, "onCreateView")
-        binding = LayoutWebviewBinding.inflate(layoutInflater, container, false)
-        return binding.root
+        const val TAG = "$BASE WebView"
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun initUi() {
-        super.initUi()
         Log.d(TAG, "initUi")
+        binding.webView.isVisible = false
+
         binding.fragment = this@WebViewFragment
         binding.webView.settings.apply {
             builtInZoomControls = false                     // 화면 줌 동작
@@ -208,6 +198,9 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     override fun onBackPressed(): Boolean {
         if(webCanGoBack()) {
+            if(App.SHARED.onlyCurrent) {
+                viewModel.clear()
+            }
             webGoBack()
             return true
         }
@@ -217,6 +210,11 @@ class WebViewFragment : BaseFragment(), NWebListener {
     override fun onResume() {
         Log.d(TAG, "onResume URL[$requestUrl]")
         super.onResume()
+
+        if(requestUrl.isEmpty()) {
+            showInputEdit()
+        }
+
         binding.webView.apply {
             onResume()
 
@@ -293,6 +291,8 @@ class WebViewFragment : BaseFragment(), NWebListener {
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         Log.e(TAG, "onPageStarted URL[$url]")
+        if(!binding.webView.isVisible)
+            binding.webView.isVisible = true
 
         url ?: return
         webData = recent.addWebData(data = WebData(id = url.hashCode().toLong(), url = url, time = Date().time, icon = favicon))

@@ -30,9 +30,8 @@ import kotlin.math.abs
  * CollectionFragment.kt
  * WebHandler
  */
-class CollectionFragment : BaseFragment() {
+class CollectionFragment : BaseFragment<LayoutCollectionBinding>(LayoutCollectionBinding::inflate) {
 
-    private lateinit var binding : LayoutCollectionBinding
     private val viewModel : WebViewViewModel by activityViewModels {
         object : ViewModelProvider.Factory {
             override fun <T : ViewModel?> create(modelClass: Class<T>): T
@@ -44,25 +43,14 @@ class CollectionFragment : BaseFragment() {
     private var detailItemPosition = -1
 
     companion object {
-        private const val TAG = "[DE][FR] Collection"
+        private const val TAG = "$BASE Collection"
         val INSTANCE by lazy(LazyThreadSafetyMode.SYNCHRONIZED) { CollectionFragment() }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        Log.d(TAG, "onCreateView")
-        binding = LayoutCollectionBinding.inflate(layoutInflater, container, false)
+    override fun initUi() {
+        Log.d(TAG, "initUi")
         binding.fragment = this
         binding.vm = viewModel
-        return binding.root
-    }
-
-    override fun initUi() {
-        super.initUi()
-        Log.d(TAG, "initUi")
 
         initRecycler()
         initProgress()
@@ -149,7 +137,10 @@ class CollectionFragment : BaseFragment() {
         binding.apply {
             laDetail/*ivDetail*/.apply {
                 visibility = View.GONE
-                setOnClickListener { visibility = View.GONE }
+                setOnClickListener {
+//                    visibility = View.GONE
+                    showDetailView(show = false)
+                }
             }
             laDetail.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
         }

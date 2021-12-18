@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.databinding.ObservableArrayList
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
@@ -75,7 +76,11 @@ class CollectionAdapter(val lifecycleOwner: LifecycleOwner, val vm: WebViewViewM
         fun bind(data: ImageData, position: Int) {
 //            Log.d(TAG, "bind Position[$position]")
             binding.apply {
-                ivImage.setImageBitmap(data.thumb)
+                data.thumb?.apply {
+                    progress.isVisible = false
+                    ivImage.setImageBitmap(this)
+                }
+
                 ivImage.setOnClickListener {
                     if(!adapter.isCheckMode || adapter.isPauseMode)
                         listener.clickImageItem(data, position)
