@@ -117,5 +117,17 @@
 
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tv_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="30dp"
+            android:padding="10dp"
+            android:background="@drawable/bg_text_box"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:text="Version 1.0.0"/>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

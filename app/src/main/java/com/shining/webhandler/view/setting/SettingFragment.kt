@@ -1,13 +1,11 @@
 package com.shining.webhandler.view.setting
 
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
 import com.shining.webhandler.App
+import com.shining.webhandler.BuildConfig
 import com.shining.webhandler.databinding.LayoutSettingBinding
 import com.shining.webhandler.view.common.base.BaseFragment
 import com.shining.webhandler.view.dashboard.FavoriteViewModel
@@ -76,5 +74,7 @@ class SettingFragment : BaseFragment<LayoutSettingBinding>(LayoutSettingBinding:
                 Toast.makeText(requireContext(), "Recent Delete All!", Toast.LENGTH_SHORT).show()
             }
         }
+
+        binding.tvVersion.text = "Version ${BuildConfig.VERSION_NAME}"
     }
 }
