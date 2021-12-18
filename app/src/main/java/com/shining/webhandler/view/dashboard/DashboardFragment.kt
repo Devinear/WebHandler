@@ -2,25 +2,20 @@ package com.shining.webhandler.view.dashboard
 
 import android.R
 import android.app.AlertDialog
-import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.fragment.app.viewModels
-import com.shining.webhandler.databinding.LayoutDashboardBinding
-import com.shining.webhandler.view.common.base.BaseFragment
-import com.shining.webhandler.view.collection.ItemListener
 import android.text.Editable
-
 import android.text.TextWatcher
+import android.util.Log
+import android.view.View
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.shining.webhandler.common.Constants
 import com.shining.webhandler.common.data.WebData
+import com.shining.webhandler.databinding.LayoutDashboardBinding
 import com.shining.webhandler.view.MainActivity
+import com.shining.webhandler.view.collection.ItemListener
 import com.shining.webhandler.view.collection.ItemLongListener
 import com.shining.webhandler.view.collection.ItemSizeListener
+import com.shining.webhandler.view.common.base.BaseFragment
 import java.net.URLEncoder
 
 /**

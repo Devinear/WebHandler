@@ -8,13 +8,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.webkit.*
 import androidx.core.net.toUri
@@ -217,19 +214,6 @@ class WebViewFragment : BaseFragment<LayoutWebviewBinding>(LayoutWebviewBinding:
 
         binding.webView.apply {
             onResume()
-
-//            loadUrl("https://topegirl.com/watch/dakota-pink-nude-seduce-120-photos.html")
-//            loadUrl("https://hiyobi.io/viewer/1991566")
-//            loadUrl("https://www.sex.com/pins")
-//            loadUrl("https://scrolller.com/?filter=pictures")
-//            loadUrl("https://m.phimvuspot.com/search?q=Kang%20In-kyung?&max-results=50")
-//            loadUrl("https://hot2048.com/2048/simple/?t4782653.html")
-//            loadUrl("https://mozimozing.tistory.com/category/%EC%95%84%EC%9D%B4%EB%8F%8C/%EC%95%84%EC%9D%B4%EC%9C%A0") // 아이유
-//            loadUrl("https://kissme-wallpapers.com/category/%ED%8F%B0%20%EB%B0%B0%EA%B2%BD%ED%99%94%EB%A9%B4/%EC%95%84%EC%9D%B4%EC%9C%A0%20%EB%B0%B0%EA%B2%BD") // 아이유
-//            loadUrl("http://www.etoland.co.kr/bbs/board.php?bo_table=animal01&wr_id=25205")
-//            loadUrl("https://scrolller.com/r/u_Your_submissive_doll")
-//            loadUrl("https://buondua.com/tag/kang-in-kyung-10847")
-//            loadUrl("https://www.redgifs.com/")
 
             if(isUpdate) {
                 executeWebLoad()

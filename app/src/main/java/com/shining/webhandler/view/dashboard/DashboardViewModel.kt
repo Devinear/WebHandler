@@ -7,9 +7,7 @@ import com.shining.webhandler.common.data.WebData
 import com.shining.webhandler.common.listener.DataListener
 import com.shining.webhandler.repository.local.BaseRepository
 import com.shining.webhandler.repository.local.RepositoryListener
-import com.shining.webhandler.repository.local.favorite.FavoriteRepository
 import com.shining.webhandler.view.common.base.BaseViewModel
-import kotlin.properties.Delegates
 
 /**
  * DashboardViewModel.kt

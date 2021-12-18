@@ -122,7 +122,7 @@
                     android:id="@+id/edt_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Download Name" />
+                    android:hint="@string/download_hint_msg" />
 
             </com.google.android.material.textfield.TextInputLayout>
 

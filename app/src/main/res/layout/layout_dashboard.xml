@@ -7,9 +7,6 @@
         <variable
             name="fragment"
             type="com.shining.webhandler.view.dashboard.DashboardFragment" />
-        <variable
-            name="vm"
-            type="com.shining.webhandler.view.dashboard.DashboardViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -52,7 +49,7 @@
                 android:id="@+id/edt_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="검색어 또는 주소"/>
+                android:hint="@string/search_hint_msg"/>
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -78,7 +75,7 @@
             android:textStyle="bold"
             android:textColor="@color/white"
             android:textSize="20sp"
-            android:text="FAVORITE"
+            android:text="@string/favorite"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/la_input"
             app:layout_constraintBottom_toTopOf="@id/re_favorite" />
@@ -92,7 +89,7 @@
             android:textStyle="bold"
             android:textColor="@color/white"
             android:textSize="20sp"
-            android:text="RECENT"
+            android:text="@string/recent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/re_favorite"
             app:layout_constraintBottom_toTopOf="@id/re_recent" />
@@ -133,7 +130,7 @@
             android:id="@+id/tv_fe_empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="EMPTY"
+            android:text="@string/empty"
             android:textStyle="bold"
             android:textSize="25sp"
             android:visibility="gone"
@@ -147,7 +144,7 @@
             android:id="@+id/tv_re_empty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="EMPTY"
+            android:text="@string/empty"
             android:textStyle="bold"
             android:textSize="25sp"
             android:visibility="gone"

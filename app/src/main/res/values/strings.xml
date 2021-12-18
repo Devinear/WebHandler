@@ -1,5 +1,18 @@
 <resources>
-    <string name="app_name">Content Downloader</string>
-    <string name="setting_delete_favorite"><u>즐겨 찾기 삭제</u></string>
-    <string name="setting_delete_recent"><u>최근 내역 삭제</u></string>
+    <string name="app_name" translatable="false">Content Downloader</string>
+    <string name="empty" translatable="false">EMPTY</string>
+
+    <string name="favorite">Favorites</string>
+    <string name="recent">Recent</string>
+    <string name="search_hint_msg">Please enter a search word or address.</string>
+    <string name="download_hint_msg">Please enter the file name.</string>
+
+    <string name="setting">Setting</string>
+    <string name="setting_width">Width</string>
+    <string name="setting_height">Height</string>
+    <string name="setting_delete_favorite"><u>Delete favorites.</u></string>
+    <string name="setting_delete_recent"><u>Delete recent.</u></string>
+    <string name="setting_only_page_msg">Extract thumbnails from the current page only.</string>
+    <string name="setting_db_delete">Delete database</string>
+    <string name="setting_min_size">Image min size</string>
 </resources>
