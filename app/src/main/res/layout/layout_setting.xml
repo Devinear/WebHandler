@@ -21,7 +21,7 @@
             android:id="@+id/tv_title"
             android:layout_marginTop="20dp"
             android:layout_marginStart="10dp"
-            android:text="SETTING"
+            android:text="@string/setting"
             android:textStyle="bold"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -41,7 +41,7 @@
 
                 <TextView
                     style="@style/Setting.MainText"
-                    android:text="최소 이미지 크기"/>
+                    android:text="@string/setting_min_size"/>
 
                 <CheckBox
                     style="@style/Setting.CheckBox"
@@ -56,13 +56,13 @@
                     style="@style/Setting.EditText"
                     android:id="@+id/edt_width"
                     android:layout_marginEnd="10dp"
-                    android:hint="Width" />
+                    android:hint="@string/setting_width" />
 
                 <EditText
                     style="@style/Setting.EditText"
                     android:id="@+id/edt_height"
                     android:layout_marginStart="10dp"
-                    android:hint="Height" />
+                    android:hint="@string/setting_height" />
 
             </LinearLayout>
 
@@ -81,7 +81,7 @@
 
             <TextView
                 style="@style/Setting.MainText"
-                android:text="현재 페이지만 썸네일 추출"/>
+                android:text="@string/setting_only_page_msg"/>
 
             <CheckBox
                 style="@style/Setting.CheckBox"
@@ -102,7 +102,7 @@
                 style="@style/Setting.MainText"
                 android:layout_width="match_parent"
                 android:layout_marginTop="10dp"
-                android:text="데이터베이스 삭제"/>
+                android:text="@string/setting_db_delete"/>
 
             <Button
                 style="@style/Setting.Button"

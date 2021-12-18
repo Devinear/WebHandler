@@ -1,26 +1,17 @@
 package com.shining.webhandler.view
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.Bundle
 import android.util.Log
-import android.view.KeyEvent
-import android.view.MenuItem
-import android.view.View
 import android.view.WindowManager
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.GravityCompat
-import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
 import androidx.viewpager2.widget.ViewPager2
 import com.shining.webhandler.R
 import com.shining.webhandler.common.FragmentType
 import com.shining.webhandler.databinding.ActivityMainBinding
-import com.shining.webhandler.view.common.base.BaseFragment
 import com.shining.webhandler.view.collection.CollectionFragment
 import com.shining.webhandler.view.common.PageAdapter
 import com.shining.webhandler.view.common.base.BaseActivity
+import com.shining.webhandler.view.common.base.BaseFragment
 import com.shining.webhandler.view.dashboard.DashboardFragment
 import com.shining.webhandler.view.setting.SettingFragment
 import com.shining.webhandler.view.webview.WebViewFragment

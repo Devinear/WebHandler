@@ -1,0 +1,15 @@
+<resources>
+    <string name="favorite">즐겨찾기</string>
+    <string name="recent">최근 내역</string>
+    <string name="search_hint_msg">검색어 또는 주소를 입력해주세요.</string>
+    <string name="download_hint_msg">파일 이름을 입력해주세요.</string>
+
+    <string name="setting">설정</string>
+    <string name="setting_width">너비</string>
+    <string name="setting_height">높이</string>
+    <string name="setting_delete_favorite"><u>즐겨찾기 삭제</u></string>
+    <string name="setting_delete_recent"><u>최근 내역 삭제</u></string>
+    <string name="setting_only_page_msg">현재 페이지만 썸네일 추출</string>
+    <string name="setting_db_delete">데이터베이스 삭제</string>
+    <string name="setting_min_size">최소 이미지 크기</string>
+</resources>
