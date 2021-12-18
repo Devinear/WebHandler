@@ -198,6 +198,9 @@ class WebViewFragment : BaseFragment<LayoutWebviewBinding>(LayoutWebviewBinding:
 
     override fun onBackPressed(): Boolean {
         if(webCanGoBack()) {
+            if(App.SHARED.onlyCurrent) {
+                viewModel.clear()
+            }
             webGoBack()
             return true
         }
