@@ -137,7 +137,10 @@ class CollectionFragment : BaseFragment<LayoutCollectionBinding>(LayoutCollectio
         binding.apply {
             laDetail/*ivDetail*/.apply {
                 visibility = View.GONE
-                setOnClickListener { visibility = View.GONE }
+                setOnClickListener {
+//                    visibility = View.GONE
+                    showDetailView(show = false)
+                }
             }
             laDetail.setOnTouchListener { _, event -> gestureDetector.onTouchEvent(event) }
         }
