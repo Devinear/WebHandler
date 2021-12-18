@@ -52,13 +52,19 @@ class SettingFragment : BaseFragment<LayoutSettingBinding>(LayoutSettingBinding:
                 App.SHARED.minHeight = it.toString().toInt()
             }
         }
-
+        /*
         binding.ckbPage.apply {
             isChecked = App.SHARED.onlyCurrent
             setOnCheckedChangeListener { _, isChecked ->
                 App.SHARED.onlyCurrent = isChecked
             }
         }
+        */
+        /**
+         * OnlyPage 아직 고려가 필요한 사항이 많다.
+         * */
+        binding.laPage.visibility = View.GONE
+        App.SHARED.onlyCurrent = false
 
         binding.btFavorite.setOnClickListener {
             favoriteViewModel.removeAllData() {
