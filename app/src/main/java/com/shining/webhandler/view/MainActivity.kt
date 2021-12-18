@@ -66,6 +66,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(ActivityMainBinding::infl
                 }
             })
         }
+        binding.viewPager.offscreenPageLimit = 4
 
         try {
             // ViewPager2 Swipe 민감도 조절
